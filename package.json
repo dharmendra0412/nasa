@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "start": "node backend-server.js",
-    "build": "echo Static frontend ready",
     "share": "npx localtunnel --port 8080",
     "test": "node test_simulator.cjs",
     "test:multiplayer": "node test_multiplayer.cjs"
