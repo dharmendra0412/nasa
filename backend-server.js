@@ -10,6 +10,8 @@ const __dirname = path.dirname(__filename);
 
 const DEFAULT_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 const ROOT_DIR = fs.existsSync(path.join(__dirname, 'index.html')) ? __dirname : process.cwd();
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://nasa-hazel.vercel.app';
+let activeRoomManager = null;
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -51,9 +53,17 @@ function getLocalIPAddresses() {
 }
 
 function handleRequest(req, res) {
-  // CORS & No-Cache for real-time development
+  // CORS & No-Cache
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 204;
+    res.end();
+    return;
+  }
 
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.statusCode = 405;
@@ -62,12 +72,68 @@ function handleRequest(req, res) {
     return;
   }
 
-  let reqPath = decodeURI(req.url.split('?')[0]);
-  if (reqPath === '/' || reqPath === '') {
-    reqPath = '/index.html';
+  const reqPath = decodeURI(req.url.split('?')[0]);
+
+  // Health check / Backend status API for Render & monitoring
+  if (reqPath === '/health' || reqPath === '/status' || reqPath === '/api' || reqPath === '/api/health') {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    const statusPayload = {
+      status: 'online',
+      service: 'NASA Mission Control Real-Time Multiplayer Backend',
+      version: '2.0.0',
+      role: 'websocket-backend',
+      frontend: FRONTEND_URL,
+      websocketUrl: 'wss://' + (req.headers.host || 'nasa-yr0n.onrender.com'),
+      activeRooms: activeRoomManager ? activeRoomManager.rooms.size : 0,
+      activeConnections: activeRoomManager ? activeRoomManager.clientInfo.size : 0,
+      uptimeSeconds: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString()
+    };
+    res.end(JSON.stringify(statusPayload, null, 2));
+    return;
   }
 
-  const safePath = path.normalize(reqPath).replace(/^(\.\.[/\\])+/, '');
+  // Detect whether this is running on Render or in cloud backend mode
+  const host = (req.headers.host || '').toLowerCase();
+  const isCloudBackend = Boolean(process.env.RENDER) || 
+                         process.env.NODE_ENV === 'production' || 
+                         process.env.BACKEND_ONLY === 'true' ||
+                         host.includes('onrender.com');
+
+  if (isCloudBackend) {
+    // If accessed via Render URL, do not serve heavy frontend HTML/assets from Render!
+    // Redirect browser to Vercel frontend to keep Render CPU/memory load at ~0%
+    const targetUrl = (reqPath === '/' || reqPath === '' || reqPath === '/index.html') 
+      ? FRONTEND_URL 
+      : `${FRONTEND_URL}${reqPath}`;
+
+    res.writeHead(302, {
+      'Location': targetUrl,
+      'Content-Type': 'text/html; charset=utf-8'
+    });
+    res.end(`<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="refresh" content="0;url=${targetUrl}" />
+  <title>NASA Mission Control Backend</title>
+</head>
+<body style="background:#030712;color:#38bdf8;font-family:system-ui,sans-serif;text-align:center;padding:50px;">
+  <h2>🚀 NASA Mission Control WebSocket Backend Online</h2>
+  <p>The game frontend is hosted on high-speed Vercel Edge CDN.</p>
+  <p>Redirecting to <a href="${targetUrl}" style="color:#38bdf8;font-weight:bold;">${targetUrl}</a>...</p>
+</body>
+</html>`);
+    return;
+  }
+
+  // Local development / router Wi-Fi mode: Serve static files from local disk
+  let localFilePath = reqPath;
+  if (localFilePath === '/' || localFilePath === '') {
+    localFilePath = '/index.html';
+  }
+
+  const safePath = path.normalize(localFilePath).replace(/^(\.\.[/\\])+/, '');
   const filePath = path.join(ROOT_DIR, safePath);
 
   if (!filePath.startsWith(ROOT_DIR)) {
@@ -82,7 +148,7 @@ function handleRequest(req, res) {
       if (err.code === 'ENOENT') {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/plain');
-        res.end(`404 Not Found: ${reqPath}`);
+        res.end(`404 Not Found: ${localFilePath}`);
       } else {
         res.statusCode = 500;
         res.setHeader('Content-Type', 'text/plain');
@@ -103,7 +169,7 @@ function handleRequest(req, res) {
       if (readErr) {
         res.statusCode = 404;
         res.setHeader('Content-Type', 'text/plain');
-        res.end(`404 File Not Found: ${reqPath}`);
+        res.end(`404 File Not Found: ${localFilePath}`);
         return;
       }
 
@@ -119,7 +185,7 @@ function startServer(port) {
   const server = http.createServer(handleRequest);
 
   // Initialize Real-time WebSocket Room Manager
-  const roomManager = new RoomManager(server);
+  activeRoomManager = new RoomManager(server);
 
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
