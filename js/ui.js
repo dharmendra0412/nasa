@@ -278,6 +278,178 @@ window.GameUI = (function () {
         launchInstantFlight();
       });
     }
+
+    // --- NASA APP CHALLENGE PORTAL & FLIGHT OPERATIONS CONTROLS ---
+    function updateProgressTracker() {
+      let solvedList = [];
+      let totalPts = 0;
+      try {
+        solvedList = JSON.parse(localStorage.getItem("nasa_solved_challenges") || "[]");
+        totalPts = parseInt(localStorage.getItem("nasa_total_points") || "0", 10);
+      } catch (e) {
+        solvedList = [];
+      }
+
+      const count = solvedList.length;
+      const percent = Math.min(100, Math.round((count / 6) * 100));
+
+      const percentEl = document.getElementById("progress-percent-val");
+      const solvedEl = document.getElementById("stat-solved-count");
+      const pointsEl = document.getElementById("stat-points-count");
+      const circleFill = document.getElementById("progress-circle-fill");
+      const profileSolved = document.getElementById("profile-solved-count");
+      const profilePoints = document.getElementById("profile-points-count");
+
+      if (percentEl) percentEl.textContent = `${percent}%`;
+      if (solvedEl) solvedEl.textContent = count;
+      if (pointsEl) pointsEl.textContent = totalPts;
+      if (profileSolved) profileSolved.textContent = `${count} / 6`;
+      if (profilePoints) profilePoints.textContent = `${totalPts} PTS`;
+
+      if (circleFill) {
+        // Circumference: 2 * PI * 62 ~= 390
+        const offset = 390 - (390 * percent) / 100;
+        circleFill.style.strokeDashoffset = offset;
+      }
+    }
+
+    function recordChallengeCompletion(missionId) {
+      try {
+        let solvedList = JSON.parse(localStorage.getItem("nasa_solved_challenges") || "[]");
+        if (!solvedList.includes(missionId)) {
+          solvedList.push(missionId);
+          localStorage.setItem("nasa_solved_challenges", JSON.stringify(solvedList));
+        }
+        let totalPts = parseInt(localStorage.getItem("nasa_total_points") || "0", 10) + 1250;
+        localStorage.setItem("nasa_total_points", totalPts.toString());
+        updateProgressTracker();
+      } catch (e) {}
+    }
+
+    updateProgressTracker();
+
+    // Challenge Cards Start buttons
+    document.querySelectorAll("[data-mission]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const mid = btn.dataset.mission || "sentinel-e";
+        selectedQuickMissionId = mid;
+        launchInstantFlight();
+      });
+    });
+
+    // Challenge Card container click
+    document.querySelectorAll(".challenge-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const mid = card.dataset.missionId || "sentinel-e";
+        selectedQuickMissionId = mid;
+        launchInstantFlight();
+      });
+    });
+
+    // Hero CTA Buttons
+    const btnHeroStart = document.getElementById("btn-hero-start");
+    if (btnHeroStart) {
+      btnHeroStart.addEventListener("click", () => {
+        selectedQuickMissionId = "sentinel-e";
+        launchInstantFlight();
+      });
+    }
+
+    const btnHeroCoop = document.getElementById("btn-hero-coop");
+    if (btnHeroCoop) {
+      btnHeroCoop.addEventListener("click", () => {
+        showScreen("screen-multiplayer");
+      });
+    }
+
+    const btnHeroLearn = document.getElementById("btn-hero-learn");
+    if (btnHeroLearn) {
+      btnHeroLearn.addEventListener("click", () => {
+        const modal = document.getElementById("modal-about-challenge");
+        if (modal) modal.classList.remove("hidden");
+        if (window.SoundFX) window.SoundFX.playBeep(850, 0.04);
+      });
+    }
+
+    // Portal Navbar Tabs
+    const navTabs = document.querySelectorAll(".portal-nav-pill .nav-tab");
+    navTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const tabTarget = tab.dataset.tab;
+        navTabs.forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        if (window.SoundFX) window.SoundFX.playBeep(900, 0.03);
+
+        if (tabTarget === "home") {
+          showScreen("screen-title");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else if (tabTarget === "challenges") {
+          showScreen("screen-title");
+          const target = document.getElementById("section-challenges");
+          if (target) target.scrollIntoView({ behavior: "smooth" });
+        } else if (tabTarget === "coop") {
+          showScreen("screen-multiplayer");
+        } else if (tabTarget === "leaderboard") {
+          const m = document.getElementById("modal-leaderboard");
+          if (m) m.classList.remove("hidden");
+        } else if (tabTarget === "profile") {
+          const m = document.getElementById("modal-profile");
+          if (m) m.classList.remove("hidden");
+        }
+      });
+    });
+
+    // Notifications & Profile avatar buttons
+    const btnNotifs = document.getElementById("btn-notifications");
+    if (btnNotifs) {
+      btnNotifs.addEventListener("click", () => {
+        const m = document.getElementById("modal-notifications");
+        if (m) m.classList.remove("hidden");
+        if (window.SoundFX) window.SoundFX.playBeep(850, 0.04);
+      });
+    }
+
+    const btnAvatar = document.getElementById("btn-avatar");
+    if (btnAvatar) {
+      btnAvatar.addEventListener("click", () => {
+        const m = document.getElementById("modal-profile");
+        if (m) m.classList.remove("hidden");
+        if (window.SoundFX) window.SoundFX.playBeep(850, 0.04);
+      });
+    }
+
+    // Quick links buttons
+    const btnQuickHelp = document.getElementById("btn-quick-help");
+    if (btnQuickHelp) {
+      btnQuickHelp.addEventListener("click", openGuide);
+    }
+
+    const btnQuickAbout = document.getElementById("btn-quick-about");
+    if (btnQuickAbout) {
+      btnQuickAbout.addEventListener("click", () => {
+        const m = document.getElementById("modal-about-challenge");
+        if (m) m.classList.remove("hidden");
+        if (window.SoundFX) window.SoundFX.playBeep(850, 0.04);
+      });
+    }
+
+    const btnViewAll = document.getElementById("btn-view-all");
+    if (btnViewAll) {
+      btnViewAll.addEventListener("click", () => {
+        const target = document.getElementById("section-challenges");
+        if (target) target.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+
+    // Generic Modal Close Buttons
+    document.querySelectorAll("[data-close-modal]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const modalId = btn.dataset.closeModal;
+        const modal = document.getElementById(modalId);
+        if (modal) modal.classList.add("hidden");
+      });
+    });
   }
 
   // SCREEN 2: TEAM SETUP

@@ -245,8 +245,8 @@ console.log(`       - Orbit Temperature: ${flight.getOrbitState().temperature.to
 flight.reviveFlight();
 console.log(`[PASS] reviveFlight() executed. Phase is '${flight.getPhase()}', health is ${flight.getOrbitState().health}%`);
 
-// 12. Test User-Friendly AutoConfigure for All Mission Presets
-const testMissions = ['sentinel-e', 'stormwatch', 'artemis-scout', 'red-pioneer'];
+// 12. Test User-Friendly AutoConfigure for All Mission Presets (All 6 NASA App Challenge Missions)
+const testMissions = ['sentinel-e', 'stormwatch', 'artemis-scout', 'red-pioneer', 'asteroid-guard', 'deepview'];
 for (const mid of testMissions) {
   const result = window.GameEngine.autoConfigure(mid);
   if (!result.canLaunch) {

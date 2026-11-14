@@ -978,6 +978,32 @@ window.GameEngine = (function () {
       state.components.band = "ka-band";
       state.components.groundStation = "dsn";
       state.launchVehicleId = "workhorse";
+    } else if (mission.id === "asteroid-guard") {
+      state.orbitId = "heo";
+      state.instruments = ["hires-cam", "sar"];
+      state.components.bus = "medium-sat";
+      state.components.power = "medium-solar";
+      state.components.thermal = "active";
+      state.components.computer = "standard-comp";
+      state.components.attitude = "precision";
+      state.components.propulsion = "chemical";
+      state.components.antenna = "hga";
+      state.components.band = "ka-band";
+      state.components.groundStation = "dsn";
+      state.launchVehicleId = "workhorse";
+    } else if (mission.id === "deepview") {
+      state.orbitId = "l2";
+      state.instruments = ["hires-cam", "ir-spec", "magnetometer"];
+      state.components.bus = "medium-sat";
+      state.components.power = "small-solar";
+      state.components.thermal = "passive";
+      state.components.computer = "basic-comp";
+      state.components.attitude = "precision";
+      state.components.propulsion = "cold-gas";
+      state.components.antenna = "omni";
+      state.components.band = "s-band";
+      state.components.groundStation = "network";
+      state.launchVehicleId = "titan";
     } else {
       const preferred = (mission.requirements && mission.requirements.preferredOrbits) ? mission.requirements.preferredOrbits[0] : "leo";
       state.orbitId = preferred;
