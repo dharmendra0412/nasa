@@ -113,11 +113,22 @@
             </div>
           </div>
 
-          <!-- Floating 3D Astronaut against Earth Space Horizon -->
+          <!-- Interactive Photorealistic 3D Earth Globe & Orbiting Satellite -->
           <div class="portal-hero-visual">
-            <div class="astronaut-visual-card">
-              <img src="assets/hero_astronaut.jpg" alt="NASA Astronaut Spacewalking in Orbit" class="hero-astronaut-image" />
-              <div class="astronaut-glow-halo"></div>
+            <div class="earth-visual-card">
+              <canvas id="title-earth-canvas" width="460" height="260" class="hero-earth-canvas"></canvas>
+              <div class="earth-hud-overlay">
+                <div class="earth-hud-pill">
+                  <span class="hud-pulse-dot"></span>
+                  <span class="hud-text">LEO 400 KM ORBITAL FEED</span>
+                </div>
+                <div class="earth-hud-pill text-cyan">
+                  <span>🛰️ REAL-TIME 3D TELEMETRY</span>
+                </div>
+              </div>
+              <div class="earth-drag-hint">
+                <span>🖱️ Click & Drag to Rotate in 360° &bull; Scroll to Zoom</span>
+              </div>
             </div>
           </div>
         </div>
@@ -363,7 +374,6 @@
 
         <!-- Hidden Compatibility DOM Elements for existing automated scripts & tests -->
         <div style="display:none !important;" aria-hidden="true">
-          <canvas id="title-earth-canvas" width="1" height="1"></canvas>
           <div id="quick-preset-chips">
             <button type="button" class="quick-chip active" data-mission-id="sentinel-e"></button>
             <button type="button" class="quick-chip" data-mission-id="stormwatch"></button>

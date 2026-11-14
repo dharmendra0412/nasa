@@ -155,9 +155,16 @@ window.GameUI = (function () {
   // SCREEN 1: TITLE & CONFIG
   function setupTitleScreen() {
     // 1. Initialize Interactive 3D Earth Globe & Orbiting Satellite
-    const globeCanvas = document.getElementById("title-earth-canvas");
-    if (globeCanvas && window.Space3D) {
-      window.Space3D.initTitleGlobe(globeCanvas);
+    const initGlobe = () => {
+      const globeCanvas = document.getElementById("title-earth-canvas");
+      if (globeCanvas && window.Space3D && typeof window.Space3D.initTitleGlobe === "function") {
+        window.Space3D.initTitleGlobe(globeCanvas);
+      }
+    };
+    initGlobe();
+    if (typeof window !== "undefined" && window.addEventListener) {
+      window.addEventListener("load", initGlobe);
+      setTimeout(initGlobe, 200);
     }
 
     // 2. Real-time Live NASA Mission Control UTC Clock

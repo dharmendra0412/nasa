@@ -4452,7 +4452,7 @@ body {
   color: #ffffff;
 }
 
-/* Floating Astronaut Visual */
+/* Photorealistic 3D Earth Visual Card */
 .portal-hero-visual {
   display: flex;
   justify-content: center;
@@ -4460,32 +4460,86 @@ body {
   position: relative;
 }
 
-.astronaut-visual-card {
+.earth-visual-card {
   position: relative;
   width: 100%;
-  max-width: 440px;
+  max-width: 480px;
+  height: 280px;
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: 0 20px 50px rgba(14, 165, 233, 0.25);
-  background: radial-gradient(circle at 60% 40%, rgba(14, 165, 233, 0.2), transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.18) 0%, rgba(3, 7, 18, 0.9) 75%);
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65), 0 0 35px rgba(14, 165, 233, 0.22);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.hero-astronaut-image {
-  width: 100%;
-  height: auto;
+.hero-earth-canvas {
+  width: 100% !important;
+  height: 100% !important;
   display: block;
-  border-radius: 24px;
-  animation: astronautFloat 6s ease-in-out infinite;
-  transform-origin: center center;
+  cursor: grab;
 }
 
-@keyframes astronautFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-10px) rotate(1.2deg);
-  }
+.hero-earth-canvas:active {
+  cursor: grabbing;
+}
+
+.earth-hud-overlay {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.earth-hud-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: rgba(8, 14, 30, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+}
+
+.hud-pulse-dot {
+  width: 6px;
+  height: 6px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #10b981;
+  animation: pulseLive 1.5s infinite;
+}
+
+.earth-drag-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 14px;
+  background: rgba(8, 14, 30, 0.78);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+  pointer-events: none;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  z-index: 5;
 }
 
 .astronaut-glow-halo {
