@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DEFAULT_PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
-const ROOT_DIR = __dirname;
+const ROOT_DIR = fs.existsSync(path.join(__dirname, 'index.html')) ? __dirname : process.cwd();
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',

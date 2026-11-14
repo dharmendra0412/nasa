@@ -1,4 +1,11 @@
 {
-  "version": 2,
-  "cleanUrls": true
+  "buildCommand": "echo Static frontend build complete",
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/index.html"
+    }
+  ]
 }
