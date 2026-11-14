@@ -224,7 +224,7 @@ body {
 
 /* Screen Management */
 .screen {
-  display: none;
+  display: none !important;
   opacity: 0;
   transition: opacity 0.3s ease;
   padding: 24px;
@@ -234,7 +234,7 @@ body {
 }
 
 .screen.active {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
   opacity: 1;
   animation: screenFadeIn 0.35s ease forwards;
@@ -1278,6 +1278,14 @@ body {
 /* ==========================================================================
    SCREEN 4: SPACECRAFT DESIGN STUDIO
    ========================================================================== */
+.design-screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
 .design-layout {
   display: grid;
   grid-template-columns: 330px 1fr;
@@ -4134,9 +4142,6 @@ body {
   margin: 0 auto;
   padding: 16px 24px 40px 24px;
   position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
 /* 1. TOP NAVBAR */

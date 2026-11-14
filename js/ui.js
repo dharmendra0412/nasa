@@ -686,6 +686,13 @@ window.GameUI = (function () {
   function renderDesignStudio() {
     renderTabContent();
 
+    const designTitleEl = document.getElementById("design-header-mission-title");
+    const st = window.GameEngine.getState();
+    const curMission = (window.GameData && window.GameData.missions) ? window.GameData.missions.find(m => m.id === st.missionId) : null;
+    if (designTitleEl && curMission) {
+      designTitleEl.textContent = `🛠️ ${curMission.name.toUpperCase()} - DESIGN STUDIO`;
+    }
+
     // Initialize Live 3D Spacecraft CAD / Blueprint Inspector
     const cadCanvas = document.getElementById("design-cad-canvas");
     if (cadCanvas && window.Space3D && window.Space3D.initDesignCADViewer && !cadCanvas.dataset.cadInit) {
@@ -975,6 +982,24 @@ window.GameUI = (function () {
 
     if (el.btnBackDesign) {
       el.btnBackDesign.addEventListener("click", () => showScreen("screen-mission"));
+    }
+
+    const btnBackDesignToHub = document.getElementById("btn-back-design-to-hub");
+    if (btnBackDesignToHub) {
+      btnBackDesignToHub.addEventListener("click", () => {
+        showScreen("screen-title");
+      });
+    }
+
+    const btnQuickLaunchFromDesign = document.getElementById("btn-quick-launch-from-design");
+    if (btnQuickLaunchFromDesign) {
+      btnQuickLaunchFromDesign.addEventListener("click", () => {
+        const state = window.GameEngine.getState();
+        if (state.missionId) {
+          selectedQuickMissionId = state.missionId;
+        }
+        launchInstantFlight();
+      });
     }
   }
 
