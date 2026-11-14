@@ -1042,6 +1042,16 @@ window.GameUI = (function () {
         showScreen("screen-results");
       });
     }
+
+    const btnBackToHub = document.getElementById("btn-back-to-hub");
+    if (btnBackToHub) {
+      btnBackToHub.addEventListener("click", () => {
+        if (window.SpaceFlightGame) {
+          window.SpaceFlightGame.stop();
+        }
+        showScreen("screen-title");
+      });
+    }
   }
 
   // SCREEN 6: SIMULATION & CANVAS VISUALIZER

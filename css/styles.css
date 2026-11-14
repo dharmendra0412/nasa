@@ -132,17 +132,7 @@ body {
 }
 
 .global-header {
-  height: 64px;
-  background: rgba(10, 15, 30, 0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-cyan);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  display: none !important;
 }
 
 .header-brand {

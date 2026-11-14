@@ -19,25 +19,12 @@
   </div>
 
   <div id="app" class="app-container">
-    <!-- Top Global Header / HUD Bar -->
-    <header class="global-header">
-      <div class="header-brand">
-        <span class="brand-icon">🛰️</span>
-        <div class="brand-text">
-          <span class="brand-title">MISSION CONTROL</span>
-          <span class="brand-subtitle">NASA SYSTEMS ENGINEERING SIMULATOR</span>
-        </div>
-      </div>
-      <div id="header-mission-badge" class="header-badge hidden">
-        <span id="badge-mission-name">No Mission</span>
-        <span id="badge-mission-orbit" class="badge-tag">No Orbit</span>
-      </div>
-      <div class="header-actions">
-        <button id="btn-header-multiplayer" class="btn-icon header-mp-btn" title="Play Online with Friends (Multiplayer)">🌐</button>
-        <button id="btn-sound-toggle" class="btn-icon" title="Toggle Audio Telemetry">🔊</button>
-        <button id="btn-header-help" class="btn-icon" title="Systems Engineering Guide">❓</button>
-      </div>
-    </header>
+    <!-- Hidden compatibility elements for existing listeners -->
+    <div style="display:none !important;" aria-hidden="true">
+      <div id="header-mission-badge"><span id="badge-mission-name"></span><span id="badge-mission-orbit"></span></div>
+      <button id="btn-header-multiplayer"></button>
+      <button id="btn-header-help"></button>
+    </div>
 
     <!-- Main Screens Container -->
     <main class="main-content">
@@ -85,6 +72,9 @@
 
           <!-- Right Action Controls -->
           <div class="portal-nav-actions">
+            <button type="button" class="portal-action-btn" id="btn-sound-toggle" title="Toggle Audio Telemetry">
+              <span>🔊</span>
+            </button>
             <button type="button" class="portal-action-btn" id="btn-notifications" title="Houston Mission Control Alerts">
               <span class="action-icon">🔔</span>
               <span class="notification-dot"></span>
@@ -939,6 +929,7 @@
       <!-- SCREEN: INTERACTIVE ARCADE FLIGHT & MISSION OPERATIONS -->
       <section id="screen-arcade" class="screen">
         <div class="arcade-header">
+          <button id="btn-back-to-hub" type="button" class="btn btn-outline btn-small" title="Return to NASA App Challenge Hub">⬅ NASA Hub</button>
           <div class="arcade-title-group">
             <h2 id="arcade-mission-title">🎮 FLIGHT OPERATIONS: ASCENT & ORBITAL MISSION</h2>
             <p>Control rocket ascent, execute staging burns, navigate orbit, dodge hazards, and scan planetary science targets!</p>
