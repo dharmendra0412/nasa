@@ -133,6 +133,10 @@ window.GameUI = (function () {
       target.classList.add("active");
     }
 
+    if (screenId === "screen-design") {
+      renderDesignStudio();
+    }
+
     updateHeaderBadge();
     if (window.SoundFX) window.SoundFX.playBeep(700, 0.05);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -693,11 +697,24 @@ window.GameUI = (function () {
       designTitleEl.textContent = `🛠️ ${curMission.name.toUpperCase()} - DESIGN STUDIO`;
     }
 
+    // Ensure currently selected or first tab is active
+    const activeTabBtn = document.querySelector(".design-tabs-nav .tab-btn.active") || document.querySelector(".design-tabs-nav .tab-btn");
+    if (activeTabBtn) {
+      const tabName = activeTabBtn.dataset.tab;
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".design-panel").forEach(p => p.classList.remove("active"));
+      activeTabBtn.classList.add("active");
+      const activePanel = document.getElementById(`panel-${tabName}`);
+      if (activePanel) activePanel.classList.add("active");
+    }
+
     // Initialize Live 3D Spacecraft CAD / Blueprint Inspector
     const cadCanvas = document.getElementById("design-cad-canvas");
     if (cadCanvas && window.Space3D && window.Space3D.initDesignCADViewer && !cadCanvas.dataset.cadInit) {
       cadCanvas.dataset.cadInit = "true";
       window.Space3D.initDesignCADViewer(cadCanvas);
+    } else if (cadCanvas && window.Space3D && window.Space3D.updateDesignCAD) {
+      window.Space3D.updateDesignCAD(st);
     }
 
     // Wire Blueprint Wireframe Toggle Button
@@ -722,100 +739,100 @@ window.GameUI = (function () {
 
     // 1. Orbit Cards
     renderHardwareGrid("orbit-cards", data.orbits, state.orbitId, (id) => {
-      window.GameEngine.selectOrbit(id);
+      window.GameEngine.selectOrbit(state.orbitId === id ? null : id);
       updateDesignState();
     }, (item) => `
       <div class="stat-chip mass">ΔV: +${item.deltaV} km/s</div>
       <div class="stat-chip science">Sci Mult: ${item.scienceMultiplier}x</div>
-      <div class="stat-chip cost">Rad: ${item.radiationLevel.toUpperCase()}</div>
-      <div class="stat-chip power">Coverage: ${Math.round(item.commsCoverage * 100)}%</div>
+      <div class="stat-chip cost">Rad: ${(item.radiationLevel || "Low").toUpperCase()}</div>
+      <div class="stat-chip power">Coverage: ${Math.round((item.commsCoverage || 0.5) * 100)}%</div>
     `);
 
     // 2. Bus & Propulsion
     renderHardwareGrid("bus-cards", data.busSizes, state.components.bus, (id) => {
-      window.GameEngine.setComponent("bus", id);
+      window.GameEngine.setComponent("bus", state.components.bus === id ? null : id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip mass">Dry: ${item.dryMass} kg</div>
+      <div class="stat-chip mass">Dry Mass: ${item.dryMass} kg</div>
       <div class="stat-chip science">Payload Max: ${item.maxPayloadMass} kg</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
-      <div class="stat-chip power">Max: ${item.powerCapacity} W</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
+      <div class="stat-chip power">Capacity: ${item.powerCapacity} W</div>
     `);
 
     renderHardwareGrid("propulsion-cards", data.propulsionSystems, state.components.propulsion, (id) => {
-      window.GameEngine.setComponent("propulsion", id);
+      window.GameEngine.setComponent("propulsion", state.components.propulsion === id ? null : id);
       updateDesignState();
     }, (item) => `
       <div class="stat-chip science">ΔV: ${item.deltaV} m/s</div>
-      <div class="stat-chip mass">${item.mass} kg</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
-      <div class="stat-chip power">${item.power} W</div>
+      <div class="stat-chip mass">Mass: ${item.mass} kg</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
+      <div class="stat-chip power">Power: ${item.power} W</div>
     `);
 
     // 3. Avionics & Power
     renderHardwareGrid("power-cards", data.powerSystems, state.components.power, (id) => {
-      window.GameEngine.setComponent("power", id);
+      window.GameEngine.setComponent("power", state.components.power === id ? null : id);
       updateDesignState();
     }, (item) => `
       <div class="stat-chip power">Output: +${item.power} W</div>
-      <div class="stat-chip mass">${item.mass} kg</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
-      <div class="stat-chip science">${item.type.toUpperCase()}</div>
+      <div class="stat-chip mass">Mass: ${item.mass} kg</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
+      <div class="stat-chip science">Type: ${(item.type || "Solar").toUpperCase()}</div>
     `);
 
     renderHardwareGrid("attitude-cards", data.attitudeControls, state.components.attitude, (id) => {
-      window.GameEngine.setComponent("attitude", id);
+      window.GameEngine.setComponent("attitude", state.components.attitude === id ? null : id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip science">Jitter: ±${item.pointingAccuracy}"</div>
-      <div class="stat-chip mass">${item.mass} kg</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
-      <div class="stat-chip power">${item.power} W</div>
+      <div class="stat-chip science">Precision: ±${item.pointingAccuracy}"</div>
+      <div class="stat-chip mass">Mass: ${item.mass} kg</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
+      <div class="stat-chip power">Power: ${item.power} W</div>
     `);
 
     renderHardwareGrid("computer-cards", data.computers, state.components.computer, (id) => {
-      window.GameEngine.setComponent("computer", id);
+      window.GameEngine.setComponent("computer", state.components.computer === id ? null : id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip science">Memory: ${item.dataStorage} GB</div>
-      <div class="stat-chip mass">${item.mass} kg</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
-      <div class="stat-chip power">${item.power} W</div>
+      <div class="stat-chip science">Storage: ${item.dataStorage} GB</div>
+      <div class="stat-chip mass">Mass: ${item.mass} kg</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
+      <div class="stat-chip power">Power: ${item.power} W</div>
     `);
 
     renderHardwareGrid("thermal-cards", data.thermalSystems, state.components.thermal, (id) => {
-      window.GameEngine.setComponent("thermal", id);
+      window.GameEngine.setComponent("thermal", state.components.thermal === id ? null : id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip mass">${item.mass} kg</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
+      <div class="stat-chip mass">Mass: ${item.mass} kg</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
     `);
 
     // 4. Comms & Ground
     renderHardwareGrid("antenna-cards", data.antennas, state.components.antenna, (id) => {
-      window.GameEngine.setComponent("antenna", id);
+      window.GameEngine.setComponent("antenna", state.components.antenna === id ? null : id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip science">${item.dataRate} Mbps</div>
-      <div class="stat-chip mass">${item.mass} kg</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
+      <div class="stat-chip science">Data: ${item.dataRate} Mbps</div>
+      <div class="stat-chip mass">Mass: ${item.mass} kg</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
       <div class="stat-chip power">Gain: ${item.gain} dBi</div>
     `);
 
     renderHardwareGrid("band-cards", data.frequencyBands, state.components.band, (id) => {
-      window.GameEngine.setComponent("band", id);
+      window.GameEngine.setComponent("band", state.components.band === id ? null : id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip science">Max: ${item.maxDataRate} Mbps</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
+      <div class="stat-chip science">Max Rate: ${item.maxDataRate} Mbps</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
     `);
 
     renderHardwareGrid("groundstation-cards", data.groundStations, state.components.groundStation, (id) => {
-      window.GameEngine.setComponent("groundStation", id);
+      window.GameEngine.setComponent("groundStation", state.components.groundStation === id ? null : id);
       updateDesignState();
     }, (item) => `
       <div class="stat-chip science">Passes: ${item.coverage} hrs/day</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
     `);
 
     // 5. Scientific Instruments (Multi-Select)
@@ -823,24 +840,24 @@ window.GameUI = (function () {
       window.GameEngine.toggleInstrument(id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip science">Sci: +${item.scienceValue}</div>
-      <div class="stat-chip mass">${item.mass} kg</div>
-      <div class="stat-chip power">${item.power} W</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
-      <div class="stat-chip science">${item.dataRate} Mbps</div>
+      <div class="stat-chip science">🔬 Sci: +${item.scienceValue}</div>
+      <div class="stat-chip mass">Mass: ${item.mass} kg</div>
+      <div class="stat-chip power">Power: ${item.power} W</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
+      <div class="stat-chip science">Data: ${item.dataRate} Mbps</div>
       <div class="stat-chip">Pointing: ${item.requiredPointing}</div>
     `, true);
 
     // 6. Launch Vehicles
     renderHardwareGrid("vehicle-cards", data.launchVehicles, state.launchVehicleId, (id) => {
-      window.GameEngine.selectLaunchVehicle(id);
+      window.GameEngine.selectLaunchVehicle(state.launchVehicleId === id ? null : id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip mass">LEO: ${item.payloadLEO} kg</div>
-      <div class="stat-chip mass">GTO: ${item.payloadGTO} kg</div>
-      <div class="stat-chip cost">$${item.cost}M</div>
-      <div class="stat-chip science">Rel: ${(item.reliability * 100).toFixed(0)}%</div>
-      <div class="stat-chip power">Orbits: ${item.maxOrbitTypes.join("/")}</div>
+      <div class="stat-chip mass">LEO Cap: ${item.payloadLEO} kg</div>
+      <div class="stat-chip mass">GTO Cap: ${item.payloadGTO} kg</div>
+      <div class="stat-chip cost">Cost: $${item.cost}M</div>
+      <div class="stat-chip science">Reliability: ${(item.reliability * 100).toFixed(0)}%</div>
+      <div class="stat-chip power">Orbits: ${(item.maxOrbitTypes || []).join("/")}</div>
     `);
   }
 
@@ -864,6 +881,7 @@ window.GameUI = (function () {
         <div class="hw-card-top">
           <span class="hw-card-icon">${item.icon || "⚙️"}</span>
           <div class="hw-card-name">${item.name}</div>
+          <span class="hw-card-check">✓</span>
         </div>
         <div class="hw-card-desc">${item.description}</div>
         <div class="hw-stats-badges">
@@ -942,9 +960,24 @@ window.GameUI = (function () {
     const cadBusBadge = document.getElementById("cad-bus-badge");
     const cadPowerBadge = document.getElementById("cad-power-badge");
     const cadPayloadBadge = document.getElementById("cad-instruments-badge");
-    if (cadBusBadge) cadBusBadge.textContent = "BUS: " + (state.components.bus || "CUBESAT").toUpperCase();
-    if (cadPowerBadge) cadPowerBadge.textContent = "PWR: " + (state.components.power || "SOLAR").toUpperCase();
+    if (cadBusBadge) cadBusBadge.textContent = "BUS: " + (state.components.bus ? state.components.bus.replace("-", " ").toUpperCase() : "NONE");
+    if (cadPowerBadge) cadPowerBadge.textContent = "PWR: " + (state.components.power ? state.components.power.replace("-", " ").toUpperCase() : "NONE");
     if (cadPayloadBadge) cadPayloadBadge.textContent = "PAYLOAD: " + (state.instruments ? state.instruments.length : 0) + " UNITS";
+
+    const statusLine = document.getElementById("cad-status-line");
+    if (statusLine) {
+      if (!state.components.bus) {
+        statusLine.textContent = "AWAITING HARDWARE INTEGRATION · SELECT BUS & SUBSYSTEMS BELOW";
+      } else {
+        let count = 1;
+        if (state.components.power) count++;
+        if (state.components.propulsion && state.components.propulsion !== "no-prop") count++;
+        if (state.components.antenna) count++;
+        if (state.components.attitude || state.components.computer) count++;
+        if (state.instruments) count += state.instruments.length;
+        statusLine.textContent = `LIVE CAD TELEMETRY · ${count} SUBSYSTEMS / INSTRUMENTS INTEGRATED`;
+      }
+    }
   }
 
   function setupDesignTabs() {
@@ -967,8 +1000,8 @@ window.GameUI = (function () {
       btnAutoConfig.addEventListener("click", () => {
         const state = window.GameEngine.getState();
         window.GameEngine.autoConfigure(state.missionId);
-        renderDesignSubsystems();
-        updateSystemsDiagnostics();
+        renderTabContent();
+        updateDesignState();
         if (window.SoundFX) window.SoundFX.playBeep(1200, 0.15);
       });
     }

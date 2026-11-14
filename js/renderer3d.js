@@ -286,6 +286,89 @@ window.Space3D = (function () {
     const comps = config.components || {};
     const insts = config.instruments || [];
 
+    // Title Demo mode fallback (for small background earth satellite)
+    if (config.defaultDemo) {
+      comps.bus = comps.bus || "medium-sat";
+      comps.power = comps.power || "medium-solar";
+      comps.antenna = comps.antenna || "hga";
+      comps.propulsion = comps.propulsion || "chemical";
+      if (!insts.length) insts.push("hires-cam");
+    }
+
+    // 0. STRICT REQUIREMENT: If user has not selected a bus yet, show empty assembly cradle
+    if (!comps.bus) {
+      const cradleGroup = new THREE.Group();
+
+      // Hexagonal / circular cleanroom turntable base
+      const baseGeo = new THREE.CylinderGeometry(2.8, 3.2, 0.22, 16);
+      const baseMat = new THREE.MeshStandardMaterial({
+        color: 0x16202c,
+        roughness: 0.65,
+        metalness: 0.8
+      });
+      const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+      baseMesh.position.y = -2.1;
+      cradleGroup.add(baseMesh);
+
+      // Glowing turntable concentric cyan ring
+      const ringGeo = new THREE.RingGeometry(2.0, 2.15, 32);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI / 2;
+      ringMesh.position.y = -1.98;
+      cradleGroup.add(ringMesh);
+
+      // 4 Corner Docking Stanchions with amber alignment beacons
+      const stanchionGeo = new THREE.CylinderGeometry(0.06, 0.08, 3.8, 8);
+      const stanchionMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.5, metalness: 0.8 });
+      const beaconGeo = new THREE.SphereGeometry(0.12, 8, 8);
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xffab00 });
+
+      const corners = [
+        [-1.6, -1.6], [1.6, -1.6], [1.6, 1.6], [-1.6, 1.6]
+      ];
+      corners.forEach(([cx, cz]) => {
+        const st = new THREE.Mesh(stanchionGeo, stanchionMat);
+        st.position.set(cx, -0.2, cz);
+        cradleGroup.add(st);
+
+        const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+        beacon.position.set(cx, 1.75, cz);
+        cradleGroup.add(beacon);
+
+        // Clamp arm pointing toward center
+        const armGeo = new THREE.BoxGeometry(0.45, 0.08, 0.1);
+        const arm = new THREE.Mesh(armGeo, stanchionMat);
+        arm.position.set(cx > 0 ? cx - 0.22 : cx + 0.22, 0.4, cz);
+        cradleGroup.add(arm);
+      });
+
+      // Holographic Unbuilt Wireframe Bounding Chassis
+      const holoGeo = new THREE.BoxGeometry(2.5, 2.5, 3.2);
+      const holoEdges = new THREE.EdgesGeometry(holoGeo);
+      const holoMat = new THREE.LineBasicMaterial({
+        color: 0x00e5ff,
+        transparent: true,
+        opacity: 0.4
+      });
+      const holoBox = new THREE.LineSegments(holoEdges, holoMat);
+      holoBox.position.set(0, 0, 0);
+      cradleGroup.add(holoBox);
+
+      // Central Holographic Target Reticle
+      const targetGeo = new THREE.RingGeometry(0.5, 0.55, 24);
+      const targetMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+      const targetRing = new THREE.Mesh(targetGeo, targetMat);
+      targetRing.rotation.x = Math.PI / 2;
+      targetRing.position.set(0, 0, 0);
+      cradleGroup.add(targetRing);
+
+      group.add(cradleGroup);
+      group.userData = { isUnbuilt: true, cradleGroup };
+      return group;
+    }
+
+    // Material definitions for configured hardware
     const goldMat = new THREE.MeshStandardMaterial({
       color: 0xffd54f,
       roughness: 0.35,
@@ -310,6 +393,7 @@ window.Space3D = (function () {
     let busW = 3.0, busH = 3.0, busL = 3.8;
     if (comps.bus === "cubesat") { busW = 1.6; busH = 1.6; busL = 2.4; }
     else if (comps.bus === "small-sat") { busW = 2.4; busH = 2.4; busL = 3.0; }
+    else if (comps.bus === "medium-sat") { busW = 3.0; busH = 3.0; busL = 3.8; }
     else if (comps.bus === "large-sat") { busW = 4.2; busH = 4.2; busL = 5.2; }
 
     const busGeo = new THREE.BoxGeometry(busW, busH, busL);
@@ -325,113 +409,278 @@ window.Space3D = (function () {
     ring.position.z = busL * 0.25;
     group.add(ring);
 
-    // 2. Power Subsystem (Solar Arrays vs RTG)
+    // Cleanroom mounting cradle ring beneath spacecraft bus
+    const cradleBaseGeo = new THREE.CylinderGeometry(busW * 0.85, busW * 0.95, 0.15, 16);
+    const cradleBaseMat = new THREE.MeshStandardMaterial({ color: 0x1f2a3a, roughness: 0.6, metalness: 0.8 });
+    const cradleBase = new THREE.Mesh(cradleBaseGeo, cradleBaseMat);
+    cradleBase.position.y = -busH * 0.5 - 0.12;
+    group.add(cradleBase);
+
+    // 2. Power Subsystem (Solar Arrays vs RTG) - ONLY rendered if chosen!
     let leftWing = null, rightWing = null;
     if (comps.power === "rtg") {
-      // Nuclear RTG Cylinder with cooling fins
-      const rtgGeo = new THREE.CylinderGeometry(0.7, 0.7, 2.2, 16);
+      // Nuclear RTG Cylinder with cooling fins and radiator
+      const rtgGeo = new THREE.CylinderGeometry(0.65, 0.65, 2.2, 16);
       const rtgMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.6, metalness: 0.7 });
       const rtgMesh = new THREE.Mesh(rtgGeo, rtgMat);
       rtgMesh.position.set(-busW * 0.75, 0, 0);
 
-      // Orange glow core indicator
-      const glowGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.8, 12);
+      // Cooling fins
+      for (let f = 0; f < 6; f++) {
+        const finGeo = new THREE.BoxGeometry(0.04, 2.0, 0.32);
+        const fin = new THREE.Mesh(finGeo, metalMat);
+        const ang = (f * Math.PI) / 3;
+        fin.position.set(Math.cos(ang) * 0.68, 0, Math.sin(ang) * 0.68);
+        fin.rotation.y = ang;
+        rtgMesh.add(fin);
+      }
+
+      // Warm amber/orange nuclear glow core indicator
+      const glowGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.9, 12);
       const glowMat = new THREE.MeshBasicMaterial({ color: 0xff5722 });
       const glow = new THREE.Mesh(glowGeo, glowMat);
       rtgMesh.add(glow);
+
+      // Mounting boom
+      const rtgBoomGeo = new THREE.CylinderGeometry(0.08, 0.08, busW * 0.3);
+      const rtgBoom = new THREE.Mesh(rtgBoomGeo, metalMat);
+      rtgBoom.rotation.z = Math.PI / 2;
+      rtgBoom.position.set(-busW * 0.5 - (busW * 0.15), 0, 0);
+      group.add(rtgBoom);
+
       group.add(rtgMesh);
-    } else {
+    } else if (comps.power === "small-solar" || comps.power === "medium-solar" || comps.power === "large-solar") {
       // Solar Wings (Deployable Photovoltaic Arrays)
-      const span = comps.power === "large-solar" ? 6.5 : (comps.power === "small-solar" ? 3.0 : 4.5);
-      const solarWingGeo = new THREE.BoxGeometry(span, 0.12, 2.0);
+      let span = 4.8;
+      if (comps.power === "small-solar") span = 3.2;
+      else if (comps.power === "large-solar") span = 7.4;
+
+      const solarWingGeo = new THREE.BoxGeometry(span, 0.1, 1.8);
 
       leftWing = new THREE.Mesh(solarWingGeo, solarMat);
-      leftWing.position.set(-(busW / 2 + span / 2 + 0.6), 0, 0);
+      leftWing.position.set(-(busW / 2 + span / 2 + 0.5), 0, 0);
       leftWing.castShadow = true;
       group.add(leftWing);
 
       rightWing = new THREE.Mesh(solarWingGeo, solarMat);
-      rightWing.position.set(busW / 2 + span / 2 + 0.6, 0, 0);
+      rightWing.position.set(busW / 2 + span / 2 + 0.5, 0, 0);
       rightWing.castShadow = true;
       group.add(rightWing);
 
       // Structural hinge booms
-      const boomGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.8);
-      const b1 = new THREE.Mesh(boomGeo, metalMat); b1.rotation.z = Math.PI / 2; b1.position.set(-(busW / 2 + 0.4), 0, 0); group.add(b1);
-      const b2 = new THREE.Mesh(boomGeo, metalMat); b2.rotation.z = Math.PI / 2; b2.position.set(busW / 2 + 0.4, 0, 0); group.add(b2);
+      const boomGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.65);
+      const b1 = new THREE.Mesh(boomGeo, metalMat);
+      b1.rotation.z = Math.PI / 2;
+      b1.position.set(-(busW / 2 + 0.3), 0, 0);
+      group.add(b1);
+
+      const b2 = new THREE.Mesh(boomGeo, metalMat);
+      b2.rotation.z = Math.PI / 2;
+      b2.position.set(busW / 2 + 0.3, 0, 0);
+      group.add(b2);
     }
 
-    // 3. Telecommunications Antenna
+    // 3. Telecommunications Antenna - ONLY rendered if chosen!
     let dishMesh = null;
-    if (comps.antenna === "hga" || comps.antenna === "parabolic" || !comps.antenna) {
+    if (comps.antenna === "hga" || comps.antenna === "parabolic") {
       // High-Gain Parabolic Dish
-      const dishRadius = comps.antenna === "hga" ? 1.6 : 1.1;
+      const dishRadius = comps.antenna === "hga" ? 1.5 : 1.0;
       const dishGeo = new THREE.SphereGeometry(dishRadius, 24, 16, 0, Math.PI * 2, 0, Math.PI / 3);
-      const dishMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.2, side: THREE.DoubleSide });
+      const dishMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        roughness: 0.3,
+        metalness: 0.2,
+        side: THREE.DoubleSide
+      });
       dishMesh = new THREE.Mesh(dishGeo, dishMat);
       dishMesh.rotation.x = -Math.PI / 2;
-      dishMesh.position.set(0, busH * 0.55 + 0.8, 0);
+      dishMesh.position.set(0, busH * 0.5 + 0.75, 0);
 
-      const hornGeo = new THREE.CylinderGeometry(0.04, 0.1, 0.7);
+      const hornGeo = new THREE.CylinderGeometry(0.04, 0.1, 0.6);
       const horn = new THREE.Mesh(hornGeo, metalMat);
-      horn.position.set(0, 0, 0.4); horn.rotation.x = Math.PI / 2;
+      horn.position.set(0, 0, 0.35);
+      horn.rotation.x = Math.PI / 2;
       dishMesh.add(horn);
+
+      // Gimbal mast pedestal
+      const mastGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.7);
+      const mast = new THREE.Mesh(mastGeo, metalMat);
+      mast.position.set(0, busH * 0.5 + 0.35, 0);
+      group.add(mast);
+
       group.add(dishMesh);
-    } else {
-      // Patch / Dipole array
-      const patchGeo = new THREE.BoxGeometry(0.8, 0.1, 0.8);
+    } else if (comps.antenna === "patch") {
+      // Conformal Phased-Array Patch Antenna Plate
+      const patchGeo = new THREE.BoxGeometry(0.9, 0.08, 0.9);
       const patch = new THREE.Mesh(patchGeo, metalMat);
-      patch.position.set(0, busH * 0.52, 0);
+      patch.position.set(0, busH * 0.51, 0);
       group.add(patch);
+    } else if (comps.antenna === "dipole") {
+      // Dual Deployable Whip Antennas
+      const whipGeo = new THREE.CylinderGeometry(0.02, 0.02, 2.2);
+      const whip1 = new THREE.Mesh(whipGeo, metalMat);
+      whip1.rotation.z = Math.PI / 4;
+      whip1.position.set(busW * 0.45, busH * 0.5 + 0.8, 0);
+      group.add(whip1);
+
+      const whip2 = new THREE.Mesh(whipGeo, metalMat);
+      whip2.rotation.z = -Math.PI / 4;
+      whip2.position.set(-busW * 0.45, busH * 0.5 + 0.8, 0);
+      group.add(whip2);
     }
 
-    // 4. Optical Telescope Camera
-    const scopeGeo = new THREE.CylinderGeometry(0.65, 0.65, 1.6, 24);
-    const scopeMesh = new THREE.Mesh(scopeGeo, metalMat);
-    scopeMesh.rotation.x = Math.PI / 2;
-    scopeMesh.position.set(0, -busH * 0.2, busL * 0.5 + 0.8);
+    // 4. Propulsion Thruster Nozzle - ONLY rendered if chosen!
+    let nozzle = null;
+    if (comps.propulsion && comps.propulsion !== "no-prop") {
+      if (comps.propulsion === "ion") {
+        // High-Efficiency Xenon Ion Thruster with glowing cyan plasma ring
+        const chamberGeo = new THREE.CylinderGeometry(0.5, 0.55, 0.8, 20);
+        const chamberMat = new THREE.MeshStandardMaterial({ color: 0x424242, roughness: 0.3, metalness: 0.9 });
+        nozzle = new THREE.Mesh(chamberGeo, chamberMat);
+        nozzle.rotation.x = Math.PI / 2;
+        nozzle.position.set(0, 0, -busL * 0.5 - 0.4);
 
-    const lensGeo = new THREE.CircleGeometry(0.6, 24);
-    const lensMat = new THREE.MeshPhysicalMaterial({ color: 0x00e5ff, roughness: 0.05, transmission: 0.9, ior: 1.5 });
-    const lens = new THREE.Mesh(lensGeo, lensMat);
-    lens.position.set(0, 0.81, 0); lens.rotation.x = -Math.PI / 2;
-    scopeMesh.add(lens);
-    group.add(scopeMesh);
+        // Glowing cyan plasma ionization ring
+        const plasmaGeo = new THREE.RingGeometry(0.2, 0.45, 24);
+        const plasmaMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
+        const plasmaMesh = new THREE.Mesh(plasmaGeo, plasmaMat);
+        plasmaMesh.position.set(0, -0.41, 0);
+        plasmaMesh.rotation.x = Math.PI / 2;
+        nozzle.add(plasmaMesh);
 
-    // 5. Magnetometer Boom Arm if equipped
+        group.add(nozzle);
+      } else if (comps.propulsion === "chemical") {
+        // Flared Chemical Rocket Bell Nozzle
+        const nozGeo = new THREE.ConeGeometry(0.58, 1.0, 20, 1, true);
+        const nozMat = new THREE.MeshStandardMaterial({
+          color: 0x212121,
+          roughness: 0.4,
+          metalness: 0.85,
+          side: THREE.DoubleSide
+        });
+        nozzle = new THREE.Mesh(nozGeo, nozMat);
+        nozzle.rotation.x = Math.PI;
+        nozzle.position.set(0, 0, -busL * 0.5 - 0.55);
+
+        // Niobium throat ring
+        const throatGeo = new THREE.CylinderGeometry(0.18, 0.22, 0.25, 16);
+        const throat = new THREE.Mesh(throatGeo, metalMat);
+        throat.rotation.x = Math.PI / 2;
+        throat.position.set(0, 0, -busL * 0.5 - 0.12);
+        group.add(throat);
+
+        group.add(nozzle);
+      } else if (comps.propulsion === "cold-gas") {
+        // Quad Cold-Gas RCS Clusters
+        const corners = [
+          [-busW * 0.45, -busH * 0.45],
+          [busW * 0.45, -busH * 0.45],
+          [-busW * 0.45, busH * 0.45],
+          [busW * 0.45, busH * 0.45]
+        ];
+        corners.forEach(([cx, cy]) => {
+          const rcsGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+          const rcsBlock = new THREE.Mesh(rcsGeo, metalMat);
+          rcsBlock.position.set(cx, cy, -busL * 0.5 - 0.1);
+          group.add(rcsBlock);
+        });
+      }
+    }
+
+    // 5. Avionics & Attitude Subsystem (Star Trackers)
+    if (comps.attitude || comps.computer) {
+      const trackerGeo = new THREE.CylinderGeometry(0.12, 0.14, 0.4, 12);
+      const trackerMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2, metalness: 0.9 });
+      
+      const st1 = new THREE.Mesh(trackerGeo, trackerMat);
+      st1.rotation.x = Math.PI / 4;
+      st1.position.set(busW * 0.4, busH * 0.48, busL * 0.3);
+      group.add(st1);
+
+      const st2 = new THREE.Mesh(trackerGeo, trackerMat);
+      st2.rotation.x = -Math.PI / 4;
+      st2.position.set(-busW * 0.4, busH * 0.48, busL * 0.3);
+      group.add(st2);
+    }
+
+    // 6. Scientific Instruments - ONLY rendered if selected!
+    // 6.1. Optical Telescopes / Cameras (wide-cam, hires-cam, hyper-img)
+    if (insts.some(i => i.includes("cam") || i.includes("img"))) {
+      const scopeRadius = insts.includes("hires-cam") ? 0.72 : 0.52;
+      const scopeLen = insts.includes("hires-cam") ? 1.8 : 1.3;
+      const scopeGeo = new THREE.CylinderGeometry(scopeRadius, scopeRadius * 0.9, scopeLen, 24);
+      const scopeMesh = new THREE.Mesh(scopeGeo, metalMat);
+      scopeMesh.rotation.x = Math.PI / 2;
+      scopeMesh.position.set(0, -busH * 0.15, busL * 0.5 + scopeLen * 0.5);
+
+      // Cyan glossy glass entrance aperture
+      const lensGeo = new THREE.CircleGeometry(scopeRadius * 0.88, 24);
+      const lensMat = new THREE.MeshPhysicalMaterial({
+        color: 0x00e5ff,
+        roughness: 0.05,
+        transmission: 0.9,
+        ior: 1.5
+      });
+      const lens = new THREE.Mesh(lensGeo, lensMat);
+      lens.position.set(0, scopeLen * 0.5 + 0.01, 0);
+      lens.rotation.x = -Math.PI / 2;
+      scopeMesh.add(lens);
+
+      group.add(scopeMesh);
+    }
+
+    // 6.2. Synthetic Aperture Radar / Radar Altimeter (sar, radar-alt)
+    if (insts.includes("sar") || insts.includes("radar-alt")) {
+      const sarGeo = new THREE.BoxGeometry(busW * 1.6, 1.4, 0.12);
+      const sarMat = new THREE.MeshStandardMaterial({
+        color: 0xdcdcdc,
+        roughness: 0.4,
+        metalness: 0.6
+      });
+      const sarMesh = new THREE.Mesh(sarGeo, sarMat);
+      sarMesh.position.set(0, -busH * 0.65, 0);
+      group.add(sarMesh);
+    }
+
+    // 6.3. Magnetometer Boom Arm (magnetometer)
     if (insts.includes("magnetometer")) {
-      const magBoomGeo = new THREE.CylinderGeometry(0.05, 0.05, 5.5);
+      const magBoomGeo = new THREE.CylinderGeometry(0.04, 0.04, 5.2);
       const magBoom = new THREE.Mesh(magBoomGeo, metalMat);
       magBoom.rotation.z = Math.PI / 3;
-      magBoom.position.set(busW * 0.8, busH * 0.8, -busL * 0.4);
+      magBoom.position.set(busW * 0.75, busH * 0.75, -busL * 0.35);
 
-      const sensorSphere = new THREE.Mesh(new THREE.SphereGeometry(0.25, 12, 12), goldMat);
-      sensorSphere.position.set(0, 2.8, 0);
+      const sensorSphere = new THREE.Mesh(new THREE.SphereGeometry(0.24, 12, 12), goldMat);
+      sensorSphere.position.set(0, 2.65, 0);
       magBoom.add(sensorSphere);
       group.add(magBoom);
     }
 
-    // 6. SAR Radar Planar Panel if equipped
-    if (insts.includes("sar")) {
-      const sarGeo = new THREE.BoxGeometry(5.0, 1.4, 0.15);
-      const sarMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.4, metalness: 0.5 });
-      const sarMesh = new THREE.Mesh(sarGeo, sarMat);
-      sarMesh.position.set(0, -busH * 0.7, 0);
-      group.add(sarMesh);
+    // 6.4. Spectrometer Instruments (uv-spec, ir-spec, mass-spec)
+    if (insts.some(i => i.includes("spec"))) {
+      const specBoxGeo = new THREE.BoxGeometry(0.9, 0.7, 0.9);
+      const specBoxMat = new THREE.MeshStandardMaterial({ color: 0x546e7a, roughness: 0.3, metalness: 0.8 });
+      const specBox = new THREE.Mesh(specBoxGeo, specBoxMat);
+      specBox.position.set(busW * 0.48, -busH * 0.2, busL * 0.2);
+
+      // Gold cryogenic sensor window
+      const winGeo = new THREE.CircleGeometry(0.2, 16);
+      const win = new THREE.Mesh(winGeo, goldMat);
+      win.rotation.y = Math.PI / 2;
+      win.position.set(0.46, 0, 0);
+      specBox.add(win);
+
+      group.add(specBox);
     }
 
-    // 7. Propulsion Thruster Nozzle
-    const nozGeo = new THREE.ConeGeometry(0.55, 0.9, 16, 1, true);
-    const nozMat = new THREE.MeshStandardMaterial({
-      color: comps.propulsion === "ion" ? 0x00e5ff : 0x222222,
-      roughness: 0.5,
-      metalness: 0.8,
-      side: THREE.DoubleSide
-    });
-    const nozzle = new THREE.Mesh(nozGeo, nozMat);
-    nozzle.rotation.x = Math.PI;
-    nozzle.position.set(0, 0, -busL * 0.5 - 0.5);
-    group.add(nozzle);
+    // 6.5. Plasma / Cosmic Ray Sensors (plasma, cosmic-ray)
+    if (insts.includes("plasma") || insts.includes("cosmic-ray")) {
+      const cupGeo = new THREE.CylinderGeometry(0.25, 0.15, 0.5, 16);
+      const cupMat = new THREE.MeshStandardMaterial({ color: 0x78909c, roughness: 0.3, metalness: 0.9 });
+      const cup = new THREE.Mesh(cupGeo, cupMat);
+      cup.rotation.z = -Math.PI / 2;
+      cup.position.set(-busW * 0.52, busH * 0.2, -busL * 0.1);
+      group.add(cup);
+    }
 
     group.userData = { leftWing, rightWing, dishMesh, nozzle };
     return group;
@@ -943,7 +1192,7 @@ window.Space3D = (function () {
     titleScene.add(atmo);
 
     // Orbiting Satellite
-    titleSatellite = buildSpacecraft({});
+    titleSatellite = buildSpacecraft({ defaultDemo: true });
     titleSatellite.scale.set(0.42, 0.42, 0.42);
     titleScene.add(titleSatellite);
 
@@ -1046,16 +1295,35 @@ window.Space3D = (function () {
   let cadRotY = 0;
   let cadIsDragging = false;
   let cadPrevX = 0, cadPrevY = 0;
+  let cadCanvasElement = null;
+
+  function checkCADResize() {
+    if (!cadRenderer || !cadCamera || !cadCanvasElement) return;
+    const rect = cadCanvasElement.getBoundingClientRect();
+    const rw = Math.floor(rect.width);
+    const rh = Math.floor(rect.height);
+    if (rw > 20 && rh > 20) {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const targetW = Math.floor(rw * dpr);
+      const targetH = Math.floor(rh * dpr);
+      if (Math.abs(cadCanvasElement.width - targetW) > 2 || Math.abs(cadCanvasElement.height - targetH) > 2) {
+        cadRenderer.setSize(rw, rh, false);
+        cadCamera.aspect = rw / rh;
+        cadCamera.updateProjectionMatrix();
+      }
+    }
+  }
 
   function initDesignCADViewer(canvasElement) {
     if (!canvasElement || typeof THREE === "undefined") return;
+    cadCanvasElement = canvasElement;
     if (cadAnimId) cancelAnimationFrame(cadAnimId);
 
-    const w = canvasElement.clientWidth || 700;
-    const h = canvasElement.clientHeight || 240;
+    const w = canvasElement.clientWidth > 0 ? canvasElement.clientWidth : (canvasElement.parentElement ? canvasElement.parentElement.clientWidth : 800) || 800;
+    const h = canvasElement.clientHeight > 0 ? canvasElement.clientHeight : 220;
 
     cadRenderer = new THREE.WebGLRenderer({ canvas: canvasElement, antialias: true, alpha: true });
-    cadRenderer.setSize(w, h);
+    cadRenderer.setSize(w, h, false);
     cadRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     cadScene = new THREE.Scene();
@@ -1063,23 +1331,30 @@ window.Space3D = (function () {
     cadCamera.position.set(0, 3, 14);
     cadCamera.lookAt(0, 0, 0);
 
-    const amb = new THREE.AmbientLight(0x334455, 0.8);
+    const amb = new THREE.AmbientLight(0x334455, 0.9);
     cadScene.add(amb);
 
     const light1 = new THREE.DirectionalLight(0xffffff, 1.8);
     light1.position.set(20, 25, 30);
     cadScene.add(light1);
 
-    const light2 = new THREE.DirectionalLight(0x00e5ff, 0.6);
+    const light2 = new THREE.DirectionalLight(0x00e5ff, 0.7);
     light2.position.set(-20, -10, -20);
     cadScene.add(light2);
 
-    // Initial default spacecraft
-    updateDesignCAD({});
+    // Initial spacecraft strictly reflects current engine state
+    const curState = (window.GameEngine && typeof window.GameEngine.getState === "function") 
+      ? window.GameEngine.getState() 
+      : {};
+    updateDesignCAD(curState);
 
-    // Drag to rotate CAD inspector in 360 degrees
+    // Drag to rotate CAD inspector in 360 degrees (Mouse)
     canvasElement.addEventListener("mousedown", (e) => {
       cadIsDragging = true;
+      if (cadSpacecraft) {
+        cadRotY = cadSpacecraft.rotation.y;
+        cadRotX = cadSpacecraft.rotation.x;
+      }
       cadPrevX = e.clientX;
       cadPrevY = e.clientY;
     });
@@ -1096,14 +1371,42 @@ window.Space3D = (function () {
 
     window.addEventListener("mouseup", () => { cadIsDragging = false; });
 
+    // Touch controls for tablets / mobile
+    canvasElement.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 1) {
+        cadIsDragging = true;
+        if (cadSpacecraft) {
+          cadRotY = cadSpacecraft.rotation.y;
+          cadRotX = cadSpacecraft.rotation.x;
+        }
+        cadPrevX = e.touches[0].clientX;
+        cadPrevY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchmove", (e) => {
+      if (!cadIsDragging || e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - cadPrevX;
+      const dy = e.touches[0].clientY - cadPrevY;
+      cadRotY += dx * 0.01;
+      cadRotX += dy * 0.01;
+      cadPrevX = e.touches[0].clientX;
+      cadPrevY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener("touchend", () => { cadIsDragging = false; });
+
     // Scroll to zoom
     canvasElement.addEventListener("wheel", (e) => {
       e.preventDefault();
       cadCamera.position.z = Math.max(7, Math.min(25, cadCamera.position.z + e.deltaY * 0.02));
     }, { passive: false });
 
+    window.addEventListener("resize", checkCADResize);
+
     function anim() {
       if (!cadRenderer) return;
+      checkCADResize();
       if (!cadIsDragging && cadSpacecraft) {
         cadSpacecraft.rotation.y += 0.005; // Slow gentle rotation
       } else if (cadSpacecraft) {
@@ -1118,9 +1421,10 @@ window.Space3D = (function () {
 
   function updateDesignCAD(config) {
     if (!cadScene) return;
+    checkCADResize();
     if (cadSpacecraft) cadScene.remove(cadSpacecraft);
 
-    cadSpacecraft = buildSpacecraft(config);
+    cadSpacecraft = buildSpacecraft(config || {});
     if (cadIsWireframe) applyWireframeMode(cadSpacecraft);
     cadScene.add(cadSpacecraft);
   }
