@@ -2485,6 +2485,35 @@ window.SpaceFlightGame = (function () {
     window.MultiplayerClient.on("roomUpdated", () => {
       if (isRunning) updateFlightHudCrew();
     });
+
+    window.MultiplayerClient.on("playerLeft", (leftPlayer) => {
+      if (isRunning && leftPlayer) {
+        updateFlightHudCrew();
+        const w = canvasHUD ? canvasHUD.width : 960;
+        addFloatingText(`⚠️ [DISCONNECT] ${leftPlayer.name} VACATED CONSOLE`, w / 2, 160, "#ff1744", 24);
+        if (window.SoundFX) {
+          window.SoundFX.playLeave();
+          window.SoundFX.speak(`Alert: ${leftPlayer.name} has disconnected`);
+        }
+        const ticker = document.getElementById("hud-action-ticker");
+        if (ticker) {
+          ticker.textContent = `● [DISCONNECT] ${leftPlayer.name} VACATED CONSOLE`;
+          ticker.classList.add("flash");
+        }
+      }
+    });
+
+    window.MultiplayerClient.on("playerJoined", (newPlayer) => {
+      if (isRunning && newPlayer) {
+        updateFlightHudCrew();
+        const w = canvasHUD ? canvasHUD.width : 960;
+        addFloatingText(`🛰️ [CONNECTED] ${newPlayer.name} JOINED CREW`, w / 2, 160, "#00e676", 24);
+        if (window.SoundFX) {
+          window.SoundFX.playJoin();
+          window.SoundFX.speak(`${newPlayer.name} connected to flight operations`);
+        }
+      }
+    });
   }
 
   function setInput(key, state) {

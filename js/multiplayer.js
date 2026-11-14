@@ -160,8 +160,17 @@ window.MultiplayerClient = (function () {
         emit('roomUpdated', {
           room: currentRoom,
           players: roomPlayers,
-          newPlayer: payload.newPlayer || null
+          newPlayer: payload.newPlayer || null,
+          leftPlayer: payload.leftPlayer || null
         });
+        break;
+
+      case 'PLAYER_JOINED':
+        emit('playerJoined', payload);
+        break;
+
+      case 'PLAYER_LEFT':
+        emit('playerLeft', payload);
         break;
 
       case 'GAME_START':
@@ -268,6 +277,20 @@ window.MultiplayerClient = (function () {
     const url = new URL(window.location.href);
     url.searchParams.set('room', currentRoom.code);
     return url.toString();
+  }
+
+  // Fast disconnect dispatch on tab close / window unload
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', () => {
+      if (isInRoom()) {
+        sendRaw('ROOM_LEAVE', {});
+      }
+    });
+    window.addEventListener('pagehide', () => {
+      if (isInRoom()) {
+        sendRaw('ROOM_LEAVE', {});
+      }
+    });
   }
 
   return {

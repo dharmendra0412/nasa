@@ -4076,3 +4076,61 @@ body {
   border-radius: 4px;
   cursor: pointer;
 }
+
+/* Real-Time Live Room Join/Leave Toast Alert */
+.mp-live-alert-banner {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+  animation: alertSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.mp-live-alert-banner.alert-leave {
+  background: rgba(255, 23, 68, 0.18);
+  border: 1px solid #ff1744;
+  color: #ff5252;
+  text-shadow: 0 0 10px rgba(255, 23, 68, 0.6);
+}
+
+.mp-live-alert-banner.alert-join {
+  background: rgba(0, 230, 118, 0.18);
+  border: 1px solid var(--accent-green);
+  color: var(--accent-green);
+  text-shadow: 0 0 10px rgba(0, 230, 118, 0.6);
+}
+
+@keyframes alertSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes vacateFlash {
+  0%, 100% {
+    border-color: rgba(255, 23, 68, 0.95);
+    box-shadow: 0 0 24px rgba(255, 23, 68, 0.75);
+    transform: translateY(-2px);
+  }
+  50% {
+    border-color: rgba(255, 145, 0, 0.95);
+    box-shadow: 0 0 14px rgba(255, 145, 0, 0.55);
+    transform: translateY(0);
+  }
+}
+
+.role-vacated-flash {
+  animation: vacateFlash 0.5s ease-in-out 4 !important;
+}

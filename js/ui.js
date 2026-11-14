@@ -1421,6 +1421,7 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
         const role = btn.dataset.role;
         if (role && window.MultiplayerClient) {
           window.MultiplayerClient.selectRole(role);
+          if (window.SoundFX) window.SoundFX.playClaim();
         }
       });
     });
@@ -1432,6 +1433,7 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
         const local = window.MultiplayerClient.getLocalPlayer();
         const currentReady = local ? local.ready : false;
         window.MultiplayerClient.toggleReady(!currentReady);
+        if (window.SoundFX) window.SoundFX.playReady();
       });
     }
 
@@ -1531,8 +1533,21 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
       });
 
       window.MultiplayerClient.on("roomUpdated", (data) => {
+        if (data.leftPlayer) {
+          showLiveAlert("leave", data.leftPlayer);
+        } else if (data.newPlayer) {
+          showLiveAlert("join", data.newPlayer);
+        }
         renderRolesAndOccupants(data.players);
         updateHostControls();
+      });
+
+      window.MultiplayerClient.on("playerLeft", (leftPlayer) => {
+        showLiveAlert("leave", leftPlayer);
+      });
+
+      window.MultiplayerClient.on("playerJoined", (newPlayer) => {
+        showLiveAlert("join", newPlayer);
       });
 
       window.MultiplayerClient.on("gameStart", (payload) => {
@@ -1547,7 +1562,7 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
 
       window.MultiplayerClient.on("chatMessage", (msg) => {
         appendChatMessage(msg);
-        if (window.SoundFX) window.SoundFX.playBeep(880, 0.05);
+        if (window.SoundFX) window.SoundFX.playQuindarTone();
       });
 
       window.MultiplayerClient.on("ping", (data) => {
@@ -1626,6 +1641,56 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
         btnMpLaunch.title = allReady ? "Authorize Flight Launch Sequence" : "All crew members must mark READY first";
       } else {
         btnMpLaunch.style.display = "none";
+      }
+    }
+
+    function showLiveAlert(type, player) {
+      if (!player) return;
+      const banner = document.getElementById("mp-live-alert-banner");
+      const roleMap = {
+        flight_director: "Flight Director (FLIGHT)",
+        systems_engineer: "Propulsion & Systems (PROP)",
+        science_officer: "Lead Science Officer (SCIENCE)",
+        comms_officer: "Flight Dynamics & Comms (FDO)",
+        crew_specialist: "Crew Specialist"
+      };
+      const roleName = roleMap[player.role] || player.role || "Crew Member";
+
+      if (type === "leave") {
+        if (window.SoundFX) {
+          window.SoundFX.playLeave();
+          window.SoundFX.speak(`${player.name} has left the room. Console is open.`);
+        }
+        if (banner) {
+          banner.className = "mp-live-alert-banner alert-leave";
+          banner.innerHTML = `<span>⚠️</span> <span><strong>${player.name}</strong> left the mission room. The <em>${roleName}</em> console is now vacant!</span>`;
+          banner.style.display = "flex";
+        }
+
+        // Pulse the vacated console with red-amber highlight
+        const cardSuffix = getRoleCardSuffix(player.role);
+        const cardEl = document.getElementById(`role-card-${cardSuffix}`);
+        if (cardEl) {
+          cardEl.classList.add("role-vacated-flash");
+          setTimeout(() => cardEl.classList.remove("role-vacated-flash"), 2500);
+        }
+      } else if (type === "join") {
+        if (window.SoundFX) {
+          window.SoundFX.playJoin();
+          window.SoundFX.speak(`${player.name} has connected to mission control.`);
+        }
+        if (banner) {
+          banner.className = "mp-live-alert-banner alert-join";
+          banner.innerHTML = `<span>🛰️</span> <span><strong>${player.name}</strong> connected to flight loop as <em>${roleName}</em>!</span>`;
+          banner.style.display = "flex";
+        }
+      }
+
+      if (banner) {
+        clearTimeout(banner._hideTimer);
+        banner._hideTimer = setTimeout(() => {
+          banner.style.display = "none";
+        }, 6000);
       }
     }
 

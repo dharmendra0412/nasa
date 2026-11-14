@@ -65,7 +65,7 @@ export class RoomManager {
       });
     });
 
-    // Heartbeat ping every 25 seconds
+    // Heartbeat ping every 5 seconds for rapid disconnect detection
     setInterval(() => {
       for (const client of this.wss.clients) {
         if (!client.isAlive) {
@@ -75,7 +75,7 @@ export class RoomManager {
         client.isAlive = false;
         client.ping();
       }
-    }, 25000);
+    }, 5000);
   }
 
   handleMessage(ws, msg) {
@@ -424,6 +424,7 @@ export class RoomManager {
 
     const playerWrap = room.players.get(ws.clientId);
     const playerName = playerWrap ? playerWrap.player.name : 'Crew member';
+    const playerRole = playerWrap ? playerWrap.player.role : 'crew';
 
     room.players.delete(ws.clientId);
     this.clientRooms.delete(ws);
@@ -437,20 +438,29 @@ export class RoomManager {
     }
 
     // If host left, assign host to next remaining player
+    let newHostName = null;
     if (room.hostId === ws.clientId) {
       const nextHostWrap = room.players.values().next().value;
       if (nextHostWrap) {
         room.hostId = nextHostWrap.player.id;
         nextHostWrap.player.isHost = true;
+        newHostName = nextHostWrap.player.name;
         console.log(`[ROOM] Reassigned host of ${roomCode} to ${nextHostWrap.player.name}`);
       }
     }
+
+    const leftData = {
+      id: ws.clientId,
+      name: playerName,
+      role: playerRole,
+      newHostName: newHostName
+    };
 
     const leaveMsg = {
       id: 'sys_' + Date.now(),
       sender: 'HOUSTON CAPCOM',
       role: 'system',
-      text: `${playerName} disconnected from audio loop.`,
+      text: `⚠️ ${playerName} (${this.formatRoleName(playerRole)}) left the flight room. Console is now open.`,
       time: new Date().toLocaleTimeString(),
       voiceCallout: 'CREW_LEFT'
     };
@@ -460,9 +470,11 @@ export class RoomManager {
       players: this.serializePlayers(room),
       state: room.status,
       missionId: room.missionId,
-      difficulty: room.difficulty
+      difficulty: room.difficulty,
+      leftPlayer: leftData
     });
 
+    this.broadcastToRoom(roomCode, 'PLAYER_LEFT', leftData);
     this.broadcastToRoom(roomCode, 'CHAT_BROADCAST', leaveMsg);
   }
 
