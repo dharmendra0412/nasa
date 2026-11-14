@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mission Control: Space Mission Design Game | NASA Systems Engineering</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Starfield Ambient Background -->
+  <div class="stars-container">
+    <div class="stars-layer stars-1"></div>
+    <div class="stars-layer stars-2"></div>
+    <div class="stars-layer stars-3"></div>
+    <div class="nebula-overlay"></div>
+  </div>
+
+  <div id="app" class="app-container">
+    <!-- Top Global Header / HUD Bar -->
+    <header class="global-header">
+      <div class="header-brand">
+        <span class="brand-icon">🛰️</span>
+        <div class="brand-text">
+          <span class="brand-title">MISSION CONTROL</span>
+          <span class="brand-subtitle">NASA SYSTEMS ENGINEERING SIMULATOR</span>
+        </div>
+      </div>
+      <div id="header-mission-badge" class="header-badge hidden">
+        <span id="badge-mission-name">No Mission</span>
+        <span id="badge-mission-orbit" class="badge-tag">No Orbit</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-header-multiplayer" class="btn-icon header-mp-btn" title="Play Online with Friends (Multiplayer)">🌐</button>
+        <button id="btn-sound-toggle" class="btn-icon" title="Toggle Audio Telemetry">🔊</button>
+        <button id="btn-header-help" class="btn-icon" title="Systems Engineering Guide">❓</button>
+      </div>
+    </header>
+
+    <!-- Main Screens Container -->
+    <main class="main-content">
+      
+      <!-- SCREEN 1: TITLE & GAME SETUP (ONE-VIEW DASHBOARD) -->
+      <section id="screen-title" class="screen active">
+        <!-- NASA Mission Control Live Telemetry Status Ticker -->
+        <div class="nasa-terminal-ticker">
+          <div class="ticker-segment">
+            <span class="ticker-dot green-blink">●</span>
+            <span class="ticker-label">MISSION STATUS:</span>
+            <span class="ticker-val">SYSTEMS NOMINAL [PHASE A]</span>
+          </div>
+          <div class="ticker-segment">
+            <span class="ticker-label">UTC TIME:</span>
+            <span id="live-utc-clock" class="ticker-val text-cyan">12:00:00Z</span>
+          </div>
+          <div class="ticker-segment dsn-segment">
+            <span class="ticker-label">DSN TRACKING:</span>
+            <span class="ticker-val">GOLDSTONE [AOS] • MADRID [AOS] • CANBERRA [STBY]</span>
+          </div>
+          <div class="ticker-segment">
+            <span class="ticker-label">SPACE WEATHER:</span>
+            <span class="ticker-val text-yellow">SOLAR FLUX 138 • KP-2.0 QUIET</span>
+          </div>
+        </div>
+
+        <!-- Unified One-View Cockpit Grid -->
+        <div class="title-dashboard-grid">
+          <!-- LEFT PANEL: 3D Earth Globe + Instant Quick Launch -->
+          <div class="title-panel title-panel-left">
+            <div class="brand-hero-compact">
+              <h1 class="glitch-title-compact" data-text="MISSION CONTROL">MISSION CONTROL</h1>
+              <p class="hero-tagline-compact">3D Spaceflight & NASA Mission Simulator</p>
+            </div>
+
+            <!-- Interactive 3D Earth Globe & Orbiting Satellite -->
+            <div class="title-globe-container-compact">
+              <div class="globe-glass-frame">
+                <canvas id="title-earth-canvas" width="460" height="210"></canvas>
+                <div class="globe-hud-overlay">
+                  <span class="globe-hud-tag">🛰️ LEO 400 KM ORBITAL FEED</span>
+                  <span class="globe-hud-tag text-green"><span class="green-blink">●</span> REAL-TIME TELEMETRY</span>
+                </div>
+              </div>
+              <div class="globe-drag-hint">
+                <span>🖱️ Click & Drag to rotate Earth in 360° • Scroll to Zoom</span>
+              </div>
+            </div>
+
+            <!-- 1-Click Instant Flight Card -->
+            <div class="quick-play-card-compact">
+              <div class="quick-header-row">
+                <span class="quick-play-badge"><span class="green-blink">●</span> 1-CLICK QUICK LAUNCH</span>
+                <span class="quick-target-tag">SELECT TARGET DESTINATION:</span>
+              </div>
+
+              <div class="quick-preset-chips" id="quick-preset-chips">
+                <button type="button" class="quick-chip active" data-mission-id="sentinel-e" title="Low Earth Orbit • 400 km Climate Monitor">
+                  <span class="chip-icon">🌍</span>
+                  <span class="chip-info">
+                    <strong>Earth Sentinel</strong>
+                    <small>400 km LEO</small>
+                  </span>
+                </button>
+                <button type="button" class="quick-chip" data-mission-id="stormwatch" title="Geostationary Weather Satellite">
+                  <span class="chip-icon">🌀</span>
+                  <span class="chip-info">
+                    <strong>StormWatch</strong>
+                    <small>35,786 km GEO</small>
+                  </span>
+                </button>
+                <button type="button" class="quick-chip" data-mission-id="artemis-scout" title="Lunar Polar Reconnaissance">
+                  <span class="chip-icon">🌕</span>
+                  <span class="chip-info">
+                    <strong>Artemis Moon</strong>
+                    <small>100 km Polar</small>
+                  </span>
+                </button>
+                <button type="button" class="quick-chip" data-mission-id="red-pioneer" title="Interplanetary Mars Reconnaissance">
+                  <span class="chip-icon">🪐</span>
+                  <span class="chip-info">
+                    <strong>Red Pioneer</strong>
+                    <small>Mars Exploration</small>
+                  </span>
+                </button>
+              </div>
+
+              <button id="btn-quick-launch" type="button" class="btn btn-quick-launch-large">
+                <span class="launch-rocket-icon">🚀</span>
+                <span class="launch-text-wrap">
+                  <strong class="launch-title">LAUNCH MISSION NOW (QUICK PLAY)</strong>
+                  <span class="launch-sub">Instant Liftoff from Pad 39A &bull; Full 3D Views</span>
+                </span>
+                <span class="launch-enter-badge">[ENTER]</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT PANEL: Custom Mission Architect (Systems Engineering Studio) -->
+          <div class="title-panel title-panel-right">
+            <div class="custom-studio-card-compact">
+              <div class="custom-card-header">
+                <div class="custom-badge-tag">
+                  <span>🛠️ SYSTEMS ENGINEERING MODE</span>
+                </div>
+                <h2 class="custom-headline">CUSTOM MISSION ARCHITECT</h2>
+                <p class="custom-subline">Design custom satellites, balance mass & budget, size solar arrays, and command flight crew.</p>
+              </div>
+
+              <div class="setup-group-compact">
+                <label class="setup-label-compact">Crew / Team Mode</label>
+                <div class="btn-group player-count-group">
+                  <button type="button" class="player-count-btn active" data-count="1">👤 Solo Pilot</button>
+                  <button type="button" class="player-count-btn" data-count="2">👥 2 Players</button>
+                  <button type="button" class="player-count-btn" data-count="3">👨‍🚀 3 Players</button>
+                  <button type="button" class="player-count-btn" data-count="4">🚀 4-Player Team</button>
+                </div>
+              </div>
+
+              <div class="setup-group-compact">
+                <label class="setup-label-compact">Difficulty / Flight Physics</label>
+                <div class="btn-group difficulty-group">
+                  <button type="button" class="difficulty-btn" data-difficulty="cadet">
+                    <span class="btn-icon-large">🌟</span>
+                    <span class="btn-title">Cadet (Casual)</span>
+                    <span class="btn-sub">$650M • Safe Exploration</span>
+                  </button>
+                  <button type="button" class="difficulty-btn active" data-difficulty="engineer">
+                    <span class="btn-icon-large">⚙️</span>
+                    <span class="btn-title">Engineer (Normal)</span>
+                    <span class="btn-sub">$420M • NASA Class-B</span>
+                  </button>
+                  <button type="button" class="difficulty-btn" data-difficulty="director">
+                    <span class="btn-icon-large">🎯</span>
+                    <span class="btn-title">Director (Pro)</span>
+                    <span class="btn-sub">$270M • High Stakes</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="title-action-buttons-compact">
+                <button id="btn-open-multiplayer" type="button" class="btn btn-multiplayer-glow full-width">
+                  🌐 PLAY ONLINE CO-OP WITH FRIENDS
+                </button>
+                <button id="btn-new-game" type="button" class="btn btn-primary btn-glow">
+                  🛠️ ENTER SPACECRAFT DESIGN STUDIO ➔
+                </button>
+                <div class="title-sub-buttons">
+                  <button id="btn-how-to-play" type="button" class="btn btn-secondary">
+                    🎮 HOW TO PLAY & CONTROLS
+                  </button>
+                  <button id="btn-tutorial" type="button" class="btn btn-outline">
+                    📖 NASA SYSTEMS GUIDE
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN: REAL-TIME ONLINE MULTIPLAYER CO-OP -->
+      <section id="screen-multiplayer" class="screen">
+        <div class="screen-header">
+          <button id="btn-back-multiplayer" class="btn btn-outline btn-small">⬅ Return to Dashboard</button>
+          <div class="screen-title-group">
+            <h2>NASA REAL-TIME ONLINE MULTIPLAYER CO-OP</h2>
+            <p>Command flight missions live with friends across the world or over your local Wi-Fi router</p>
+          </div>
+          <div class="header-network-pill">
+            <span class="green-blink">●</span>
+            <span id="mp-conn-status">SERVER ONLINE</span>
+          </div>
+        </div>
+
+        <!-- VIEW 1: ROOM SETUP (CREATE OR JOIN) -->
+        <div id="mp-setup-container" class="mp-setup-grid">
+          <!-- CREATE ROOM CARD -->
+          <div class="mp-card mp-create-card">
+            <div class="mp-card-badge">HOST A MISSION</div>
+            <h3 class="mp-card-title">🚀 CREATE MISSION ROOM</h3>
+            <p class="mp-card-desc">Generate a NASA mission room code and invite your flight crew to join you online.</p>
+
+            <div class="mp-form-group">
+              <label class="mp-label">Commander Call Sign / Name</label>
+              <input type="text" id="mp-host-name" class="mp-input" placeholder="e.g. Commander Sarah" maxlength="24" value="Flight Director" />
+            </div>
+
+            <div class="mp-form-group">
+              <label class="mp-label">Target Destination / Spacecraft</label>
+              <select id="mp-host-mission" class="mp-select">
+                <option value="sentinel-e">🌍 Earth Sentinel (400 km LEO Climate Monitor)</option>
+                <option value="stormwatch">🌀 StormWatch (35,786 km GEO Weather Sat)</option>
+                <option value="artemis-scout">🌕 Artemis Scout (100 km Lunar Polar Recon)</option>
+                <option value="red-pioneer">🪐 Red Pioneer (Mars Planetary Exploration)</option>
+              </select>
+            </div>
+
+            <div class="mp-form-group">
+              <label class="mp-label">Difficulty / Mission Stakes</label>
+              <select id="mp-host-difficulty" class="mp-select">
+                <option value="cadet">🌟 Cadet (Casual • Safe Exploration)</option>
+                <option value="engineer" selected>⚙️ Systems Engineer (Normal • Realistic NASA Class-B)</option>
+                <option value="director">🎯 Flight Director (Pro • High-Risk Flagship)</option>
+              </select>
+            </div>
+
+            <button type="button" id="btn-mp-create" class="btn btn-primary btn-glow full-width">
+              🚀 CREATE ROOM & GET INVITE LINK
+            </button>
+          </div>
+
+          <!-- JOIN ROOM CARD -->
+          <div class="mp-card mp-join-card">
+            <div class="mp-card-badge badge-cyan">JOIN CREW</div>
+            <h3 class="mp-card-title">🛰️ JOIN EXISTING ROOM</h3>
+            <p class="mp-card-desc">Enter the Room Code shared by your friend to board their Mission Control room.</p>
+
+            <div class="mp-form-group">
+              <label class="mp-label">Mission Room Code</label>
+              <input type="text" id="mp-join-code" class="mp-input mp-code-input" placeholder="e.g. APOLLO" maxlength="12" autocomplete="off" />
+            </div>
+
+            <div class="mp-form-group">
+              <label class="mp-label">Astronaut Call Sign / Name</label>
+              <input type="text" id="mp-join-name" class="mp-input" placeholder="e.g. Specialist Alex" maxlength="24" />
+            </div>
+
+            <button type="button" id="btn-mp-join" class="btn btn-secondary full-width">
+              🛰️ JOIN FLIGHT ROOM
+            </button>
+
+            <!-- Quick network help info -->
+            <div class="mp-network-info">
+              <div class="info-title">💡 HOW TO PLAY WITH FRIENDS:</div>
+              <ul class="info-list">
+                <li><strong>On Same Wi-Fi / Router:</strong> Share your Wi-Fi link: <code id="mp-wifi-link-hint">http://10.44.152.6:8080/</code></li>
+                <li><strong>Over Global Internet:</strong> In a terminal run <code>npm run share</code> (or double-click <code>share_online.bat</code>) and send the generated HTTPS link to friends anywhere in the world!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: ACTIVE ROOM LOBBY COCKPIT -->
+        <div id="mp-lobby-container" class="mp-lobby-container" style="display: none;">
+          <!-- Top Room Info Bar -->
+          <div class="mp-lobby-header-bar">
+            <div class="mp-lobby-code-group">
+              <span class="mp-lobby-label">MISSION ROOM CODE:</span>
+              <span id="mp-room-code-display" class="mp-code-pill">APOLLO</span>
+              <button type="button" id="btn-mp-copy-link" class="btn btn-outline btn-small" title="Copy Direct Invite Link to Clipboard">
+                📋 COPY INVITE LINK
+              </button>
+              <span id="mp-copy-toast" class="mp-toast-badge" style="display: none;">✔ Link Copied!</span>
+            </div>
+
+            <div class="mp-lobby-meta-group">
+              <span id="mp-lobby-mission-tag" class="mp-meta-tag">Earth Sentinel (LEO 400 km)</span>
+              <span id="mp-lobby-diff-tag" class="mp-meta-tag">Engineer Difficulty</span>
+              <span class="mp-meta-tag text-green"><span class="green-blink">●</span> <span id="mp-lobby-ping">PING: --</span></span>
+            </div>
+          </div>
+
+          <!-- 4 Specialized Role Consoles Grid -->
+          <div class="mp-roles-grid">
+            <!-- 1. Flight Director -->
+            <div class="mp-role-card" data-role="flight_director" id="role-card-flight">
+              <div class="role-card-top">
+                <span class="role-icon">🚀</span>
+                <div class="role-badge">FLIGHT DIRECTOR (FLIGHT)</div>
+              </div>
+              <p class="role-desc">Mission Commander. Commands booster staging burns, payload fairing jettison, safe mode, and mission conclude debrief.</p>
+              <div class="role-occupant" id="occupant-flight_director">
+                <span class="occupant-status empty">Empty Console</span>
+              </div>
+              <button type="button" class="btn btn-small btn-claim-role" data-role="flight_director">
+                Claim Flight Director
+              </button>
+            </div>
+
+            <!-- 2. Propulsion Engineer -->
+            <div class="mp-role-card" data-role="systems_engineer" id="role-card-prop">
+              <div class="role-card-top">
+                <span class="role-icon">⚡</span>
+                <div class="role-badge">PROPULSION & SYSTEMS (PROP / EECOM)</div>
+              </div>
+              <p class="role-desc">Orbital pilot. Controls Prograde burns [W] to raise orbit, Retrograde burns [S] to de-orbit, and attitude steering [A/D].</p>
+              <div class="role-occupant" id="occupant-systems_engineer">
+                <span class="occupant-status empty">Empty Console</span>
+              </div>
+              <button type="button" class="btn btn-small btn-claim-role" data-role="systems_engineer">
+                Claim Propulsion Engineer
+              </button>
+            </div>
+
+            <!-- 3. Science Officer -->
+            <div class="mp-role-card" data-role="science_officer" id="role-card-science">
+              <div class="role-card-top">
+                <span class="role-icon">🔬</span>
+                <div class="role-badge">LEAD SCIENCE OFFICER (SCIENCE)</div>
+              </div>
+              <p class="role-desc">Scientific instrument lead. Executes planetary surface sensor sweeps [SPACEBAR] to collect mission science data and discover targets.</p>
+              <div class="role-occupant" id="occupant-science_officer">
+                <span class="occupant-status empty">Empty Console</span>
+              </div>
+              <button type="button" class="btn btn-small btn-claim-role" data-role="science_officer">
+                Claim Science Officer
+              </button>
+            </div>
+
+            <!-- 4. Comms & Flight Dynamics -->
+            <div class="mp-role-card" data-role="comms_officer" id="role-card-comms">
+              <div class="role-card-top">
+                <span class="role-icon">📡</span>
+                <div class="role-badge">FLIGHT DYNAMICS & COMMS (FDO / INCO)</div>
+              </div>
+              <p class="role-desc">Deep Space Network specialist. Manages Houston ground station locks, monitors multi-channel telemetry, and switches optical camera angles.</p>
+              <div class="role-occupant" id="occupant-comms_officer">
+                <span class="occupant-status empty">Empty Console</span>
+              </div>
+              <button type="button" class="btn btn-small btn-claim-role" data-role="comms_officer">
+                Claim Comms Officer
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Comms Audio & Intercom Chat Panel -->
+          <div class="mp-comms-panel">
+            <div class="comms-panel-header">
+              <span class="green-blink">●</span>
+              <span>HOUSTON MOC &bull; MULTI-STATION FLIGHT COMMS INTERCOM LOOP</span>
+            </div>
+            
+            <div id="mp-chat-messages" class="mp-chat-messages">
+              <!-- Dynamically populated messages -->
+            </div>
+
+            <div class="mp-quick-callouts">
+              <span class="callouts-label">🎙️ RADIO CALLOUTS:</span>
+              <button type="button" class="btn-callout" data-callout="GO_FOR_LAUNCH">"GO FOR LAUNCH"</button>
+              <button type="button" class="btn-callout" data-callout="ALL_SYSTEMS_GO">"ALL SYSTEMS NOMINAL"</button>
+              <button type="button" class="btn-callout" data-callout="STAGING_CALL">"READY FOR STAGING"</button>
+              <button type="button" class="btn-callout" data-callout="ANOMALY_ALERT">"ATTENTION: RED-TEAM ANOMALY"</button>
+            </div>
+
+            <form id="mp-chat-form" class="mp-chat-form">
+              <input type="text" id="mp-chat-input" class="mp-chat-input" placeholder="Type tactical message to crew... [Enter to Send]" maxlength="160" />
+              <button type="submit" class="btn btn-primary btn-small">Send [Enter]</button>
+            </form>
+          </div>
+
+          <!-- Lobby Action Bar -->
+          <div class="mp-lobby-footer">
+            <button type="button" id="btn-mp-leave" class="btn btn-outline">
+              🚪 Leave Room
+            </button>
+            <div class="mp-footer-right">
+              <button type="button" id="btn-mp-ready" class="btn btn-secondary">
+                ✔ Toggle Ready
+              </button>
+              <button type="button" id="btn-mp-launch" class="btn btn-primary btn-glow" style="display: none;">
+                🚀 AUTHORIZE FLIGHT & COMMENCE T-0 LAUNCH
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 2: MULTI-PLAYER TEAM SETUP -->
+      <section id="screen-team" class="screen">
+        <div class="screen-header">
+          <button id="btn-back-team" class="btn btn-outline btn-small">⬅ Back</button>
+          <div class="screen-title-group">
+            <h2>FLIGHT OPERATIONS TEAM ASSIGNMENT</h2>
+            <p>Assign mission personnel and designate specialized discipline leads</p>
+          </div>
+        </div>
+
+        <div id="team-setup-container" class="team-roster-grid">
+          <!-- Dynamically populated roster cards -->
+        </div>
+
+        <div class="team-footer">
+          <button id="btn-start-team" class="btn btn-primary btn-glow">CONFIRM CREW ROSTER & SELECT MISSION ➔</button>
+        </div>
+      </section>
+
+      <!-- SCREEN 3: MISSION SELECTION -->
+      <section id="screen-mission" class="screen">
+        <div class="screen-header">
+          <button id="btn-back-mission" class="btn btn-outline btn-small">⬅ Back</button>
+          <div class="screen-title-group">
+            <h2>SELECT MISSION OBJECTIVE</h2>
+            <p>Choose an operational science directive from the NASA Science Mission Directorate</p>
+          </div>
+        </div>
+
+        <div class="mission-select-layout">
+          <div id="mission-cards" class="mission-card-grid">
+            <!-- Dynamically populated 6 missions -->
+          </div>
+
+          <div id="mission-detail" class="mission-detail-panel hidden">
+            <div class="detail-header">
+              <span id="detail-icon" class="detail-icon">🌍</span>
+              <div>
+                <h3 id="detail-name">Mission Name</h3>
+                <span id="detail-type" class="badge-tag">Category</span>
+                <span id="detail-destination" class="badge-tag badge-cyan">Destination</span>
+              </div>
+            </div>
+            <p id="detail-briefing" class="detail-briefing-text"></p>
+
+            <div class="detail-section">
+              <h4>Primary Science Objectives</h4>
+              <ul id="detail-objectives" class="objectives-list"></ul>
+            </div>
+
+            <div class="detail-section">
+              <h4>System Requirements</h4>
+              <div id="detail-requirements" class="req-chips-container"></div>
+            </div>
+
+            <button id="btn-accept-mission" class="btn btn-primary btn-glow full-width" disabled>
+              ACCEPT MISSION DIRECTIVE & BEGIN SPACECRAFT DESIGN ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 4: SPACECRAFT & MISSION DESIGN STUDIO -->
+      <section id="screen-design" class="screen">
+        <div class="design-layout">
+          
+          <!-- Left Systems Engineering Sidebar (Resource Margins & Warnings) -->
+          <aside class="design-sidebar">
+            <div class="sidebar-header">
+              <div class="sidebar-title">SYSTEMS MARGINS</div>
+              <div class="sidebar-sub">REAL-TIME BUDGET TRACKER</div>
+            </div>
+
+            <!-- Resource 1: Budget -->
+            <div class="resource-block">
+              <div class="resource-header">
+                <span class="resource-label">💰 Fiscal Budget</span>
+                <span id="res-budget-text" class="resource-val">$0 / $420M</span>
+              </div>
+              <div class="resource-track">
+                <div id="res-budget-fill" class="resource-fill fill-green" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Resource 2: Mass -->
+            <div class="resource-block">
+              <div class="resource-header">
+                <span class="resource-label">⚖️ Spacecraft Wet Mass</span>
+                <span id="res-mass-text" class="resource-val">0 / 9999 kg</span>
+              </div>
+              <div class="resource-track">
+                <div id="res-mass-fill" class="resource-fill fill-green" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Resource 3: Power -->
+            <div class="resource-block">
+              <div class="resource-header">
+                <span class="resource-label">⚡ Electrical Power</span>
+                <span id="res-power-text" class="resource-val">0 / 0 W</span>
+              </div>
+              <div class="resource-track">
+                <div id="res-power-fill" class="resource-fill fill-green" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Resource 4: Data Downlink -->
+            <div class="resource-block">
+              <div class="resource-header">
+                <span class="resource-label">📡 Downlink Bandwidth</span>
+                <span id="res-data-text" class="resource-val">0 / 0 Mbps</span>
+              </div>
+              <div class="resource-track">
+                <div id="res-data-fill" class="resource-fill fill-green" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Warnings / Diagnostics Panel -->
+            <div class="warnings-box">
+              <div class="warnings-header">
+                <span>⚠️ ENGINEERING DIAGNOSTICS</span>
+                <span id="warnings-count" class="badge-counter">0</span>
+              </div>
+              <div id="warnings-panel" class="warnings-list">
+                <div class="warning-item info">Select subsystems from the tabs to begin systems trade studies.</div>
+              </div>
+            </div>
+
+            <div class="sidebar-actions">
+              <button id="btn-auto-configure" type="button" class="btn btn-secondary full-width" style="margin-bottom: 8px;">
+                ⚡ AUTO-RECOMMEND NASA CONFIG
+              </button>
+              <button id="btn-review" class="btn btn-primary btn-glow full-width">FLIGHT READINESS REVIEW ➔</button>
+              <button id="btn-back-design" class="btn btn-outline btn-small full-width">Change Mission</button>
+            </div>
+          </aside>
+
+          <!-- Right Interactive Design Workspace -->
+          <div class="design-main">
+            
+            <!-- Live 3D Spacecraft CAD / Blueprint Inspector -->
+            <div class="cad-inspector-card">
+              <div class="cad-header">
+                <div class="cad-title">
+                  <span class="cad-pulse"></span>
+                  <span>LIVE 3D SPACECRAFT CAD / BLUEPRINT INSPECTOR</span>
+                </div>
+                <div class="cad-controls">
+                  <span class="cad-hint"><kbd>🖱️ Drag</kbd> Rotate 360° &bull; <kbd>Scroll</kbd> Zoom</span>
+                  <button type="button" id="btn-cad-wireframe" class="btn-cad-toggle" title="Toggle Wireframe Blueprint CAD Mode">
+                    <span class="icon">📐</span> Wireframe CAD
+                  </button>
+                </div>
+              </div>
+              <div class="cad-canvas-wrapper">
+                <canvas id="design-cad-canvas" width="800" height="220"></canvas>
+                <div class="cad-overlay-badges">
+                  <span id="cad-bus-badge" class="cad-badge">BUS: CUBESAT</span>
+                  <span id="cad-power-badge" class="cad-badge">PWR: 1U SOLAR</span>
+                  <span id="cad-instruments-badge" class="cad-badge">PAYLOAD: 0 UNITS</span>
+                </div>
+                <div class="cad-watermark">NASA / JPL SPACECRAFT CONFIGURATION STUDIO</div>
+              </div>
+            </div>
+
+            <!-- Discipline Tabs -->
+            <nav class="design-tabs-nav">
+              <button class="tab-btn active" data-tab="orbit">🌍 1. Orbit</button>
+              <button class="tab-btn" data-tab="spacecraft">🛰️ 2. Bus & Prop</button>
+              <button class="tab-btn" data-tab="systems">⚙️ 3. Avionics & Power</button>
+              <button class="tab-btn" data-tab="comms">📡 4. Comms & Ground</button>
+              <button class="tab-btn" data-tab="instruments">🔬 5. Science Payload</button>
+              <button class="tab-btn" data-tab="launch">🚀 6. Launch Vehicle</button>
+            </nav>
+
+            <div class="tab-panels-viewport">
+              
+              <!-- Tab 1: Orbit Selection -->
+              <div id="panel-orbit" class="design-panel active">
+                <div class="panel-intro">
+                  <h3>SELECT MISSION ORBITAL REGIME</h3>
+                  <p>Orbital altitude and inclination govern science observation opportunities, ground pass geometry, delta-V requirements, and the radiation environment.</p>
+                </div>
+                <div id="orbit-cards" class="card-grid"></div>
+              </div>
+
+              <!-- Tab 2: Bus & Propulsion -->
+              <div id="panel-spacecraft" class="design-panel">
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>SPACECRAFT BUS STRUCTURE</h3>
+                    <p>Defines the structural backbone, payload mass limit, and physical deck capacity.</p>
+                  </div>
+                  <div id="bus-cards" class="card-grid"></div>
+                </div>
+
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>PROPULSION SUBSYSTEM</h3>
+                    <p>Provides delta-V for orbital insertion, trajectory correction maneuvers (TCM), collision avoidance, and end-of-life disposal.</p>
+                  </div>
+                  <div id="propulsion-cards" class="card-grid"></div>
+                </div>
+              </div>
+
+              <!-- Tab 3: Avionics & Power -->
+              <div id="panel-systems" class="design-panel">
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>ELECTRICAL POWER SUBSYSTEM (EPS)</h3>
+                    <p>Generates electrical energy for avionics and instruments. Solar arrays degrade in radiation and attenuate with solar distance.</p>
+                  </div>
+                  <div id="power-cards" class="card-grid"></div>
+                </div>
+
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>ATTITUDE DETERMINATION & CONTROL SYSTEM (ADCS)</h3>
+                    <p>Controls spacecraft orientation. High-resolution optical telescopes and spectrometers require sub-arcsecond fine guidance.</p>
+                  </div>
+                  <div id="attitude-cards" class="card-grid"></div>
+                </div>
+
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>COMMAND & DATA HANDLING (C&DH)</h3>
+                    <p>Central flight computer and radiation-hardened mass memory storage.</p>
+                  </div>
+                  <div id="computer-cards" class="card-grid"></div>
+                </div>
+
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>THERMAL CONTROL SUBSYSTEM (TCS)</h3>
+                    <p>Maintains sensitive electronic and detector temperatures within operational limits.</p>
+                  </div>
+                  <div id="thermal-cards" class="card-grid"></div>
+                </div>
+              </div>
+
+              <!-- Tab 4: Comms & Ground Segment -->
+              <div id="panel-comms" class="design-panel">
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>TELEMETRY ANTENNA</h3>
+                    <p>Antenna gain and aperture size determine RF link budget and beam directional requirements.</p>
+                  </div>
+                  <div id="antenna-cards" class="card-grid"></div>
+                </div>
+
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>RF FREQUENCY BAND</h3>
+                    <p>Higher frequencies (X/Ka) unlock massive data throughput but demand tighter pointing.</p>
+                  </div>
+                  <div id="band-cards" class="card-grid"></div>
+                </div>
+
+                <div class="sub-section">
+                  <div class="panel-intro">
+                    <h3>GROUND STATION SEGMENT</h3>
+                    <p>Ground contact passes per day determine how many hours the spacecraft can dump telemetry.</p>
+                  </div>
+                  <div id="groundstation-cards" class="card-grid"></div>
+                </div>
+              </div>
+
+              <!-- Tab 5: Science Payload -->
+              <div id="panel-instruments" class="design-panel">
+                <div class="panel-intro">
+                  <h3>SCIENTIFIC INSTRUMENT PAYLOAD (MULTI-SELECT)</h3>
+                  <p>Choose instruments to fulfill your mission objectives. Watch mass, power consumption, data generation, and pointing requirements!</p>
+                </div>
+                <div id="instrument-cards" class="card-grid"></div>
+              </div>
+
+              <!-- Tab 6: Launch Vehicle -->
+              <div id="panel-launch" class="design-panel">
+                <div class="panel-intro">
+                  <h3>LAUNCH VEHICLE SELECTION</h3>
+                  <p>Verify rocket payload lift capacity to your chosen orbit and consider booster reliability.</p>
+                </div>
+                <div id="vehicle-cards" class="card-grid"></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 5: FLIGHT READINESS REVIEW (FRR) -->
+      <section id="screen-review" class="screen">
+        <div class="screen-header">
+          <button id="btn-back-review" class="btn btn-outline btn-small">⬅ Modify Design</button>
+          <div class="screen-title-group">
+            <h2>FLIGHT READINESS REVIEW (FRR)</h2>
+            <p>Final NASA engineering board verification prior to launch commitment</p>
+          </div>
+        </div>
+
+        <div class="review-layout">
+          <!-- Left: Systems Spec Sheet -->
+          <div class="review-col">
+            <div class="card spec-card">
+              <h3 class="card-heading">SPACECRAFT SYSTEMS SPECIFICATION</h3>
+              <div id="review-summary" class="review-spec-grid">
+                <!-- Dynamically populated spec items -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Readiness Matrix & Launch Authorization -->
+          <div class="review-col">
+            <div class="card checklist-card">
+              <h3 class="card-heading">ENGINEERING GO / NO-GO CHECKLIST</h3>
+              <div id="validation-results" class="checklist-items">
+                <!-- Checkpoints list -->
+              </div>
+
+              <div class="launch-call-box">
+                <div id="launch-readiness-status" class="readiness-banner">
+                  VERIFYING HARDWARE COMPATIBILITY...
+                </div>
+                <div class="launch-options-stack">
+                  <button id="btn-play-interactive" class="btn btn-launch btn-glow full-width" disabled>
+                    🎮 LAUNCH & FLY MISSION (ARCADE FLIGHT MODE)
+                  </button>
+                  <button id="btn-launch-mission" class="btn btn-secondary full-width" disabled style="margin-top: 10px;">
+                    📊 RUN AUTOPILOT / ANALYTIC SIMULATION
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN: INTERACTIVE ARCADE FLIGHT & MISSION OPERATIONS -->
+      <section id="screen-arcade" class="screen">
+        <div class="arcade-header">
+          <div class="arcade-title-group">
+            <h2 id="arcade-mission-title">🎮 FLIGHT OPERATIONS: ASCENT & ORBITAL MISSION</h2>
+            <p>Control rocket ascent, execute staging burns, navigate orbit, dodge hazards, and scan planetary science targets!</p>
+          </div>
+          <button id="btn-complete-flight" class="btn btn-primary btn-glow">🏁 Conclude Flight & View NASA Report</button>
+        </div>
+
+        <!-- MASTER CONSOLE VIEW SWITCHER & EXPLORATION MODES -->
+        <div class="flight-view-mode-bar">
+          <div class="view-mode-tabs">
+            <span class="view-mode-label">🖥️ CONSOLE VIEW:</span>
+            <button type="button" class="view-mode-btn active" data-view-mode="split" title="Multi-Screen Dashboard: 3D Flight + Ground Track + Oscilloscope together">
+              <span class="v-icon">🖥️</span> Split Console
+            </button>
+            <button type="button" class="view-mode-btn" data-view-mode="3d" title="Full 3D WebGL Flight Simulator View">
+              <span class="v-icon">🚀</span> 3D Simulator
+            </button>
+            <button type="button" class="view-mode-btn" data-view-mode="track" title="Houston MCC 2D World Ground Track Map [M]">
+              <span class="v-icon">🗺️</span> Ground Track [M]
+            </button>
+            <button type="button" class="view-mode-btn" data-view-mode="telemetry" title="Houston MOC 4-Channel Oscilloscope Strip Chart">
+              <span class="v-icon">📈</span> Oscilloscope
+            </button>
+            <button type="button" class="view-mode-btn" data-view-mode="optical" title="Onboard RocketCam / SpacecraftCam Full Optical View">
+              <span class="v-icon">📹</span> RocketCam Optical
+            </button>
+          </div>
+
+          <div class="flight-mode-toggles">
+            <button type="button" id="btn-toggle-safe-mode" class="btn-safe-mode active" title="Toggle Safe Exploration Mode (Prevents Game Over while inspecting views)">
+              <span class="mode-status-dot"></span>
+              <span id="safe-mode-text">🛡️ SAFE VIEW: ON</span>
+            </button>
+            <button type="button" id="btn-restart-flight" class="btn-flight-restart" title="Restart Flight Sequence">
+              🔄 Restart
+            </button>
+          </div>
+        </div>
+
+        <!-- MULTIPLAYER IN-FLIGHT CREW HUD OVERLAY (Visible during multiplayer flight) -->
+        <div id="flight-multiplayer-hud" class="flight-multiplayer-hud" style="display: none;">
+          <div class="mp-hud-left">
+            <span class="mp-hud-room-tag">CREW ROOM: <strong id="hud-room-code">APOLLO</strong></span>
+            <div id="hud-crew-chips" class="mp-hud-crew-chips"></div>
+          </div>
+          <div class="mp-hud-center">
+            <span id="hud-action-ticker" class="mp-hud-ticker">● ALL CREW CONSOLES NOMINAL</span>
+          </div>
+          <div class="mp-hud-right">
+            <button type="button" id="btn-toggle-flight-comms" class="btn btn-small btn-comms-toggle" title="Toggle Flight Intercom [C]">
+              💬 COMMS LOOP
+            </button>
+          </div>
+        </div>
+
+        <!-- 3D Camera Controls Toolbar -->
+        <div class="camera-mode-toolbar" id="camera-mode-toolbar">
+          <div class="cam-btn-group">
+            <span class="toolbar-label">🎥 3D CAMERA:</span>
+            <button type="button" class="cam-btn active" data-cam="chase" title="Chase Cam: Behind Spacecraft [1]">🛰️ Chase [1]</button>
+            <button type="button" class="cam-btn" data-cam="orbit" title="Orbit View: Wide Celestial Overview [2]">🌍 Orbit [2]</button>
+            <button type="button" class="cam-btn" data-cam="science" title="Science Cam: Nadir Pointing to Earth [3]">🔭 Science [3]</button>
+            <button type="button" class="cam-btn" data-cam="fpv" title="Cockpit Cam: Forward Velocity Vector [4]">🚀 Cockpit [4]</button>
+            <button type="button" class="cam-btn" data-cam="earth" title="Earth Panoramic: Full Globe [5]">🌐 Earth [5]</button>
+            <button type="button" class="cam-btn" data-cam="autorotate" title="Cinematic 360° Auto-Orbit [6]">🔄 360° Orbit [6]</button>
+          </div>
+          <span class="toolbar-hint">🖱️ Drag mouse to rotate in 3D • Scroll to zoom</span>
+        </div>
+
+        <div id="arcade-workspace" class="arcade-workspace view-mode-split">
+          <div class="arcade-canvas-wrapper" style="position: relative;">
+            <!-- 3D WebGL Canvas -->
+            <canvas id="game-canvas-3d" width="960" height="540"></canvas>
+            <!-- 2D Telemetry & HUD Overlay Canvas -->
+            <canvas id="game-canvas-hud" width="960" height="540" style="position: absolute; top: 0; left: 0;"></canvas>
+
+            <!-- In-Flight Emergency Anomaly HUD Alert Banner -->
+            <div id="flight-anomaly-banner" class="flight-anomaly-banner" style="display: none;">
+              <div class="anomaly-icon-box">⚠️</div>
+              <div class="anomaly-body">
+                <div class="anomaly-header">
+                  <span class="anomaly-alert-tag">RED-TEAM EMERGENCY ANOMALY</span>
+                  <span id="anomaly-countdown" class="anomaly-timer-pill">T-14s</span>
+                </div>
+                <div id="anomaly-title" class="anomaly-headline">REACTION WHEEL SATURATION</div>
+                <div id="anomaly-desc" class="anomaly-detail">Wheel angular momentum at 100% capacity! Spacecraft attitude control locked. Execute RCS momentum dump immediately!</div>
+              </div>
+              <div class="anomaly-action-pane">
+                <button type="button" id="btn-resolve-anomaly" class="btn-anomaly-solve">
+                  <span class="solve-icon">⚡</span>
+                  <span id="anomaly-action-text">EXECUTE MOMENTUM DUMP [R]</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dedicated Full-View Onboard RocketCam / Optical Feed Card -->
+          <div id="optical-feed-card" class="optical-feed-card" style="display: none;">
+            <div class="optical-feed-header">
+              <div class="optical-feed-title">
+                <span class="optical-rec-pulse">● LIVE</span>
+                <span>ONBOARD HIGH-RESOLUTION OPTICAL DOWNLINK &bull; FOV 65°</span>
+              </div>
+              <span class="optical-feed-meta">FRAME: 1080p 60FPS &bull; SENSOR: VIS-IR BAYER CMOS &bull; LOW-LATENCY DSN</span>
+            </div>
+            <div class="optical-canvas-wrapper">
+              <canvas id="optical-feed-canvas" width="960" height="480"></canvas>
+            </div>
+          </div>
+
+          <!-- NASA Houston MCC 2D Orbital Ground Track & AOS/LOS Telemetry Console -->
+          <div id="mcc-groundtrack-card" class="mcc-groundtrack-card">
+            <div class="mcc-header">
+              <div class="mcc-title-group">
+                <span class="mcc-live-pulse"></span>
+                <span class="mcc-title">HOUSTON MCC &bull; FLIGHT DYNAMICS 2D ORBIT GROUND TRACK</span>
+                <span id="mcc-pass-badge" class="mcc-badge badge-los">LOS (LOSS OF SIGNAL)</span>
+              </div>
+              <div class="mcc-telemetry-pills">
+                <span id="mcc-subsat-coords" class="mcc-telemetry-item">LAT: 28.5° N | LON: 80.6° W</span>
+                <span id="mcc-next-station" class="mcc-telemetry-item">NEXT AOS: MADRID (04:15)</span>
+                <button type="button" id="btn-toggle-groundtrack-size" class="btn-mcc-toggle" title="Maximize or Minimize Ground Track Map">↕ Toggle Size</button>
+              </div>
+            </div>
+            <div class="mcc-canvas-wrapper">
+              <canvas id="mcc-groundtrack-canvas" width="960" height="300"></canvas>
+            </div>
+            <div class="mcc-footer-bar">
+              <div class="mcc-stations-legend">
+                <span class="legend-station"><span class="dot dsn-gold"></span> 📡 GDS (Goldstone 34M)</span>
+                <span class="legend-station"><span class="dot dsn-madrid"></span> 📡 MDS (Madrid 70M)</span>
+                <span class="legend-station"><span class="dot dsn-canberra"></span> 📡 CDS (Canberra 34M)</span>
+                <span class="legend-station"><span class="dot polar-svalbard"></span> 📡 SGS (Svalbard Polar)</span>
+                <span class="legend-station"><span class="dot ne-wallops"></span> 📡 WFF (Wallops Flight)</span>
+              </div>
+              <div id="mcc-thermal-indicator" class="mcc-thermal-indicator">
+                THERMAL: <strong id="mcc-temp-val">+114°C</strong> | ECLIPSE: <strong id="mcc-eclipse-val" class="text-green">☀️ SUNLIGHT</strong> | BATTERY: <strong id="mcc-battery-val">100%</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- NASA Houston MOC Multi-Channel Rolling Telemetry Strip Chart -->
+          <div id="mcc-telemetry-card" class="mcc-telemetry-card">
+            <div class="mcc-telemetry-header">
+              <div class="mcc-chart-title">
+                <span class="mcc-live-pulse"></span>
+                <span>HOUSTON MOC &bull; MULTI-CHANNEL TELEMETRY OSCILLOSCOPE (ROLLING 60-SEC STRIP CHART)</span>
+              </div>
+              <div class="mcc-chart-channels">
+                <span class="channel-pill ch-battery"><span class="dot"></span> CH-1: BATTERY (100%)</span>
+                <span class="channel-pill ch-temp"><span class="dot"></span> CH-2: CORE TEMP (+115°C)</span>
+                <span class="channel-pill ch-rf"><span class="dot"></span> CH-3: RF DOWNLINK (Mbps)</span>
+                <span class="channel-pill ch-deltav"><span class="dot"></span> CH-4: DELTA-V (1250 m/s)</span>
+              </div>
+            </div>
+            <div class="mcc-chart-wrapper">
+              <canvas id="mcc-stripchart-canvas" width="960" height="120"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- On-Screen Controls for Touch / Mouse + Keyboard Guide -->
+        <div class="arcade-controls-container">
+          <div class="controls-guide-text">
+            <strong>⌨️ ADVANCED FLIGHT CONTROLS:</strong> [A] / [D] Rotate & Pitch • [W] Prograde Burn (Raise Orbit) • [S] Retrograde Burn (De-Orbit) • [SPACEBAR] Stage / Science Scan • [M] Ground Track • [R] Emergency Reboot
+          </div>
+          
+          <div class="arcade-touch-pad">
+            <button id="ctrl-left" class="btn-touch">◀ ROTATE LEFT [A]</button>
+            <button id="ctrl-up" class="btn-touch btn-burn-pro">▲ PROGRADE BURN [W]</button>
+            <button id="ctrl-action" class="btn-touch btn-touch-action">🎯 STAGE / SCAN [SPACE]</button>
+            <button id="ctrl-down" class="btn-touch btn-burn-retro">▼ RETROGRADE BURN [S]</button>
+            <button id="ctrl-right" class="btn-touch">ROTATE RIGHT ▶ [D]</button>
+            <button id="ctrl-anomaly" class="btn-touch btn-touch-danger" style="display: none;">⚠️ SOLVE ANOMALY [R]</button>
+          </div>
+        </div>
+
+        <!-- Flight Comms Slide-Out Drawer -->
+        <div id="flight-comms-drawer" class="flight-comms-drawer" style="display: none;">
+          <div class="drawer-header">
+            <span>💬 FLIGHT COMMS INTERCOM</span>
+            <button type="button" id="btn-close-flight-comms" class="btn-close-drawer">✖</button>
+          </div>
+          <div id="flight-drawer-messages" class="drawer-messages"></div>
+          <form id="flight-drawer-form" class="drawer-input-row">
+            <input type="text" id="flight-drawer-input" placeholder="Radio call to crew..." maxlength="120" />
+            <button type="submit">Send</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- SCREEN 6: MISSION SIMULATION & TELEMETRY -->
+      <section id="screen-simulation" class="screen">
+        <!-- Live Orbital Telemetry Dashboard -->
+        <div class="sim-dashboard">
+          
+          <!-- Top Telemetry Gauges -->
+          <div class="telemetry-bar">
+            <div class="telemetry-gauge">
+              <span class="telemetry-label">MET (MISSION ELAPSED TIME)</span>
+              <span id="sim-day-display" class="telemetry-value">Day 0 / 730</span>
+            </div>
+            <div class="telemetry-gauge">
+              <span class="telemetry-label">SCIENCE DATA RETURN</span>
+              <span id="sim-science-display" class="telemetry-value text-cyan">0.0 pts</span>
+            </div>
+            <div class="telemetry-gauge">
+              <span class="telemetry-label">DOWNLINK TELEMETRY</span>
+              <span id="sim-data-display" class="telemetry-value text-yellow">0 GB</span>
+            </div>
+            <div class="telemetry-gauge">
+              <span class="telemetry-label">POWER BUS EFFICIENCY</span>
+              <span id="sim-power-display" class="telemetry-value text-green">100%</span>
+            </div>
+            <div class="telemetry-gauge">
+              <span class="telemetry-label">SPACECRAFT HEALTH</span>
+              <span id="sim-health-display" class="telemetry-value text-green">100%</span>
+            </div>
+          </div>
+
+          <!-- Simulation Visualizer & Orbit Animation -->
+          <div class="sim-visual-container">
+            <canvas id="sim-canvas" width="800" height="380"></canvas>
+            
+            <div class="sim-hud-overlay">
+              <div id="sim-status" class="sim-status-pill">NOMINAL FLIGHT OPERATIONS</div>
+              <div class="sim-speed-controls">
+                <button id="btn-sim-play" class="btn btn-control">⏸ Pause</button>
+                <button id="btn-sim-fast" class="btn btn-control">⏩ 5x Speed</button>
+                <button id="btn-sim-step" class="btn btn-control">⏭ +1 Day</button>
+                <button id="btn-sim-abort" class="btn btn-control btn-danger">🚨 Abort</button>
+              </div>
+            </div>
+
+            <div id="sim-progress-bar" class="sim-progress-track">
+              <div class="progress-fill" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Bottom Real-Time Flight Log -->
+          <div class="flight-log-panel">
+            <div class="log-header">
+              <span>📡 REAL-TIME MISSION TELEMETRY LOG</span>
+              <span class="live-blip">● LIVE</span>
+            </div>
+            <div id="sim-log" class="flight-log-content">
+              <!-- Dynamically streaming telemetry logs -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SCREEN 7: POST-FLIGHT EVALUATION & REPORT -->
+      <section id="screen-results" class="screen">
+        <div class="results-header">
+          <h2>NASA POST-FLIGHT MISSION EVALUATION</h2>
+          <p>Systems Engineering Assessment & Scientific Return Debrief</p>
+        </div>
+
+        <div class="results-layout">
+          <!-- Score Badge & Breakdown -->
+          <div class="score-card card">
+            <div class="score-display">
+              <div class="grade-box">
+                <span id="result-grade" class="grade-letter">A</span>
+                <span class="grade-label">OVERALL GRADE</span>
+              </div>
+              <div class="score-number-box">
+                <span id="result-score-number" class="score-number">92</span>
+                <span class="score-max">/ 100 PTS</span>
+              </div>
+            </div>
+
+            <div class="score-breakdown-list">
+              <div class="score-breakdown-item">
+                <div class="breakdown-info">
+                  <span>🔬 Science Return (Max 40)</span>
+                  <span id="result-science" class="breakdown-val">36 / 40</span>
+                </div>
+                <div class="bar-track"><div id="score-bar-science" class="bar-fill cyan-fill" style="width: 90%"></div></div>
+              </div>
+
+              <div class="score-breakdown-item">
+                <div class="breakdown-info">
+                  <span>⚙️ Systems Engineering (Max 25)</span>
+                  <span id="result-engineering" class="breakdown-val">23 / 25</span>
+                </div>
+                <div class="bar-track"><div id="score-bar-engineering" class="bar-fill purple-fill" style="width: 92%"></div></div>
+              </div>
+
+              <div class="score-breakdown-item">
+                <div class="breakdown-info">
+                  <span>💰 Fiscal Efficiency (Max 20)</span>
+                  <span id="result-budget" class="breakdown-val">18 / 20</span>
+                </div>
+                <div class="bar-track"><div id="score-bar-budget" class="bar-fill green-fill" style="width: 90%"></div></div>
+              </div>
+
+              <div class="score-breakdown-item">
+                <div class="breakdown-info">
+                  <span>⏳ Operational Longevity (Max 15)</span>
+                  <span id="result-lifetime" class="breakdown-val">15 / 15</span>
+                </div>
+                <div class="bar-track"><div id="score-bar-lifetime" class="bar-fill orange-fill" style="width: 100%"></div></div>
+              </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="achievements-section">
+              <h4>MISSION COMMENDATIONS</h4>
+              <div id="result-achievements" class="achievements-grid"></div>
+            </div>
+          </div>
+
+          <!-- Comprehensive Systems Report -->
+          <div class="report-card card">
+            <h3 class="card-heading">OFFICIAL NASA MISSION REPORT</h3>
+            <div id="result-report" class="report-content">
+              <!-- Dynamic post-flight systems review -->
+            </div>
+
+            <div class="results-actions">
+              <button id="btn-retry" class="btn btn-outline">🔄 Re-engineer Design</button>
+              <button id="btn-new-mission" class="btn btn-primary btn-glow">🎯 Select New Mission</button>
+              <button id="btn-export-report" class="btn btn-secondary">📄 Export Mission Log</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 8: SYSTEMS ENGINEERING TUTORIAL -->
+      <section id="screen-tutorial" class="screen">
+        <div class="screen-header">
+          <button id="btn-back-tutorial" class="btn btn-outline btn-small">⬅ Back to Mission</button>
+          <div class="screen-title-group">
+            <h2>NASA SYSTEMS ENGINEERING & MISSION DESIGN GUIDE</h2>
+            <p>Fundamental principles of aerospace trade studies and spacecraft subsystems</p>
+          </div>
+        </div>
+
+        <div class="tutorial-container">
+          <div class="tutorial-card">
+            <h3>1. The Core Systems Engineering Challenge</h3>
+            <p>Every space mission is an intricate balance of <strong>competing physical constraints</strong>. No single subsystem can be optimized in isolation without penalizing another:</p>
+            <ul>
+              <li><strong>More Instruments:</strong> Increases science discovery, but drives up mass, power demands, radio data rates, and total cost.</li>
+              <li><strong>Higher Orbit (e.g. GEO or L2):</strong> Eliminates atmospheric drag and expands field of view, but drastically reduces the payload mass a rocket can deliver.</li>
+              <li><strong>Larger Solar Arrays:</strong> Generate more power, but introduce structural mass penalties and attitude-pointing drag.</li>
+            </ul>
+          </div>
+
+          <div class="tutorial-card">
+            <h3>2. Key Spacecraft Subsystems</h3>
+            <div class="tutorial-subsystem-grid">
+              <div class="subsystem-box">
+                <strong>🛰️ Spacecraft Bus</strong>
+                <p>The structural skeleton that protects avionics, supports mounting brackets, and bears launch acoustic loads.</p>
+              </div>
+              <div class="subsystem-box">
+                <strong>⚡ Power Subsystem (EPS)</strong>
+                <p>Triple-junction solar cells or RTG nuclear power. Note that solar irradiance follows the inverse-square law (\(1/r^2\)) at Mars.</p>
+              </div>
+              <div class="subsystem-box">
+                <strong>🎯 Attitude Determination & Control (ADCS)</strong>
+                <p>Reaction wheels and star trackers that point cameras at targets with arcsecond precision and maintain antenna alignment.</p>
+              </div>
+              <div class="subsystem-box">
+                <strong>📡 Telecommunications</strong>
+                <p>RF carrier links (UHF, S, X, Ka-band) and directional high-gain antennas to downlink data to ground stations.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="tutorial-card">
+            <h3>3. Flight Readiness & Evaluation Rubric</h3>
+            <p>Before liftoff, missions undergo a rigorous Flight Readiness Review (FRR). Missions are scored across four key pillars:</p>
+            <ul>
+              <li><strong>Science Return (40%):</strong> Fulfillment of specific mission objectives, sensor diversity, and observation quality.</li>
+              <li><strong>Systems Engineering (25%):</strong> Health of mass and power margins, pointing stability alignment, and launcher reliability.</li>
+              <li><strong>Fiscal Efficiency (20%):</strong> Completing objectives within designated budget envelopes without over-spending.</li>
+              <li><strong>Operational Longevity (15%):</strong> Maintaining spacecraft health through solar flares, debris risks, and component aging.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- IN-FLIGHT OPERATIONAL ANOMALY MODAL -->
+    <div id="modal-overlay" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <span class="modal-alert-icon">⚠️</span>
+          <h3 id="modal-title">ANOMALY DETECTED</h3>
+        </div>
+        <div id="modal-body" class="modal-body">
+          Telemetry indicates an unexpected event requires command intervention.
+        </div>
+        <div id="modal-choices" class="modal-choices-list">
+          <!-- Choice buttons -->
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TO PLAY & CONTROLS POPUP MODAL -->
+    <div id="modal-how-to-play" class="modal-overlay hidden">
+      <div class="modal-card how-to-play-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-alert-icon">🎮</span>
+            <div>
+              <h3 class="modal-title-text">HOW TO PLAY & FLIGHT CONTROLS</h3>
+              <p class="modal-sub-text">NASA Mission Control & 3D Flight Operations Guide</p>
+            </div>
+          </div>
+          <button id="btn-close-how-to-play" type="button" class="btn-modal-close" title="Close Guide">✖</button>
+        </div>
+
+        <div class="how-to-play-grid">
+          <!-- Card 1: Ascent -->
+          <div class="guide-card">
+            <div class="guide-card-header">
+              <span class="guide-icon">🚀</span>
+              <h4>1. Rocket Liftoff & Ascent</h4>
+            </div>
+            <ul class="guide-list">
+              <li><kbd>[A]</kbd> / <kbd>[D]</kbd> or <kbd>[←]</kbd> / <kbd>[→]</kbd> : Steer rocket into the <strong>green flight corridor</strong>.</li>
+              <li><kbd>[SPACEBAR]</kbd> : Skip countdown, trigger MECO Stage 1 separation, and jettison payload fairing.</li>
+              <li>Maintain corridor alignment to minimize aerodynamic Max-Q drag and reach vacuum orbit!</li>
+            </ul>
+          </div>
+
+          <!-- Card 2: Orbit -->
+          <div class="guide-card">
+            <div class="guide-card-header">
+              <span class="guide-icon">🛰️</span>
+              <h4>2. Orbit Operations & Science</h4>
+            </div>
+            <ul class="guide-list">
+              <li><kbd>[W]</kbd> : <strong>Prograde Burn</strong> to raise your orbit altitude.</li>
+              <li><kbd>[S]</kbd> : <strong>Retrograde Burn</strong> to lower periapsis for de-orbit.</li>
+              <li><kbd>[SPACEBAR]</kbd> : Scan Earth phenomena (cyclones, polar ice, volcanoes) for Science XP points!</li>
+              <li>Watch solar eclipse umbra: heaters turn on to protect avionics from cold soak!</li>
+            </ul>
+          </div>
+
+          <!-- Card 3: Cameras & Views -->
+          <div class="guide-card">
+            <div class="guide-card-header">
+              <span class="guide-icon">🎥</span>
+              <h4>3. Camera Angles & 360° Rotation</h4>
+            </div>
+            <ul class="guide-list">
+              <li><kbd>[1]</kbd> Chase Cam &bull; <kbd>[2]</kbd> Orbit Cam &bull; <kbd>[3]</kbd> Science Sensor</li>
+              <li><kbd>[4]</kbd> Cockpit FPV &bull; <kbd>[5]</kbd> Earth Horizon &bull; <kbd>[6]</kbd> 360° Auto-Orbit</li>
+              <li><strong>Mouse Controls:</strong> Click & drag on 3D view to rotate anywhere in 360°! Scroll wheel to zoom.</li>
+              <li>Use Master Console tabs at top to switch views (Split, 3D Only, Ground Track, Oscilloscope, RocketCam).</li>
+            </ul>
+          </div>
+
+          <!-- Card 4: Safe Mode -->
+          <div class="guide-card">
+            <div class="guide-card-header">
+              <span class="guide-icon">🛡️</span>
+              <h4>4. Stress-Free Safe View Mode</h4>
+            </div>
+            <ul class="guide-list">
+              <li>Click <strong>🛡️ SAFE VIEW: ON</strong> in the top bar to fly without risk of battery exhaustion, debris loss, or mission failure.</li>
+              <li>Perfect for peaceful observation of photorealistic Earth, atmospheric terminator, and city night lights!</li>
+              <li>If you crash, press <kbd>[SPACEBAR]</kbd> or click <strong>Revive Flight</strong> to resume instantly!</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-start-from-guide" type="button" class="btn btn-primary btn-glow">
+            🚀 GOT IT! LET'S FLY!
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Audio Synthesizer Script / Telemetry Audio (Web Audio API) -->
+  <script>
+    window.SoundFX = (function() {
+      let ctx = null;
+      let enabled = true;
+      function initAudio() {
+        if (!ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) ctx = new AudioContext();
+        }
+      }
+      return {
+        toggle() {
+          enabled = !enabled;
+          return enabled;
+        },
+        isEnabled() { return enabled; },
+        playBeep(freq = 880, duration = 0.08) {
+          if (!enabled) return;
+          try {
+            initAudio();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            gain.gain.setValueAtTime(0.04, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + duration);
+          } catch(e) {}
+        },
+        playAlarm() {
+          if (!enabled) return;
+          try {
+            initAudio();
+            if (!ctx) return;
+            [440, 660, 440].forEach((f, i) => {
+              setTimeout(() => this.playBeep(f, 0.12), i * 140);
+            });
+          } catch(e) {}
+        },
+        playLaunch() {
+          if (!enabled) return;
+          try {
+            initAudio();
+            if (!ctx) return;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(120, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 1.2);
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 1.2);
+          } catch(e) {}
+        },
+        playQuindarTone() {
+          if (!enabled) return;
+          try {
+            initAudio();
+            if (!ctx) return;
+            // NASA Quindar Telemetry Tone (2525 Hz intro tone + comms squelch)
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(2525, ctx.currentTime);
+            gain.gain.setValueAtTime(0.04, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.12);
+
+            setTimeout(() => {
+              if (!ctx) return;
+              const bufferSize = Math.floor(ctx.sampleRate * 0.04);
+              const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+              const data = buffer.getChannelData(0);
+              for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.02;
+              const noise = ctx.createBufferSource();
+              noise.buffer = buffer;
+              const noiseGain = ctx.createGain();
+              noiseGain.gain.setValueAtTime(0.02, ctx.currentTime);
+              noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+              noise.connect(noiseGain);
+              noiseGain.connect(ctx.destination);
+              noise.start();
+            }, 120);
+          } catch(e) {}
+        }
+      };
+    })();
+  </script>
+
+  <!-- Three.js 3D WebGL Library & Photorealistic NASA Textures -->
+  <script src="js/three.min.js"></script>
+  <script src="js/textures.js"></script>
+  <script src="js/renderer3d.js"></script>
+
+  <!-- Game Scripts (Loaded in exact order) -->
+  <script src="js/data.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/gameplay.js"></script>
+  <script src="js/multiplayer.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

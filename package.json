@@ -1,0 +1,29 @@
+{
+  "name": "nasa-mission-control-simulator",
+  "version": "2.0.0",
+  "description": "NASA Systems Engineering & Real-Time Multiplayer 3D Spaceflight Simulator",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "share": "npx localtunnel --port 8080",
+    "test": "node test_simulator.cjs",
+    "test:multiplayer": "node test_multiplayer.cjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "keywords": [
+    "nasa",
+    "spaceflight",
+    "simulator",
+    "threejs",
+    "webgl",
+    "multiplayer",
+    "websocket"
+  ],
+  "author": "",
+  "license": "MIT"
+}
