@@ -4610,163 +4610,72 @@ body {
 .challenge-card {
   position: relative;
   background: rgba(11, 20, 42, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 18px;
   overflow: hidden;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  display: flex;
-  flex-direction: column;
+  display: block;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  aspect-ratio: 530 / 248;
 }
 
 .challenge-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
 }
 
-/* Specific Card Themes */
-.card-sentinel:hover {
-  border-color: rgba(14, 165, 233, 0.45);
-  box-shadow: 0 12px 30px rgba(14, 165, 233, 0.22);
-}
-.card-stormwatch:hover {
-  border-color: rgba(168, 85, 247, 0.45);
-  box-shadow: 0 12px 30px rgba(168, 85, 247, 0.22);
-}
-.card-artemis:hover {
-  border-color: rgba(249, 115, 22, 0.45);
-  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.22);
-}
-.card-mars:hover {
-  border-color: rgba(239, 68, 68, 0.45);
-  box-shadow: 0 12px 30px rgba(239, 68, 68, 0.22);
-}
-.card-asteroid:hover {
-  border-color: rgba(16, 185, 129, 0.45);
-  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.22);
-}
-.card-deepview:hover {
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.22);
-}
-
-.card-art-box {
-  width: 100%;
-  height: 125px;
-  position: relative;
-  overflow: hidden;
-  background: #030712;
-}
-
-.card-thumb-img {
+.card-full-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
-  transition: transform 0.4s ease;
+  object-fit: cover;
+  border-radius: 18px;
+  transition: transform 0.35s ease;
+  pointer-events: none;
 }
 
-.challenge-card:hover .card-thumb-img {
-  transform: scale(1.05);
+.challenge-card:hover .card-full-img {
+  transform: scale(1.02);
 }
 
-.card-art-overlay {
+.card-overlay-btn {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(11, 20, 42, 0.95) 100%);
-}
-
-.card-body {
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.card-title-group {
-  margin-bottom: 6px;
-}
-
-.card-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: #ffffff;
-  line-height: 1.25;
-}
-
-.card-subtitle {
-  font-size: 12px;
-  font-weight: 600;
-  color: #94a3b8;
-  line-height: 1.2;
-}
-
-.card-desc {
-  font-size: 11.5px;
-  color: #cbd5e1;
-  line-height: 1.45;
-  margin-bottom: 14px;
-  flex-grow: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card-meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.card-meta-tag {
-  font-size: 11px;
-  color: #94a3b8;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.meta-icon {
-  font-size: 11px;
-}
-
-.btn-card-launch {
-  border: none;
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  font-weight: 700;
-  color: #ffffff;
+  right: 8px;
+  bottom: 8px;
+  width: 86px;
+  height: 34px;
+  opacity: 0;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.2s ease;
-  user-select: none;
+  border: none;
+  background: transparent;
+  z-index: 5;
 }
 
-.btn-card-launch:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.15);
+/* Specific Card Hover Glow Themes */
+.card-sentinel:hover {
+  border-color: rgba(14, 165, 233, 0.6);
+  box-shadow: 0 14px 34px rgba(14, 165, 233, 0.3);
 }
-
-.btn-theme-blue { background: #2563eb; box-shadow: 0 0 12px rgba(37, 99, 235, 0.4); }
-.btn-theme-purple { background: #8b5cf6; box-shadow: 0 0 12px rgba(139, 92, 246, 0.4); }
-.btn-theme-orange { background: #ea580c; box-shadow: 0 0 12px rgba(234, 88, 12, 0.4); }
-.btn-theme-red { background: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
-.btn-theme-green { background: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
-.btn-theme-indigo { background: #6366f1; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4); }
-
-.arrow-char {
-  font-size: 13px;
-  font-weight: 800;
+.card-stormwatch:hover {
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow: 0 14px 34px rgba(168, 85, 247, 0.3);
+}
+.card-artemis:hover {
+  border-color: rgba(249, 115, 22, 0.6);
+  box-shadow: 0 14px 34px rgba(249, 115, 22, 0.3);
+}
+.card-mars:hover {
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow: 0 14px 34px rgba(239, 68, 68, 0.3);
+}
+.card-asteroid:hover {
+  border-color: rgba(16, 185, 129, 0.6);
+  box-shadow: 0 14px 34px rgba(16, 185, 129, 0.3);
+}
+.card-deepview:hover {
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 14px 34px rgba(99, 102, 241, 0.3);
 }
 
 /* 4. SIDEBAR (YOUR PROGRESS & QUICK LINKS) */
