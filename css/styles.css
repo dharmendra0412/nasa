@@ -1278,30 +1278,71 @@ body {
 /* ==========================================================================
    SCREEN 4: SPACECRAFT DESIGN STUDIO
    ========================================================================== */
+#screen-design {
+  max-width: 1360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 20px 40px 20px;
+  box-sizing: border-box;
+}
+
 .design-screen-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+}
+
+.design-screen-header .screen-title-group {
+  flex: 1 1 auto;
+  min-width: 180px;
+}
+
+.design-screen-header h2,
+#design-header-mission-title {
+  font-family: var(--font-display);
+  font-size: clamp(14px, 1.6vw, 18px) !important;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+  line-height: 1.3;
+}
+
+.design-screen-header .screen-subtitle {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.design-screen-header .btn {
+  font-size: 11.5px;
+  padding: 7px 14px;
+  white-space: nowrap;
 }
 
 .design-layout {
   display: grid;
-  grid-template-columns: 330px 1fr;
-  gap: 24px;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
   align-items: start;
+  width: 100%;
 }
 
 /* Sidebar Margin Tracker */
 .design-sidebar {
-  background: var(--bg-surface);
+  background: rgba(11, 20, 42, 0.75);
   backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-md);
-  padding: 20px;
+  padding: 14px 16px;
   position: sticky;
-  top: 80px;
+  top: 14px;
 }
 
 .sidebar-header {
@@ -1479,11 +1520,11 @@ body {
 .cad-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: clamp(11px, 1.2vw, 13px);
   font-weight: 700;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   color: #fff;
 }
 
@@ -1556,7 +1597,7 @@ body {
 .cad-canvas-wrapper {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: clamp(160px, 20vh, 190px);
   background: radial-gradient(circle at center, rgba(0, 229, 255, 0.05) 0%, rgba(2, 6, 16, 0.95) 75%);
   display: flex;
   justify-content: center;
