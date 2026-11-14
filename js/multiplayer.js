@@ -40,10 +40,28 @@ window.MultiplayerClient = (function () {
     });
   }
 
+  const PRODUCTION_RENDER_BACKEND = "wss://nasa-yr0n.onrender.com";
+
   function getWsUrl() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host || 'localhost:8080';
-    return `${protocol}//${host}`;
+    if (window.NASA_BACKEND_URL) {
+      return window.NASA_BACKEND_URL.replace(/^http/, 'ws');
+    }
+    const hostname = window.location.hostname || "localhost";
+    const isLocal = hostname === "localhost" ||
+                    hostname === "127.0.0.1" ||
+                    hostname.startsWith("192.168.") ||
+                    hostname.startsWith("10.") ||
+                    hostname.startsWith("172.");
+    if (isLocal) {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      return `${protocol}//${window.location.host}`;
+    }
+    if (hostname.includes("onrender.com")) {
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      return `${protocol}//${window.location.host}`;
+    }
+    // External Frontend (e.g. Vercel, Netlify, GitHub Pages) -> Connect to Render Backend
+    return PRODUCTION_RENDER_BACKEND;
   }
 
   function connect(onOpenCallback) {
