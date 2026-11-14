@@ -4,7 +4,7 @@ cd /d "%~dp0"
 echo ===============================================================
 echo Starting NASA Mission Control Local Web Server...
 echo ===============================================================
-node server.js
+node backend-server.js
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo Node.js not found or error occurred. Trying Python fallback...
