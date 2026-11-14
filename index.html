@@ -1591,6 +1591,73 @@
       </div>
     </div>
 
+    <!-- CHALLENGE MISSION BRIEFING & OPERATIONS MODAL -->
+    <div id="modal-challenge-brief" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="brief-mission-name">
+      <div class="modal-card modal-brief-card">
+        <div class="modal-header brief-modal-header">
+          <div class="modal-title-wrap">
+            <span id="brief-mission-icon" class="modal-alert-icon">🌍</span>
+            <div>
+              <div class="brief-category-badge" id="brief-mission-category">EARTH SCIENCE · CLASS-B</div>
+              <h3 id="brief-mission-name" class="modal-title-text">Sentinel-Earth Climate Monitor</h3>
+            </div>
+          </div>
+          <button id="btn-close-challenge-brief" type="button" class="btn-modal-close" data-close-modal="modal-challenge-brief" title="Close Mission Briefing">✖</button>
+        </div>
+
+        <div class="modal-hub-body brief-modal-body">
+          <!-- Meta chips: Destination, Difficulty, Duration -->
+          <div class="brief-meta-chips">
+            <div class="brief-chip">
+              <span class="chip-label">DESTINATION</span>
+              <span class="chip-val" id="brief-destination">Low Earth Orbit (400 km SSO)</span>
+            </div>
+            <div class="brief-chip">
+              <span class="chip-label">DIFFICULTY</span>
+              <span class="chip-val" id="brief-difficulty">⭐⭐ Cadet (2/5)</span>
+            </div>
+            <div class="brief-chip">
+              <span class="chip-label">MISSION DURATION</span>
+              <span class="chip-val" id="brief-duration">~720 Days (2 Years)</span>
+            </div>
+          </div>
+
+          <!-- Mission Directive Narrative -->
+          <div class="brief-section">
+            <h4 class="brief-section-title">MISSION DIRECTIVE & FLIGHT OBJECTIVES</h4>
+            <p id="brief-narrative" class="brief-narrative-text">
+              Track global polar ice melting rates, tropical canopy deforestation, and sea surface height variations using multispectral radar imaging.
+            </p>
+          </div>
+
+          <!-- Scientific Directives List -->
+          <div class="brief-section">
+            <h4 class="brief-section-title">KEY SCIENTIFIC MILESTONES</h4>
+            <div id="brief-objectives-list" class="brief-objectives-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Launch Choice Action Bar -->
+          <div class="brief-action-box">
+            <div class="brief-action-desc">
+              Choose your operational approach: Launch straight into real-time 3D flight operations or customize your spacecraft payload and telemetry bus in the engineering studio.
+            </div>
+            <div class="brief-actions-row">
+              <button id="btn-brief-launch-flight" type="button" class="btn btn-primary btn-glow brief-launch-btn">
+                <span class="btn-main-label">🚀 LAUNCH FLIGHT OPERATIONS</span>
+                <span class="btn-subtext">3D WebGL Liftoff from Pad 39A</span>
+              </button>
+              <button id="btn-brief-enter-studio" type="button" class="btn btn-secondary brief-studio-btn">
+                <span class="btn-main-label">🛠️ SPACECRAFT DESIGN STUDIO</span>
+                <span class="btn-subtext">Configure Antennas, Solar & Instruments</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Audio Synthesizer Script / Telemetry Audio (Web Audio API) -->

@@ -335,13 +335,99 @@ window.GameUI = (function () {
 
     updateProgressTracker();
 
+    // Mission Operations Briefing Modal Handler
+    const modalChallengeBrief = document.getElementById("modal-challenge-brief");
+    const btnCloseBrief = document.getElementById("btn-close-challenge-brief");
+    const btnBriefLaunchFlight = document.getElementById("btn-brief-launch-flight");
+    const btnBriefEnterStudio = document.getElementById("btn-brief-enter-studio");
+
+    const openChallengeBrief = (mid) => {
+      selectedQuickMissionId = mid || "sentinel-e";
+      const mission = (window.GameData && window.GameData.missions) ? 
+        window.GameData.missions.find(m => m.id === selectedQuickMissionId) || window.GameData.missions[0] : null;
+
+      if (!mission) {
+        launchInstantFlight();
+        return;
+      }
+
+      const iconEl = document.getElementById("brief-mission-icon");
+      const nameEl = document.getElementById("brief-mission-name");
+      const categoryEl = document.getElementById("brief-mission-category");
+      const destEl = document.getElementById("brief-destination");
+      const diffEl = document.getElementById("brief-difficulty");
+      const durEl = document.getElementById("brief-duration");
+      const narrativeEl = document.getElementById("brief-narrative");
+      const objectivesList = document.getElementById("brief-objectives-list");
+
+      if (iconEl) iconEl.textContent = mission.icon || "🚀";
+      if (nameEl) nameEl.textContent = mission.name || "NASA Mission Challenge";
+      if (categoryEl) categoryEl.textContent = `${(mission.type || "NASA Spaceflight").toUpperCase()} · CLASS-B`;
+      if (destEl) destEl.textContent = mission.destination || "Planetary Orbit";
+      if (diffEl) {
+        const d = mission.difficulty || 2;
+        const stars = "⭐".repeat(Math.min(5, d));
+        diffEl.textContent = `${stars} (${d}/5)`;
+      }
+      if (durEl) durEl.textContent = `~${mission.duration || 365} Days`;
+      if (narrativeEl) narrativeEl.textContent = mission.briefing || "Telemetry indicates high priority science exploration. Configure subsystems or initiate orbital launch.";
+
+      if (objectivesList) {
+        objectivesList.innerHTML = "";
+        if (mission.objectives && mission.objectives.length > 0) {
+          mission.objectives.forEach(obj => {
+            const item = document.createElement("div");
+            item.className = "brief-obj-item";
+            item.innerHTML = `
+              <div class="brief-obj-title">🎯 ${obj.name}</div>
+              <div class="brief-obj-desc">${obj.description}</div>
+            `;
+            objectivesList.appendChild(item);
+          });
+        }
+      }
+
+      if (modalChallengeBrief) {
+        modalChallengeBrief.classList.remove("hidden");
+      }
+      if (window.SoundFX && typeof window.SoundFX.playBeep === "function") {
+        window.SoundFX.playBeep(880, 0.05);
+      }
+    };
+
+    const closeChallengeBrief = () => {
+      if (modalChallengeBrief) modalChallengeBrief.classList.add("hidden");
+    };
+
+    if (btnCloseBrief) btnCloseBrief.addEventListener("click", closeChallengeBrief);
+    if (modalChallengeBrief) {
+      modalChallengeBrief.addEventListener("click", (e) => {
+        if (e.target === modalChallengeBrief) closeChallengeBrief();
+      });
+    }
+
+    if (btnBriefLaunchFlight) {
+      btnBriefLaunchFlight.addEventListener("click", () => {
+        closeChallengeBrief();
+        launchInstantFlight();
+      });
+    }
+
+    if (btnBriefEnterStudio) {
+      btnBriefEnterStudio.addEventListener("click", () => {
+        closeChallengeBrief();
+        window.GameEngine.init(selectedDifficulty || "engineer");
+        window.GameEngine.selectMission(selectedQuickMissionId);
+        showScreen("screen-design");
+      });
+    }
+
     // Challenge Cards Start buttons
     document.querySelectorAll("[data-mission]").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         const mid = btn.dataset.mission || "sentinel-e";
-        selectedQuickMissionId = mid;
-        launchInstantFlight();
+        openChallengeBrief(mid);
       });
     });
 
@@ -349,8 +435,7 @@ window.GameUI = (function () {
     document.querySelectorAll(".challenge-card").forEach(card => {
       card.addEventListener("click", () => {
         const mid = card.dataset.missionId || "sentinel-e";
-        selectedQuickMissionId = mid;
-        launchInstantFlight();
+        openChallengeBrief(mid);
       });
     });
 
@@ -358,8 +443,7 @@ window.GameUI = (function () {
     const btnHeroStart = document.getElementById("btn-hero-start");
     if (btnHeroStart) {
       btnHeroStart.addEventListener("click", () => {
-        selectedQuickMissionId = "sentinel-e";
-        launchInstantFlight();
+        openChallengeBrief("sentinel-e");
       });
     }
 
