@@ -254,15 +254,67 @@
 
       <!-- SCREEN: REAL-TIME ONLINE MULTIPLAYER CO-OP -->
       <section id="screen-multiplayer" class="screen">
-        <div class="screen-header">
-          <button id="btn-back-multiplayer" class="btn btn-outline btn-small">⬅ Return to Dashboard</button>
-          <div class="screen-title-group">
-            <h2>NASA REAL-TIME ONLINE MULTIPLAYER CO-OP</h2>
-            <p>Command flight missions live with friends across the world or over your local Wi-Fi router</p>
+        <!-- Top Navbar (OrbitOps NASA Simulation) -->
+        <nav class="mp-navbar">
+          <div class="mp-nav-brand">
+            <div class="nasa-meatball-container">
+              <img src="assets/nasa_meatball.jpg" alt="NASA Logo" class="nasa-logo-img" />
+            </div>
+            <div class="mp-brand-text">
+              <span class="mp-brand-name">ORBITOPS</span>
+              <span class="mp-brand-sub">NASA Mission Simulation</span>
+            </div>
           </div>
-          <div class="header-network-pill">
-            <span class="green-blink">●</span>
-            <span id="mp-conn-status">SERVER ONLINE</span>
+
+          <div class="mp-nav-links">
+            <button type="button" class="mp-nav-link" data-tab="dashboard">
+              <span class="mp-nav-icon">🏠</span>
+              <span>Dashboard</span>
+            </button>
+            <button type="button" class="mp-nav-link" data-tab="missions">
+              <span class="mp-nav-icon">🚀</span>
+              <span>Missions</span>
+            </button>
+            <button type="button" class="mp-nav-link active" data-tab="multiplayer">
+              <span class="mp-nav-icon">👥</span>
+              <span>Multiplayer</span>
+            </button>
+            <button type="button" class="mp-nav-link" data-tab="design">
+              <span class="mp-nav-icon">🗂️</span>
+              <span>Design Studio</span>
+            </button>
+            <button type="button" class="mp-nav-link" data-tab="resources">
+              <span class="mp-nav-icon">🗄️</span>
+              <span>Resources</span>
+            </button>
+            <button type="button" class="mp-nav-link" data-tab="guide">
+              <span class="mp-nav-icon">📖</span>
+              <span>Guide</span>
+            </button>
+          </div>
+
+          <div class="mp-nav-right">
+            <button type="button" class="mp-notif-btn" title="Notifications">
+              <span class="mp-bell-icon">🔔</span>
+              <span class="mp-notif-dot">1</span>
+            </button>
+            <div class="mp-user-avatar" title="Flight Crew">D</div>
+          </div>
+        </nav>
+
+        <!-- Sub-Header Bar (← Dashboard | 🎮 Multiplayer Co-Op | 🟢 Server Online) -->
+        <div class="mp-sub-header">
+          <button id="btn-back-multiplayer" type="button" class="mp-back-pill" title="Return to Dashboard">
+            <span class="mp-arrow">←</span> Dashboard
+          </button>
+          <div class="mp-header-center">
+            <h1 class="mp-header-title">
+              <span class="mp-title-icon">🎮</span> Multiplayer <span class="mp-title-highlight">Co-Op</span>
+            </h1>
+          </div>
+          <div class="mp-status-pill">
+            <span class="mp-status-dot"></span>
+            <span id="mp-conn-status">Server Online</span>
           </div>
         </div>
 
@@ -270,67 +322,101 @@
         <div id="mp-setup-container" class="mp-setup-grid">
           <!-- CREATE ROOM CARD -->
           <div class="mp-card mp-create-card">
-            <div class="mp-card-badge">HOST A MISSION</div>
-            <h3 class="mp-card-title">🚀 CREATE MISSION ROOM</h3>
-            <p class="mp-card-desc">Generate a NASA mission room code and invite your flight crew to join you online.</p>
-
-            <div class="mp-form-group">
-              <label class="mp-label">Commander Call Sign / Name</label>
-              <input type="text" id="mp-host-name" class="mp-input" placeholder="e.g. Commander Sarah" maxlength="24" value="Flight Director" />
+            <!-- Card Header -->
+            <div class="mp-card-top-row">
+              <div class="mp-badge-box mp-badge-gold">
+                <span class="mp-badge-icon">🚀</span>
+              </div>
+              <h2 class="mp-card-title-text">Create Mission Room</h2>
+              <div class="mp-corner-graphic">
+                <img src="assets/mp_rocket_launch.png" alt="Rocket Launch Pad" class="mp-rocket-thumb" />
+              </div>
             </div>
 
-            <div class="mp-form-group">
-              <label class="mp-label">Target Destination / Spacecraft</label>
-              <select id="mp-host-mission" class="mp-select">
-                <option value="sentinel-e">🌍 Earth Sentinel (400 km LEO Climate Monitor)</option>
-                <option value="stormwatch">🌀 StormWatch (35,786 km GEO Weather Sat)</option>
-                <option value="artemis-scout">🌕 Artemis Scout (100 km Lunar Polar Recon)</option>
-                <option value="red-pioneer">🪐 Red Pioneer (Mars Planetary Exploration)</option>
-              </select>
+            <div class="mp-form-rows">
+              <!-- Row 1: Call Sign -->
+              <div class="mp-form-row">
+                <label class="mp-row-label" for="mp-host-name">
+                  <span class="row-icon">👤</span> Call Sign
+                </label>
+                <div class="mp-row-field">
+                  <input type="text" id="mp-host-name" class="mp-input-styled" placeholder="e.g. Flight Director" value="Flight Director" maxlength="24" />
+                </div>
+              </div>
+
+              <!-- Row 2: Destination -->
+              <div class="mp-form-row">
+                <label class="mp-row-label" for="mp-host-mission">
+                  <span class="row-icon">🎯</span> Destination
+                </label>
+                <div class="mp-row-field">
+                  <select id="mp-host-mission" class="mp-select-styled">
+                    <option value="sentinel-e" selected>🌍 Earth Sentinel (400 km LEO)</option>
+                    <option value="stormwatch">🌀 StormWatch (GEO Weather Sat)</option>
+                    <option value="artemis-scout">🌕 Artemis Scout (Lunar Recon)</option>
+                    <option value="red-pioneer">🪐 Red Pioneer (Mars Exploration)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Row 3: Difficulty -->
+              <div class="mp-form-row">
+                <label class="mp-row-label" for="mp-host-difficulty">
+                  <span class="row-icon">📊</span> Difficulty
+                </label>
+                <div class="mp-row-field">
+                  <select id="mp-host-difficulty" class="mp-select-styled">
+                    <option value="cadet">Cadet (Casual)</option>
+                    <option value="engineer" selected>Systems Engineer (Normal)</option>
+                    <option value="director">Flight Director (Pro)</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-            <div class="mp-form-group">
-              <label class="mp-label">Difficulty / Mission Stakes</label>
-              <select id="mp-host-difficulty" class="mp-select">
-                <option value="cadet">🌟 Cadet (Casual • Safe Exploration)</option>
-                <option value="engineer" selected>⚙️ Systems Engineer (Normal • Realistic NASA Class-B)</option>
-                <option value="director">🎯 Flight Director (Pro • High-Risk Flagship)</option>
-              </select>
-            </div>
-
-            <button type="button" id="btn-mp-create" class="btn btn-primary btn-glow full-width">
-              🚀 CREATE ROOM & GET INVITE LINK
+            <button type="button" id="btn-mp-create" class="mp-btn-action mp-btn-gold">
+              <span class="btn-icon">🚀</span> Create Room
             </button>
           </div>
 
           <!-- JOIN ROOM CARD -->
           <div class="mp-card mp-join-card">
-            <div class="mp-card-badge badge-cyan">JOIN CREW</div>
-            <h3 class="mp-card-title">🛰️ JOIN EXISTING ROOM</h3>
-            <p class="mp-card-desc">Enter the Room Code shared by your friend to board their Mission Control room.</p>
-
-            <div class="mp-form-group">
-              <label class="mp-label">Mission Room Code</label>
-              <input type="text" id="mp-join-code" class="mp-input mp-code-input" placeholder="e.g. APOLLO" maxlength="12" autocomplete="off" />
+            <!-- Card Header -->
+            <div class="mp-card-top-row">
+              <div class="mp-badge-box mp-badge-blue">
+                <span class="mp-badge-icon">👥</span>
+              </div>
+              <h2 class="mp-card-title-text">Join Mission Room</h2>
+              <div class="mp-corner-graphic">
+                <img src="assets/mp_iss_station.png" alt="International Space Station" class="mp-iss-thumb" />
+              </div>
             </div>
 
-            <div class="mp-form-group">
-              <label class="mp-label">Astronaut Call Sign / Name</label>
-              <input type="text" id="mp-join-name" class="mp-input" placeholder="e.g. Specialist Alex" maxlength="24" />
+            <div class="mp-form-rows">
+              <!-- Row 1: Room Code -->
+              <div class="mp-form-row">
+                <label class="mp-row-label" for="mp-join-code">
+                  <span class="row-icon">#</span> Room Code
+                </label>
+                <div class="mp-row-field">
+                  <input type="text" id="mp-join-code" class="mp-input-styled mp-code-styled" placeholder="e.g. APOLLO123" maxlength="12" autocomplete="off" />
+                </div>
+              </div>
+
+              <!-- Row 2: Call Sign -->
+              <div class="mp-form-row">
+                <label class="mp-row-label" for="mp-join-name">
+                  <span class="row-icon">👤</span> Call Sign
+                </label>
+                <div class="mp-row-field">
+                  <input type="text" id="mp-join-name" class="mp-input-styled" placeholder="e.g. Specialist Alex" maxlength="24" />
+                </div>
+              </div>
             </div>
 
-            <button type="button" id="btn-mp-join" class="btn btn-secondary full-width">
-              🛰️ JOIN FLIGHT ROOM
+            <button type="button" id="btn-mp-join" class="mp-btn-action mp-btn-blue">
+              <span class="btn-icon">👥</span> Join Room
             </button>
-
-            <!-- Quick network help info -->
-            <div class="mp-network-info">
-              <div class="info-title">💡 HOW TO PLAY WITH FRIENDS:</div>
-              <ul class="info-list">
-                <li><strong>On Same Wi-Fi / Router:</strong> Share your Wi-Fi link: <code id="mp-wifi-link-hint">http://10.44.152.6:8080/</code></li>
-                <li><strong>Over Global Internet:</strong> In a terminal run <code>npm run share</code> (or double-click <code>share_online.bat</code>) and send the generated HTTPS link to friends anywhere in the world!</li>
-              </ul>
-            </div>
           </div>
         </div>
 

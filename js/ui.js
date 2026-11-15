@@ -1687,6 +1687,31 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
       });
     }
 
+    // Top navbar navigation links inside screen-multiplayer
+    document.querySelectorAll(".mp-nav-link").forEach(link => {
+      link.addEventListener("click", () => {
+        const tab = link.dataset.tab;
+        if (tab === "dashboard") {
+          showScreen("screen-title");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else if (tab === "missions") {
+          showScreen("screen-title");
+          const target = document.getElementById("section-challenges");
+          if (target) target.scrollIntoView({ behavior: "smooth" });
+        } else if (tab === "multiplayer") {
+          showScreen("screen-multiplayer");
+        } else if (tab === "design") {
+          showScreen("screen-design");
+        } else if (tab === "resources") {
+          const modal = document.getElementById("modal-about-challenge");
+          if (modal) modal.classList.remove("hidden");
+        } else if (tab === "guide") {
+          const modal = document.getElementById("modal-how-to-play");
+          if (modal) modal.classList.remove("hidden");
+        }
+      });
+    });
+
     // CREATE ROOM
     if (btnMpCreate) {
       btnMpCreate.addEventListener("click", () => {
