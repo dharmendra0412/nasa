@@ -283,20 +283,57 @@ window.Space3D = (function () {
   // =========================================================================
   function buildSpacecraft(config = {}) {
     const group = new THREE.Group();
-    const comps = config.components || {};
-    const insts = config.instruments || [];
+    const comps = Object.assign({}, config.components || {});
+    let insts = Array.isArray(config.instruments) ? [...config.instruments] : [];
 
-    // Title Demo mode fallback (for small background earth satellite)
-    if (config.defaultDemo) {
-      comps.bus = comps.bus || "medium-sat";
-      comps.power = comps.power || "medium-solar";
-      comps.antenna = comps.antenna || "hga";
-      comps.propulsion = comps.propulsion || "chemical";
-      if (!insts.length) insts.push("hires-cam");
+    // Title Demo or In-Flight Mode fallback:
+    // When flying in space or running demo, ALWAYS build an actual realistic NASA spacecraft!
+    if (config.inSpaceFlight || config.defaultDemo || !config.isCadInspector) {
+      if (!comps.bus) {
+        const m = config.mission || (window.GameEngine && window.GameEngine.getState ? window.GameEngine.getState().missionId : null);
+        const mId = typeof m === "string" ? m : (m ? m.id : "sentinel-e");
+        if (mId === "stormwatch") {
+          comps.bus = comps.bus || "medium-sat";
+          comps.power = comps.power || "medium-solar";
+          comps.antenna = comps.antenna || "hga";
+          comps.propulsion = comps.propulsion || "chemical";
+          if (!insts.length) insts = ["wide-cam", "ir-spec"];
+        } else if (mId === "artemis-scout") {
+          comps.bus = comps.bus || "small-sat";
+          comps.power = comps.power || "medium-solar";
+          comps.antenna = comps.antenna || "hga";
+          comps.propulsion = comps.propulsion || "ion";
+          if (!insts.length) insts = ["spectrometer", "altimeter"];
+        } else if (mId === "red-pioneer") {
+          comps.bus = comps.bus || "medium-sat";
+          comps.power = comps.power || "rtg";
+          comps.antenna = comps.antenna || "hga";
+          comps.propulsion = comps.propulsion || "chemical";
+          if (!insts.length) insts = ["ir-spec", "magnetometer"];
+        } else if (mId === "asteroid-guard") {
+          comps.bus = comps.bus || "small-sat";
+          comps.power = comps.power || "medium-solar";
+          comps.antenna = comps.antenna || "hga";
+          comps.propulsion = comps.propulsion || "ion";
+          if (!insts.length) insts = ["radar", "hires-cam"];
+        } else if (mId === "deepview") {
+          comps.bus = comps.bus || "large-sat";
+          comps.power = comps.power || "large-solar";
+          comps.antenna = comps.antenna || "hga";
+          comps.propulsion = comps.propulsion || "chemical";
+          if (!insts.length) insts = ["space-telescope"];
+        } else {
+          comps.bus = comps.bus || "medium-sat";
+          comps.power = comps.power || "medium-solar";
+          comps.antenna = comps.antenna || "hga";
+          comps.propulsion = comps.propulsion || "chemical";
+          if (!insts.length) insts = ["hires-cam", "sar"];
+        }
+      }
     }
 
-    // 0. STRICT REQUIREMENT: If user has not selected a bus yet, show interactive 3D assembly cradle & holographic envelope
-    if (!comps.bus) {
+    // 0. Cleanroom Turntable Cradle & Holographic Box (ONLY shown in Design Studio CAD Inspector before a bus is picked)
+    if (!comps.bus && config.isCadInspector) {
       const cradleGroup = new THREE.Group();
 
       // Hexagonal cleanroom turntable base
@@ -443,20 +480,22 @@ window.Space3D = (function () {
     ring.position.z = busL * 0.25;
     group.add(ring);
 
-    // Cleanroom mounting cradle ring beneath spacecraft bus
-    const cradleBaseGeo = new THREE.CylinderGeometry(busW * 0.85, busW * 0.95, 0.15, 16);
-    const cradleBaseMat = new THREE.MeshStandardMaterial({ color: 0x1f2a3a, roughness: 0.6, metalness: 0.8 });
-    const cradleBase = new THREE.Mesh(cradleBaseGeo, cradleBaseMat);
-    cradleBase.position.y = -busH * 0.5 - 0.12;
-    group.add(cradleBase);
+    // Cleanroom mounting cradle ring beneath spacecraft bus (Only in Workshop CAD Inspector)
+    if (config.isCadInspector) {
+      const cradleBaseGeo = new THREE.CylinderGeometry(busW * 0.85, busW * 0.95, 0.15, 16);
+      const cradleBaseMat = new THREE.MeshStandardMaterial({ color: 0x1f2a3a, roughness: 0.6, metalness: 0.8 });
+      const cradleBase = new THREE.Mesh(cradleBaseGeo, cradleBaseMat);
+      cradleBase.position.y = -busH * 0.5 - 0.12;
+      group.add(cradleBase);
 
-    // Subtle Glowing Turntable Ring beneath bus
-    const turnRingGeo = new THREE.RingGeometry(busW * 0.65, busW * 0.72, 32);
-    const turnRingMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
-    const turnRing = new THREE.Mesh(turnRingGeo, turnRingMat);
-    turnRing.rotation.x = Math.PI / 2;
-    turnRing.position.y = -busH * 0.5 - 0.18;
-    group.add(turnRing);
+      // Subtle Glowing Turntable Ring beneath bus
+      const turnRingGeo = new THREE.RingGeometry(busW * 0.65, busW * 0.72, 32);
+      const turnRingMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
+      const turnRing = new THREE.Mesh(turnRingGeo, turnRingMat);
+      turnRing.rotation.x = Math.PI / 2;
+      turnRing.position.y = -busH * 0.5 - 0.18;
+      group.add(turnRing);
+    }
 
     group.scale.set(busScale, busScale, busScale);
 
@@ -1474,7 +1513,7 @@ window.Space3D = (function () {
     checkCADResize();
     if (cadSpacecraft) cadScene.remove(cadSpacecraft);
 
-    cadSpacecraft = buildSpacecraft(config || {});
+    cadSpacecraft = buildSpacecraft(Object.assign({}, config || {}, { isCadInspector: true }));
     if (cadIsWireframe) applyWireframeMode(cadSpacecraft);
     cadScene.add(cadSpacecraft);
   }

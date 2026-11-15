@@ -473,6 +473,9 @@ window.SpaceFlightGame = (function () {
       mission,
       orbit,
       lv,
+      components: state ? state.components : null,
+      instruments: state ? state.instruments : null,
+      inSpaceFlight: true,
       onComplete: onCompleteCallback
     };
 
