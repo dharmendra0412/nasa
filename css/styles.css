@@ -1284,6 +1284,19 @@ body {
   margin: 0 auto;
   padding: 16px 20px 40px 20px;
   box-sizing: border-box;
+  position: relative;
+  background-image: 
+    url('../assets/design_earth_top.png'),
+    url('../assets/design_earth_bottom.png');
+  background-position: 
+    top right,
+    bottom left;
+  background-repeat: 
+    no-repeat,
+    no-repeat;
+  background-size: 
+    clamp(350px, 45vw, 550px) auto,
+    clamp(300px, 40vw, 480px) auto;
 }
 
 .design-screen-header {
@@ -1732,7 +1745,7 @@ body {
 .cad-canvas-wrapper {
   position: relative;
   width: 100%;
-  height: 145px;
+  height: 115px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1744,10 +1757,10 @@ body {
   position: absolute;
   inset: 0;
   background-image: url('../assets/orbits/cad_satellite_blueprint.jpg');
-  background-size: contain;
+  background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.95;
+  opacity: 1;
   pointer-events: none;
 }
 
@@ -1913,7 +1926,7 @@ body {
   background: rgba(10, 20, 42, 0.85);
   border: 1px solid rgba(56, 189, 248, 0.2);
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -1940,28 +1953,28 @@ body {
   top: 8px;
   right: 8px;
   font-family: var(--font-heading);
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   background: #0284c7;
   color: #ffffff;
-  padding: 2px 6px;
+  padding: 2px 5px;
   border-radius: 4px;
 }
 
 .hw-card-top {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 7px;
+  margin-bottom: 5px;
 }
 
 .hw-card-icon {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .hw-card-name {
   font-family: var(--font-heading);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #fff;
   line-height: 1.25;
@@ -1988,10 +2001,10 @@ body {
 
 .hw-card-img-wrap {
   width: 100%;
-  height: 48px;
+  height: 38px;
   border-radius: 6px;
   overflow: hidden;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: #020612;
 }
@@ -2000,14 +2013,15 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
 .hw-card-desc {
-  font-size: 10.5px;
+  font-size: 10px;
   color: #94a3b8;
   line-height: 1.35;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   flex: 1;
 }
 
@@ -2016,13 +2030,13 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 4px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 8px;
+  padding-top: 6px;
 }
 
 .stat-chip {
-  padding: 3px 4px;
+  padding: 2.5px 4px;
   border-radius: 4px;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 700;
   text-align: center;
   white-space: nowrap;
@@ -2034,29 +2048,29 @@ body {
 }
 
 .stat-chip.chip-deltav {
-  background: rgba(168, 85, 247, 0.12);
+  background: rgba(168, 85, 247, 0.15);
   border: 1px solid rgba(168, 85, 247, 0.4);
   color: #c084fc;
 }
 
 .stat-chip.chip-science {
-  background: rgba(34, 197, 94, 0.12);
+  background: rgba(34, 197, 94, 0.15);
   border: 1px solid rgba(34, 197, 94, 0.4);
   color: #4ade80;
 }
 
 .stat-chip.chip-radiation {
-  background: rgba(56, 189, 248, 0.12);
+  background: rgba(56, 189, 248, 0.15);
   border: 1px solid rgba(56, 189, 248, 0.4);
   color: #38bdf8;
 }
 
 .stat-chip.chip-coverage {
   grid-column: 1 / -1;
-  background: rgba(234, 179, 8, 0.12);
+  background: rgba(234, 179, 8, 0.15);
   border: 1px solid rgba(234, 179, 8, 0.4);
   color: #facc15;
-  padding: 4px 6px;
+  padding: 3px 6px;
   margin-top: 2px;
 }
 
