@@ -193,48 +193,6 @@
   box-shadow: 0 0 28px rgba(0, 230, 118, 0.65);
 }
 
-/* Template Presets Bar */
-.custom-presets-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 10px 16px;
-  background: rgba(8, 14, 28, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-.custom-presets-label {
-  font-family: var(--font-heading, 'Orbitron', monospace);
-  font-size: 11px;
-  font-weight: 700;
-  color: #00e5ff;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  margin-right: 6px;
-}
-
-.btn-preset-chip {
-  padding: 6px 14px;
-  background: rgba(20, 32, 60, 0.6);
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  border-radius: 20px;
-  color: #cbd5e1;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-preset-chip:hover {
-  background: rgba(0, 229, 255, 0.2);
-  border-color: #00e5ff;
-  color: #ffffff;
-}
-
 /* Two Column Main Workspace */
 .custom-studio-workspace {
   display: grid;

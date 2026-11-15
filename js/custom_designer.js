@@ -208,16 +208,6 @@ window.CustomDesigner = (function () {
     if (!data) return;
 
     container.innerHTML = `
-      <!-- Presets Quick Bar -->
-      <div class="custom-presets-bar">
-        <span class="custom-presets-label">⚡ NASA FLIGHT PRESETS:</span>
-        <button type="button" class="btn-preset-chip" data-preset="earth-scout">🌍 Earth Climate Scout</button>
-        <button type="button" class="btn-preset-chip" data-preset="lunar-hunter">🌕 Lunar Resource Hunter</button>
-        <button type="button" class="btn-preset-chip" data-preset="mars-cruiser">🪐 Mars Cruiser & Lander</button>
-        <button type="button" class="btn-preset-chip" data-preset="deep-space-ion">☄️ Deep Space Ion Interceptor</button>
-        <button type="button" class="btn-preset-chip" data-preset="cubesat-constellation">📦 CubeSat Swarm Node</button>
-      </div>
-
       <div class="custom-studio-workspace">
         <!-- LEFT: Interactive Systems Architecture Panels -->
         <div class="custom-config-column">
@@ -500,17 +490,7 @@ window.CustomDesigner = (function () {
       });
     }
 
-    // 2. Preset Chips
-    document.querySelectorAll(".btn-preset-chip").forEach(chip => {
-      chip.addEventListener("click", () => {
-        const pk = chip.dataset.preset;
-        if (presets[pk]) {
-          applyPreset(presets[pk]);
-        }
-      });
-    });
-
-    // 3. Selection Option Cards
+    // 2. Selection Option Cards
     document.querySelectorAll(".custom-opt-card").forEach(card => {
       card.addEventListener("click", () => {
         const cat = card.dataset.category;
