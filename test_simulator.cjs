@@ -372,10 +372,17 @@ if (craft.name !== "Aryabhata-Mars" || craft.powerId !== "rtg" || craft.instrume
   console.error("[FAIL] Custom spacecraft state mismatch:", craft);
   process.exit(1);
 }
+
+const craftCfg = window.CustomDesigner.getCraftConfig();
+if (!Array.isArray(craftCfg.instruments) || typeof craftCfg.instruments[0] !== 'string') {
+  console.error("[FAIL] Custom craft instruments must be strings for 3D engine:", craftCfg.instruments);
+  process.exit(1);
+}
 console.log(`[PASS] Custom Spacecraft configured: '${craft.name}' (${craft.callsign})`);
 console.log(`       - Agency: ${craft.agency}`);
 console.log(`       - Bus: ${craft.busId} | Power: ${craft.powerId} | Prop: ${craft.propulsionId}`);
 console.log(`       - Instruments: [${craft.instruments.join(', ')}]`);
+console.log(`       - CAD Config instruments: [${craftCfg.instruments.join(', ')}]`);
 
 // Test Custom Craft Launch into 3D Flight
 window.CustomDesigner.launchCustomFlight();

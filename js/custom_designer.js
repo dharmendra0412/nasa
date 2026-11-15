@@ -23,7 +23,7 @@ window.CustomDesigner = (function () {
     computerId: "standard-comp",
     groundStationId: "network",
     launchVehicleId: "workhorse",
-    instruments: ["hires-cam", "spec-vis"]
+    instruments: ["hires-cam", "ir-spec"]
   };
 
   // Ready-to-Fly NASA Aerospace Presets
@@ -139,18 +139,12 @@ window.CustomDesigner = (function () {
   }
 
   function open() {
-    if (window.UI && typeof window.UI.showScreen === "function") {
-      window.UI.showScreen("screen-custom-designer");
-    } else {
-      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-      const scr = document.getElementById("screen-custom-designer");
-      if (scr) scr.classList.add("active");
-    }
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    const scr = document.getElementById("screen-custom-designer");
+    if (scr) scr.classList.add("active");
 
-    if (!domInitialized) {
-      render();
-      domInitialized = true;
-    }
+    render();
+    domInitialized = true;
 
     // Initialize 3D CAD Canvas for Custom Craft
     initCustomCAD();
@@ -167,16 +161,25 @@ window.CustomDesigner = (function () {
   function initCustomCAD() {
     const canvas = document.getElementById("custom-cad-canvas");
     if (canvas && window.Space3D && window.Space3D.initDesignCADViewer) {
-      window.Space3D.initDesignCADViewer(canvas);
+      window.Space3D.initDesignCADViewer(canvas, getCraftConfig());
       cadInitialized = true;
       update3DCad();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          update3DCad();
+        });
+      });
     }
   }
 
   function update3DCad() {
     if (!window.Space3D || !window.Space3D.updateDesignCAD) return;
-    const config = getCraftConfig();
-    window.Space3D.updateDesignCAD(config);
+    try {
+      const config = getCraftConfig();
+      window.Space3D.updateDesignCAD(config);
+    } catch (e) {
+      console.warn("[CustomDesigner] update3DCad error:", e);
+    }
   }
 
   function getCraftConfig() {
@@ -192,7 +195,7 @@ window.CustomDesigner = (function () {
         band: craftState.bandId,
         groundStation: craftState.groundStationId
       },
-      instruments: craftState.instruments.map(id => ({ id })),
+      instruments: craftState.instruments.slice(),
       orbit: { id: craftState.orbitId },
       lv: { id: craftState.launchVehicleId },
       isCustomCraft: true,
@@ -295,7 +298,7 @@ window.CustomDesigner = (function () {
                   </div>
                   <div class="custom-opt-desc">${p.description || ""}</div>
                   <div class="custom-opt-meta">
-                    <span class="meta-power">+${p.powerOutput} W</span>
+                    <span class="meta-power">+${p.power} W</span>
                     <span class="meta-mass">${p.mass} kg</span>
                     <span class="meta-cost">$${p.cost}M</span>
                   </div>
@@ -319,8 +322,8 @@ window.CustomDesigner = (function () {
                   </div>
                   <div class="custom-opt-desc">${pr.description || ""}</div>
                   <div class="custom-opt-meta">
-                    <span class="meta-mass">FUEL: ${pr.fuelMass || 0} kg</span>
-                    <span class="meta-power">${pr.powerReq || 0} W</span>
+                    <span class="meta-mass">MASS: ${pr.mass || 0} kg</span>
+                    <span class="meta-power">ΔV: +${pr.deltaV || 0} m/s</span>
                     <span class="meta-cost">$${pr.cost}M</span>
                   </div>
                 </div>
@@ -388,9 +391,9 @@ window.CustomDesigner = (function () {
                     <span class="custom-opt-title">${lv.name}</span>
                     <span class="custom-opt-check">✔</span>
                   </div>
-                  <div class="custom-opt-desc">Fairing: ${lv.fairingDiameter}m • Payload: ${lv.payloadLeo} kg</div>
+                  <div class="custom-opt-desc">Reliability: ${Math.round((lv.reliability || 0.95) * 100)}% • LEO Cap: ${lv.payloadLEO} kg</div>
                   <div class="custom-opt-meta">
-                    <span class="meta-mass">LEO CAP: ${lv.payloadLeo} kg</span>
+                    <span class="meta-mass">LEO CAP: ${lv.payloadLEO} kg</span>
                     <span class="meta-cost">$${lv.cost}M</span>
                   </div>
                 </div>
@@ -587,9 +590,6 @@ window.CustomDesigner = (function () {
     document.querySelectorAll(`.custom-opt-card[data-category="instrument"]`).forEach(c => {
       c.classList.toggle("active", craftState.instruments.includes(c.dataset.id));
     });
-
-    update3DCad();
-    updateTelemetry();
   }
 
   function applyPreset(preset) {
@@ -633,22 +633,25 @@ window.CustomDesigner = (function () {
 
     const instList = craftState.instruments.map(id => (data.instruments || []).find(i => i.id === id) || {});
 
-    // Calculations
-    const dryMass = (bus.dryMass || 300) + (power.mass || 50) + (prop.mass || 0) + (antenna.mass || 15) + instList.reduce((s, i) => s + (i.mass || 0), 0);
-    const fuelMass = prop.fuelMass || 0;
-    const wetMass = dryMass + fuelMass;
+    // Accurate component mass breakdown
+    const busMass = bus.dryMass || 240;
+    const powerMass = power.mass || 28;
+    const propMass = prop.mass || 0;
+    const antennaMass = antenna.mass || 10;
+    const instMass = instList.reduce((s, i) => s + (i.mass || 0), 0);
+    const dryMass = busMass + powerMass + propMass + antennaMass + instMass;
+    const wetMass = dryMass;
 
-    const powerGen = power.powerOutput || 300;
-    const powerLoad = (prop.powerReq || 0) + instList.reduce((s, i) => s + (i.power || 0), 0) + 75; // 75W housekeeping
+    // Power budget
+    const powerGen = power.power || 300;
+    const powerLoad = (prop.power || 0) + instList.reduce((s, i) => s + (i.power || 0), 0) + 75; // 75W housekeeping avionics
     const powerBalance = powerGen - powerLoad;
 
-    // Delta-V via Tsiolkovsky rocket equation: dv = g0 * Isp * ln(m_wet / m_dry)
-    const isp = prop.isp || 230;
-    let deltaV = 0;
-    if (wetMass > dryMass && dryMass > 0) {
-      deltaV = Math.round(9.80665 * isp * Math.log(wetMass / dryMass));
-    }
+    // Delta-V from chosen propulsion system (scaled realistically with dry mass)
+    const baseDeltaV = prop.deltaV || 0;
+    const deltaV = baseDeltaV > 0 ? Math.round(baseDeltaV * Math.min(1.4, Math.max(0.4, 340 / Math.max(50, dryMass)))) : 0;
 
+    // Cost budget
     const totalCost = (bus.cost || 5) + (power.cost || 3) + (prop.cost || 2) + (antenna.cost || 2) + (lv.cost || 15) + instList.reduce((s, i) => s + (i.cost || 0), 0);
 
     // Update DOM
@@ -656,7 +659,7 @@ window.CustomDesigner = (function () {
     if (massEl) massEl.textContent = `${Math.round(wetMass)} kg`;
 
     const massSub = document.getElementById("custom-mass-sub");
-    if (massSub) massSub.textContent = `Dry: ${Math.round(dryMass)} kg | Prop: ${fuelMass} kg`;
+    if (massSub) massSub.textContent = `Bus: ${busMass} kg | Payload: ${instMass} kg`;
 
     const powerEl = document.getElementById("custom-power-val");
     if (powerEl) {
@@ -673,8 +676,8 @@ window.CustomDesigner = (function () {
     const costEl = document.getElementById("custom-cost-val");
     if (costEl) costEl.textContent = `$${totalCost.toFixed(1)}M`;
 
-    // Capacity margin
-    const payloadCap = lv.payloadLeo || 4000;
+    // Booster capacity margin
+    const payloadCap = lv.payloadLEO || 4000;
     const margin = payloadCap - wetMass;
     const lvName = (lv && lv.name ? lv.name : "Rocket").toUpperCase();
     const statusBadge = document.getElementById("custom-status-badge");
@@ -687,7 +690,7 @@ window.CustomDesigner = (function () {
         statusBadge.textContent = `⚠️ NO-GO: CRAFT MASS EXCEEDS ${lvName} LIMIT BY ${Math.abs(Math.round(margin))} kg`;
       } else {
         statusBadge.className = "status-badge-warn";
-        statusBadge.textContent = `⚠️ WARNING: POWER DEFICIT (${powerBalance} W) — EXPAND SOLAR ARRAYS`;
+        statusBadge.textContent = `⚠️ WARNING: POWER DEFICIT (${powerBalance} W) — EXPAND POWER SYSTEM`;
       }
     }
   }
@@ -770,6 +773,9 @@ window.CustomDesigner = (function () {
     render,
     applyPreset,
     launchCustomFlight,
+    getCraftConfig,
+    updateTelemetry,
+    update3DCad,
     getCraftState: () => craftState
   };
 })();

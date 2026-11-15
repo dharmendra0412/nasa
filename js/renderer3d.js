@@ -550,7 +550,9 @@ window.Space3D = (function () {
   function buildSpacecraft(config = {}) {
     const group = new THREE.Group();
     const comps = Object.assign({}, config.components || {});
-    let insts = Array.isArray(config.instruments) ? [...config.instruments] : [];
+    let insts = Array.isArray(config.instruments)
+      ? config.instruments.map(x => (typeof x === "string" ? x : (x && x.id ? x.id : ""))).filter(Boolean)
+      : [];
 
     // Title Demo or In-Flight Mode fallback:
     // When flying in space or running demo, ALWAYS build an actual realistic NASA spacecraft!
@@ -954,7 +956,7 @@ window.Space3D = (function () {
 
     // 6. Scientific Instruments - ONLY rendered if selected!
     // 6.1. Optical Telescopes / Cameras (wide-cam, hires-cam, hyper-img)
-    if (insts.some(i => i.includes("cam") || i.includes("img"))) {
+    if (insts.some(i => typeof i === "string" && (i.includes("cam") || i.includes("img")))) {
       const scopeRadius = insts.includes("hires-cam") ? 0.72 : 0.52;
       const scopeLen = insts.includes("hires-cam") ? 1.8 : 1.3;
       const scopeGeo = new THREE.CylinderGeometry(scopeRadius, scopeRadius * 0.9, scopeLen, 24);
@@ -1005,7 +1007,7 @@ window.Space3D = (function () {
     }
 
     // 6.4. Spectrometer Instruments (uv-spec, ir-spec, mass-spec)
-    if (insts.some(i => i.includes("spec"))) {
+    if (insts.some(i => typeof i === "string" && i.includes("spec"))) {
       const specBoxGeo = new THREE.BoxGeometry(0.9, 0.7, 0.9);
       const specBoxMat = new THREE.MeshStandardMaterial({ color: 0x546e7a, roughness: 0.3, metalness: 0.8 });
       const specBox = new THREE.Mesh(specBoxGeo, specBoxMat);
@@ -2335,7 +2337,9 @@ window.Space3D = (function () {
     }
   }
 
-  function initDesignCADViewer(canvasElement) {
+  let cadLastConfig = null;
+
+  function initDesignCADViewer(canvasElement, initialConfig) {
     if (!canvasElement || typeof THREE === "undefined") return;
     cadCanvasElement = canvasElement;
     if (cadAnimId) cancelAnimationFrame(cadAnimId);
@@ -2369,10 +2373,10 @@ window.Space3D = (function () {
     light3.position.set(-15, -15, -25);
     cadScene.add(light3);
 
-    // Initial spacecraft strictly reflects current engine state
-    const curState = (window.GameEngine && typeof window.GameEngine.getState === "function") 
+    // Initial spacecraft strictly reflects initialConfig or current engine state
+    const curState = initialConfig || ((window.GameEngine && typeof window.GameEngine.getState === "function") 
       ? window.GameEngine.getState() 
-      : {};
+      : {});
     updateDesignCAD(curState);
 
     // Drag to rotate CAD inspector in 360 degrees (Mouse)
@@ -2448,12 +2452,17 @@ window.Space3D = (function () {
 
   function updateDesignCAD(config) {
     if (!cadScene) return;
+    if (config) cadLastConfig = config;
     checkCADResize();
     if (cadSpacecraft) cadScene.remove(cadSpacecraft);
 
-    cadSpacecraft = buildSpacecraft(Object.assign({}, config || {}, { isCadInspector: true }));
-    if (cadIsWireframe) applyWireframeMode(cadSpacecraft);
-    cadScene.add(cadSpacecraft);
+    try {
+      cadSpacecraft = buildSpacecraft(Object.assign({}, config || cadLastConfig || {}, { isCadInspector: true }));
+      if (cadIsWireframe) applyWireframeMode(cadSpacecraft);
+      cadScene.add(cadSpacecraft);
+    } catch (err) {
+      console.warn("[Space3D] updateDesignCAD error:", err);
+    }
   }
 
   function toggleCADWireframe() {
@@ -2461,9 +2470,8 @@ window.Space3D = (function () {
     if (cadSpacecraft) {
       if (cadIsWireframe) applyWireframeMode(cadSpacecraft);
       else {
-        // Rebuild solid
-        const state = window.GameEngine ? window.GameEngine.getState() : {};
-        updateDesignCAD(state);
+        // Rebuild solid with active config
+        updateDesignCAD(cadLastConfig || (window.GameEngine ? window.GameEngine.getState() : {}));
       }
     }
     return cadIsWireframe;
