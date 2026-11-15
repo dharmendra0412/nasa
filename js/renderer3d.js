@@ -295,76 +295,8 @@ window.Space3D = (function () {
       if (!insts.length) insts.push("hires-cam");
     }
 
-    // 0. STRICT REQUIREMENT: If user has not selected a bus yet, show empty assembly cradle
+    // 0. If user has not selected a bus yet, return empty group so the blueprint backdrop is cleanly displayed
     if (!comps.bus) {
-      const cradleGroup = new THREE.Group();
-
-      // Hexagonal / circular cleanroom turntable base
-      const baseGeo = new THREE.CylinderGeometry(2.8, 3.2, 0.22, 16);
-      const baseMat = new THREE.MeshStandardMaterial({
-        color: 0x16202c,
-        roughness: 0.65,
-        metalness: 0.8
-      });
-      const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-      baseMesh.position.y = -2.1;
-      cradleGroup.add(baseMesh);
-
-      // Glowing turntable concentric cyan ring
-      const ringGeo = new THREE.RingGeometry(2.0, 2.15, 32);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
-      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-      ringMesh.rotation.x = Math.PI / 2;
-      ringMesh.position.y = -1.98;
-      cradleGroup.add(ringMesh);
-
-      // 4 Corner Docking Stanchions with amber alignment beacons
-      const stanchionGeo = new THREE.CylinderGeometry(0.06, 0.08, 3.8, 8);
-      const stanchionMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.5, metalness: 0.8 });
-      const beaconGeo = new THREE.SphereGeometry(0.12, 8, 8);
-      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xffab00 });
-
-      const corners = [
-        [-1.6, -1.6], [1.6, -1.6], [1.6, 1.6], [-1.6, 1.6]
-      ];
-      corners.forEach(([cx, cz]) => {
-        const st = new THREE.Mesh(stanchionGeo, stanchionMat);
-        st.position.set(cx, -0.2, cz);
-        cradleGroup.add(st);
-
-        const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-        beacon.position.set(cx, 1.75, cz);
-        cradleGroup.add(beacon);
-
-        // Clamp arm pointing toward center
-        const armGeo = new THREE.BoxGeometry(0.45, 0.08, 0.1);
-        const arm = new THREE.Mesh(armGeo, stanchionMat);
-        arm.position.set(cx > 0 ? cx - 0.22 : cx + 0.22, 0.4, cz);
-        cradleGroup.add(arm);
-      });
-
-      // Holographic Unbuilt Wireframe Bounding Chassis
-      const holoGeo = new THREE.BoxGeometry(2.5, 2.5, 3.2);
-      const holoEdges = new THREE.EdgesGeometry(holoGeo);
-      const holoMat = new THREE.LineBasicMaterial({
-        color: 0x00e5ff,
-        transparent: true,
-        opacity: 0.4
-      });
-      const holoBox = new THREE.LineSegments(holoEdges, holoMat);
-      holoBox.position.set(0, 0, 0);
-      cradleGroup.add(holoBox);
-
-      // Central Holographic Target Reticle
-      const targetGeo = new THREE.RingGeometry(0.5, 0.55, 24);
-      const targetMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
-      const targetRing = new THREE.Mesh(targetGeo, targetMat);
-      targetRing.rotation.x = Math.PI / 2;
-      targetRing.position.set(0, 0, 0);
-      cradleGroup.add(targetRing);
-
-      group.add(cradleGroup);
-      group.userData = { isUnbuilt: true, cradleGroup };
       return group;
     }
 
@@ -1328,8 +1260,8 @@ window.Space3D = (function () {
 
     cadScene = new THREE.Scene();
     cadCamera = new THREE.PerspectiveCamera(40, w / h, 0.1, 500);
-    cadCamera.position.set(-1.8, 2.5, 13);
-    cadCamera.lookAt(-1.2, 0, 0);
+    cadCamera.position.set(0, 3, 14);
+    cadCamera.lookAt(0, 0, 0);
 
     const amb = new THREE.AmbientLight(0x334455, 0.9);
     cadScene.add(amb);
@@ -1424,24 +1356,7 @@ window.Space3D = (function () {
     checkCADResize();
     if (cadSpacecraft) cadScene.remove(cadSpacecraft);
 
-    // If user has not selected a bus yet, provide a baseline satellite preview
-    // matching the high-fidelity mockups (so user sees realistic CAD preview)
-    const comps = (config && config.components) ? config.components : {};
-    let effectiveConfig = config;
-    if (!comps.bus) {
-      effectiveConfig = {
-        components: {
-          bus: "medium-sat",
-          power: "medium-solar",
-          antenna: "hga",
-          propulsion: "chemical",
-          ...comps
-        },
-        instruments: (config && config.instruments && config.instruments.length) ? config.instruments : ["hires-cam", "spectrometer"]
-      };
-    }
-
-    cadSpacecraft = buildSpacecraft(effectiveConfig || {});
+    cadSpacecraft = buildSpacecraft(config || {});
     if (cadIsWireframe) applyWireframeMode(cadSpacecraft);
     cadScene.add(cadSpacecraft);
   }

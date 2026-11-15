@@ -726,9 +726,8 @@ window.GameUI = (function () {
     const designTitleEl = document.getElementById("design-header-mission-title");
     const st = window.GameEngine.getState();
     const curMission = (window.GameData && window.GameData.missions) ? window.GameData.missions.find(m => m.id === st.missionId) : null;
-    if (designTitleEl) {
-      const name = curMission ? curMission.name.toUpperCase() : "SENTINEL-EARTH CLIMATE MONITOR";
-      designTitleEl.textContent = `${name} — DESIGN STUDIO`;
+    if (designTitleEl && curMission) {
+      designTitleEl.textContent = `${curMission.name.toUpperCase()} — DESIGN STUDIO`;
     }
 
     // Ensure currently selected or first tab is active
@@ -776,10 +775,10 @@ window.GameUI = (function () {
       window.GameEngine.selectOrbit(state.orbitId === id ? null : id);
       updateDesignState();
     }, (item) => `
-      <div class="stat-chip mass">ΔV: +${item.deltaV} km/s</div>
-      <div class="stat-chip science">Sci Mult: ${item.scienceMultiplier}x</div>
-      <div class="stat-chip cost">Rad: ${(item.radiationLevel || "Low").toUpperCase()}</div>
-      <div class="stat-chip power">Coverage: ${Math.round((item.commsCoverage || 0.5) * 100)}%</div>
+      <div class="stat-chip chip-deltav">ΔV: +${item.deltaV} km/s</div>
+      <div class="stat-chip chip-science">Sci Mult: ${item.scienceMultiplier}x</div>
+      <div class="stat-chip chip-radiation">Rad: ${(item.radiationLevel || "Low").toUpperCase()}</div>
+      <div class="stat-chip chip-coverage">Coverage: ${Math.round((item.commsCoverage || 0.5) * 100)}%</div>
     `);
 
     // 2. Bus & Propulsion
@@ -900,67 +899,6 @@ window.GameUI = (function () {
     if (!container) return;
     container.innerHTML = "";
 
-    if (containerId === "orbit-cards") {
-      items.forEach(item => {
-        const card = document.createElement("div");
-        card.dataset.id = item.id;
-        const isSelected = selectedState === item.id;
-        card.className = `hw-card hw-card-orbit ${item.id === "l2" ? "hw-card-l2" : ""}${isSelected ? " card-selected" : ""}`;
-
-        const covVal = item.id === "leo" ? "42%" : (item.commsCoverage ? Math.round(item.commsCoverage * 100) + "%" : "40%");
-
-        if (item.id === "l2") {
-          card.innerHTML = `
-            <div class="hw-card-l2-left">
-              <img src="assets/orbits/l2.jpg" alt="${item.name}" class="hw-card-l2-img" />
-            </div>
-            <div class="hw-card-l2-right">
-              <div class="hw-card-top">
-                <span class="hw-card-icon">${item.icon || "🌀"}</span>
-                <div class="hw-card-name">${item.name}</div>
-                <span class="hw-card-check">✓</span>
-              </div>
-              <div class="hw-card-desc">${item.description}</div>
-              <div class="hw-stats-badges l2-stats-row">
-                <div class="stat-chip chip-deltav">ΔV: +${item.deltaV} km/s</div>
-                <div class="stat-chip chip-scimult">Sci Mult: ${item.scienceMultiplier}x</div>
-                <div class="stat-chip chip-rad">Rad: ${(item.radiationLevel || "LOW").toUpperCase()}</div>
-                <div class="stat-chip chip-coverage">Coverage: ${covVal}</div>
-              </div>
-            </div>
-          `;
-        } else {
-          card.innerHTML = `
-            <div class="hw-card-top">
-              <span class="hw-card-icon">${item.icon || "🛰️"}</span>
-              <div class="hw-card-name">${item.name}</div>
-              <span class="hw-card-check">✓</span>
-            </div>
-            <div class="hw-card-media">
-              <img src="assets/orbits/${item.id}.jpg" alt="${item.name}" class="hw-card-img" />
-            </div>
-            <div class="hw-card-desc">${item.description}</div>
-            <div class="hw-stats-badges orbit-stats-badges">
-              <div class="orbit-stats-top-row">
-                <div class="stat-chip chip-deltav">ΔV: +${item.deltaV} km/s</div>
-                <div class="stat-chip chip-scimult">Sci Mult: ${item.scienceMultiplier}x</div>
-                <div class="stat-chip chip-rad">Rad: ${(item.radiationLevel || "LOW").toUpperCase()}</div>
-              </div>
-              <div class="stat-chip chip-coverage">Coverage: ${covVal}</div>
-            </div>
-          `;
-        }
-
-        card.addEventListener("click", () => {
-          onSelect(item.id);
-          if (window.SoundFX) window.SoundFX.playBeep(950, 0.04);
-        });
-
-        container.appendChild(card);
-      });
-      return;
-    }
-
     items.forEach(item => {
       const card = document.createElement("div");
       card.className = "hw-card";
@@ -972,17 +910,38 @@ window.GameUI = (function () {
 
       if (isSelected) card.classList.add("card-selected");
 
-      card.innerHTML = `
-        <div class="hw-card-top">
-          <span class="hw-card-icon">${item.icon || "⚙️"}</span>
-          <div class="hw-card-name">${item.name}</div>
-          <span class="hw-card-check">✓</span>
-        </div>
-        <div class="hw-card-desc">${item.description}</div>
-        <div class="hw-stats-badges">
-          ${badgeRenderer(item)}
-        </div>
-      `;
+      if (item.id === "l2") {
+        card.classList.add("hw-card-l2");
+        card.innerHTML = `
+          <div class="hw-card-l2-img">
+            <img src="${item.image || 'assets/orbits/orbit_l2_exact.jpg'}" alt="${item.name}" />
+          </div>
+          <div class="hw-card-l2-content">
+            <div class="hw-card-top">
+              <span class="hw-card-icon">${item.icon || "🌀"}</span>
+              <div class="hw-card-name">${item.name}</div>
+              <span class="hw-card-check">✓</span>
+            </div>
+            <div class="hw-card-desc">${item.description}</div>
+            <div class="hw-stats-badges l2-badges">
+              ${badgeRenderer(item)}
+            </div>
+          </div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="hw-card-top">
+            <span class="hw-card-icon">${item.icon || "⚙️"}</span>
+            <div class="hw-card-name">${item.name}</div>
+            <span class="hw-card-check">✓</span>
+          </div>
+          ${item.image ? `<div class="hw-card-img-wrap"><img src="${item.image}" alt="${item.name}" class="hw-card-img" /></div>` : ''}
+          <div class="hw-card-desc">${item.description}</div>
+          <div class="hw-stats-badges">
+            ${badgeRenderer(item)}
+          </div>
+        `;
+      }
 
       card.addEventListener("click", () => {
         onSelect(item.id);
@@ -1055,9 +1014,9 @@ window.GameUI = (function () {
     const cadBusBadge = document.getElementById("cad-bus-badge");
     const cadPowerBadge = document.getElementById("cad-power-badge");
     const cadPayloadBadge = document.getElementById("cad-instruments-badge");
-    if (cadBusBadge) cadBusBadge.innerHTML = `<span class="badge-ico">⬡</span> BUS: ${state.components.bus ? state.components.bus.replace("-", " ").toUpperCase() : "NONE"}`;
-    if (cadPowerBadge) cadPowerBadge.innerHTML = `<span class="badge-ico">⚡</span> PWR: ${state.components.power ? state.components.power.replace("-", " ").toUpperCase() : "NONE"}`;
-    if (cadPayloadBadge) cadPayloadBadge.innerHTML = `<span class="badge-ico">⬡</span> PAYLOAD: ${(state.instruments ? state.instruments.length : 0)} UNITS`;
+    if (cadBusBadge) cadBusBadge.innerHTML = `<span class="badge-icon">⛁</span> BUS: ` + (state.components.bus ? state.components.bus.replace("-", " ").toUpperCase() : "NONE");
+    if (cadPowerBadge) cadPowerBadge.innerHTML = `<span class="badge-icon">⚡</span> PWR: ` + (state.components.power ? state.components.power.replace("-", " ").toUpperCase() : "NONE");
+    if (cadPayloadBadge) cadPayloadBadge.innerHTML = `<span class="badge-icon">📦</span> PAYLOAD: ` + (state.instruments ? state.instruments.length : 0) + " UNITS";
 
     const statusLine = document.getElementById("cad-status-line");
     if (statusLine) {
@@ -1070,7 +1029,7 @@ window.GameUI = (function () {
         if (state.components.antenna) count++;
         if (state.components.attitude || state.components.computer) count++;
         if (state.instruments) count += state.instruments.length;
-        statusLine.textContent = `LIVE CAD TELEMETRY — ${count} SUBSYSTEMS / INSTRUMENTS INTEGRATED`;
+        statusLine.textContent = `LIVE CAD TELEMETRY · ${count} SUBSYSTEMS / INSTRUMENTS INTEGRATED`;
       }
     }
   }
