@@ -858,10 +858,10 @@ window.SpaceFlightGame = (function () {
       const nozPos = rocket3D.position.clone().add(new window.THREE.Vector3(0, -6.5, 0));
       window.Space3D.addRocketExhaust(nozPos, new window.THREE.Vector3(0, -1, 0), 3);
 
-      // Launch Pad recedes downwards
+      // Launch Pad recedes downwards rapidly on liftoff and clears by 3 km
       if (launchPad3D) {
-        launchPad3D.position.y = -12 - (ls.altitude * 0.4);
-        if (ls.altitude > 28) launchPad3D.visible = false;
+        launchPad3D.position.y = -12 - (ls.altitude * 3.5);
+        if (ls.altitude > 3.0) launchPad3D.visible = false;
       }
 
       // Mach 1.0 Transonic Vapor Shock Cone
@@ -1881,12 +1881,12 @@ window.SpaceFlightGame = (function () {
     tCtx.font = isFullscreen ? "bold 12px 'Orbitron', monospace" : "bold 9px 'Orbitron', monospace";
     tCtx.fillStyle = "#00e5ff";
     tCtx.textAlign = "left";
-    tCtx.fillText(phase === "launch" ? "ROCKETCAM • ONBOARD OPTICAL" : "SPACECRAFTCAM • NADIR OPTICAL", x + (isFullscreen ? 26 : 18), y + (barH / 2) + (isFullscreen ? 4 : 3));
+    tCtx.fillText(isFullscreen ? (phase === "launch" ? "ROCKETCAM • ONBOARD OPTICAL" : "SPACECRAFTCAM • NADIR OPTICAL") : (phase === "launch" ? "ROCKETCAM" : "SPACECRAFTCAM"), x + (isFullscreen ? 26 : 18), y + (barH / 2) + (isFullscreen ? 4 : 3));
 
     tCtx.font = isFullscreen ? "11px monospace" : "8px monospace";
     tCtx.fillStyle = "rgba(255, 255, 255, 0.75)";
     tCtx.textAlign = "right";
-    tCtx.fillText("FOV 65° • CLICK TO ENLARGE", x + pw - 8, y + (barH / 2) + (isFullscreen ? 4 : 3));
+    tCtx.fillText(isFullscreen ? "FOV 65° • CLICK TO ENLARGE" : "LIVE", x + pw - 8, y + (barH / 2) + (isFullscreen ? 4 : 3));
 
     tCtx.restore();
   }
