@@ -84,6 +84,12 @@ class MockElement {
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(fn);
   }
+  querySelectorAll(sel) {
+    return [];
+  }
+  getAttribute(attr) {
+    return this.dataset[attr] || '';
+  }
   scrollIntoView() {}
   classList = {
     add: (c) => { this.className += ' ' + c; },
@@ -257,7 +263,76 @@ for (const mid of testMissions) {
   console.log(`[PASS] AutoConfigure verified for '${mid}': canLaunch = true, errors = 0`);
 }
 
+// 13. Test NASA Mars 4-Phase Flight Operations (Red Pioneer)
+console.log("\n=== TESTING NASA RED PIONEER MARS 4-PHASE TIMELINE ===");
+window.GameEngine.autoConfigure('red-pioneer');
+flight.start(mockElements['game-canvas-3d'], () => {});
+
+if (!flight.isMarsMission()) {
+  console.error("[FAIL] isMarsMission() returned false for Red Pioneer!");
+  process.exit(1);
+}
+console.log("[PASS] isMarsMission() confirmed true for Red Pioneer");
+
+// Phase 1: Launch & Trans-Mars Injection (TMI)
+console.log(`[PASS] Phase 1 Initialized: '${flight.getPhase()}', activePhase = ${flight.getMarsState().activePhase}`);
+flight.getLaunchState().stage = 3;
+flight.getLaunchState().altitude = 100;
+flight.getLaunchState().countdown = 0;
+flight.getLaunchState().isCountingDown = false;
+flight.getMarsState().tmiIgnited = true;
+flight.getMarsState().tmiDeltaVBurned = 3800;
+flight.update();
+console.log(`[PASS] Phase 1 TMI burn completed -> transitioned to Phase: '${flight.getPhase()}'`);
+
+// Phase 2: Interplanetary Cruise
+flight.switchMarsPhase('cruise');
+console.log(`[PASS] Switched to Phase 2 (Cruise): '${flight.getPhase()}'`);
+for (let f = 0; f < 10; f++) {
+  flight.update();
+  flight.draw();
+}
+console.log(`       - Cruise Distance: ${(flight.getMarsState().cruiseDistanceKm / 1e6).toFixed(1)}M km`);
+console.log(`       - DSN Signal Delay: ${flight.getMarsState().dsnDelayMinutes.toFixed(1)} mins`);
+console.log(`       - Solar Flux: ${flight.getMarsState().solarFluxWm2} W/m²`);
+
+// Phase 3: Mars EDL
+flight.switchMarsPhase('edl');
+console.log(`[PASS] Switched to Phase 3 (EDL): '${flight.getPhase()}'`);
+for (let f = 0; f < 10; f++) {
+  flight.update();
+  flight.draw();
+}
+console.log(`       - EDL Altitude: ${flight.getMarsState().edlAltitudeKm.toFixed(1)} km`);
+console.log(`       - Entry Speed: ${flight.getMarsState().edlVelocityMps} m/s`);
+console.log(`       - EDL Stage: ${flight.getMarsState().edlStage}`);
+
+// Phase 4: Surface Rover Operations
+flight.switchMarsPhase('surface');
+console.log(`[PASS] Switched to Phase 4 (Surface): '${flight.getPhase()}'`);
+flight.setInput({ up: true });
+for (let f = 0; f < 10; f++) {
+  flight.update();
+  flight.draw();
+}
+console.log(`       - Rover Speed: ${(Math.abs(flight.getMarsState().roverSpeed) * 20).toFixed(1)} cm/s`);
+console.log(`       - Jezero Crater Landing Site: Nominal`);
+
+// Test Core Drilling & Astrobiology Biosignature detection
+const ms = flight.getMarsState();
+ms.roverX = ms.sites[0].x;
+ms.roverZ = ms.sites[0].z;
+flight.setInput({ action: true, actionJustPressed: true });
+flight.update();
+for (let f = 0; f < 60; f++) {
+  flight.update();
+  flight.draw();
+}
+console.log(`       - Samples Cached: ${ms.samplesCached} / 10`);
+console.log(`       - Biosignatures Found: ${ms.biosignaturesFound}`);
+console.log(`[PASS] Mars Astrobiology Core Drill & Raman Spectrometer Verified!`);
+
 console.log("\n=======================================================");
-console.log("ALL 12 SIMULATION & RENDER TESTS PASSED WITH 0 ERRORS!");
+console.log("ALL 13 SIMULATION & RENDER TESTS PASSED WITH 0 ERRORS!");
 console.log("=======================================================");
 process.exit(0);

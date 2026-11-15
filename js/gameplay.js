@@ -189,6 +189,72 @@ window.SpaceFlightGame = (function () {
     viewMode: "3d"           // '3d', 'optical', 'split', 'track', 'telemetry'
   };
 
+  // =========================================================================
+  // NASA RED PIONEER: MARS 4-PHASE MISSION STATE
+  // Phase 1: Launch & Trans-Mars Injection (TMI)
+  // Phase 2: Interplanetary Cruise Phase (225M km heliocentric transit)
+  // Phase 3: Mars Arrival & EDL ("Seven Minutes of Terror")
+  // Phase 4: Martian Surface Operations (Jezero Crater 6-Wheel Rover & Astrobiology)
+  // =========================================================================
+  const marsState = {
+    activePhase: 1, // 1: launch, 2: cruise, 3: edl, 4: surface
+
+    // Phase 1: Launch & Trans-Mars Injection (TMI)
+    tmiIgnited: false,
+    tmiDeltaVBurned: 0,
+    tmiTargetDeltaV: 3800,
+    tmiComplete: false,
+
+    // Phase 2: Interplanetary Cruise
+    cruiseDistanceKm: 0,
+    cruiseMaxDistanceKm: 225000000,
+    cruiseSpeedKps: 28.5,
+    dsnDelayMinutes: 4.2,
+    solarFluxWm2: 1361,
+    tcmCompleted: 0,
+    cruiseTransitProgress: 0,
+
+    // Phase 3: Mars EDL
+    edlAltitudeKm: 125.0,
+    edlVelocityMps: 5400,
+    edlStage: "entry", // 'entry', 'parachute', 'heatshield_jettison', 'skycrane', 'touchdown'
+    heatShieldGlow: 0,
+    parachuteDeployed: false,
+    heatShieldJettisoned: false,
+    skyCraneIgnited: false,
+    roverTouchdown: false,
+
+    // Phase 4: Martian Surface Operations
+    roverX: 0,
+    roverZ: 0,
+    roverAngle: 0,
+    roverSpeed: 0,
+    samplesCached: 0,
+    maxSamples: 10,
+    biosignaturesFound: 0,
+    drillingActive: false,
+    drillProgress: 0,
+    sites: [
+      { name: "Ancient River Delta Outcrop", x: 14, z: -18, sampled: false, bioType: "Layered Carbonate Stromatolite" },
+      { name: "Clay-Rich Sedimentary Fan", x: -22, z: 24, sampled: false, bioType: "Organic Macromolecules & Kerogen" },
+      { name: "Subsurface Aquifer Sounding Site", x: 28, z: 32, sampled: false, bioType: "Hyper-saline Subsurface Brine Lens" },
+      { name: "Basalt Lava Crater Floor", x: -35, z: -16, sampled: false, bioType: "Reduced Olivine Silicate Vesicles" }
+    ],
+    nearestSiteDist: 999,
+    nearestSiteIndex: -1,
+    sciencePoints: 0
+  };
+
+  function isMarsMission() {
+    if (missionConfig) {
+      if (missionConfig.mission && (missionConfig.mission.id === "red-pioneer" || (missionConfig.mission.destination && missionConfig.mission.destination.toLowerCase().includes("mars")))) return true;
+      if (missionConfig.orbit && (missionConfig.orbit.id === "mars" || missionConfig.orbit.id === "red-pioneer")) return true;
+    }
+    const state = window.GameEngine && window.GameEngine.getState ? window.GameEngine.getState() : null;
+    if (state && state.missionId === "red-pioneer") return true;
+    return false;
+  }
+
   // Input Listeners
   function setupInputListeners() {
     window.addEventListener("keydown", (e) => {
@@ -226,13 +292,22 @@ window.SpaceFlightGame = (function () {
       if (e.code === "KeyC") {
         toggleFlightCommsDrawer();
       }
-      // Camera switch hotkeys [1] - [6]
-      if (e.code === "Digit1") setCameraPreset("chase");
-      if (e.code === "Digit2") setCameraPreset("orbit");
-      if (e.code === "Digit3") setCameraPreset("science");
-      if (e.code === "Digit4") setCameraPreset("fpv");
-      if (e.code === "Digit5") setCameraPreset("earth");
-      if (e.code === "Digit6") setCameraPreset("autorotate");
+      // Camera & Mars Phase switch hotkeys [1] - [6]
+      if (isMarsMission()) {
+        if (e.code === "Digit1") switchMarsPhase("launch");
+        if (e.code === "Digit2") switchMarsPhase("cruise");
+        if (e.code === "Digit3") switchMarsPhase("edl");
+        if (e.code === "Digit4") switchMarsPhase("surface");
+        if (e.code === "Digit5") setCameraPreset("chase");
+        if (e.code === "Digit6") setCameraPreset("autorotate");
+      } else {
+        if (e.code === "Digit1") setCameraPreset("chase");
+        if (e.code === "Digit2") setCameraPreset("orbit");
+        if (e.code === "Digit3") setCameraPreset("science");
+        if (e.code === "Digit4") setCameraPreset("fpv");
+        if (e.code === "Digit5") setCameraPreset("earth");
+        if (e.code === "Digit6") setCameraPreset("autorotate");
+      }
       if (e.code === "KeyM") setViewMode("track");
       if (e.code === "KeyR") {
         if (phase === "gameover") {
@@ -638,6 +713,70 @@ window.SpaceFlightGame = (function () {
 
     floatingTexts.length = 0;
 
+    // Mars 4-Phase Flight Timeline Setup
+    if (isMarsMission()) {
+      marsState.activePhase = 1;
+      marsState.tmiIgnited = false;
+      marsState.tmiDeltaVBurned = 0;
+      marsState.tmiComplete = false;
+      marsState.cruiseDistanceKm = 0;
+      marsState.cruiseTransitProgress = 0;
+      marsState.tcmCompleted = 0;
+      marsState.edlAltitudeKm = 125.0;
+      marsState.edlVelocityMps = 5400;
+      marsState.edlStage = "entry";
+      marsState.heatShieldGlow = 0;
+      marsState.parachuteDeployed = false;
+      marsState.heatShieldJettisoned = false;
+      marsState.skyCraneIgnited = false;
+      marsState.roverTouchdown = false;
+      marsState.roverX = 0;
+      marsState.roverZ = 0;
+      marsState.roverAngle = 0;
+      marsState.roverSpeed = 0;
+      marsState.samplesCached = 0;
+      marsState.biosignaturesFound = 0;
+      marsState.drillingActive = false;
+      marsState.drillProgress = 0;
+      marsState.sites.forEach(s => s.sampled = false);
+
+      const nav = typeof document !== "undefined" ? document.getElementById("mars-phase-nav") : null;
+      if (nav) {
+        nav.style.display = "flex";
+        const btns = nav.querySelectorAll ? nav.querySelectorAll(".btn-mars-phase") : [];
+        btns.forEach(btn => {
+          btn.classList.toggle("active", btn.getAttribute && btn.getAttribute("data-phase") === "launch");
+        });
+      }
+
+      // Wire timeline navigation button click handlers
+      if (typeof document !== "undefined") {
+        const p1 = document.getElementById("btn-mars-p1");
+        const p2 = document.getElementById("btn-mars-p2");
+        const p3 = document.getElementById("btn-mars-p3");
+        const p4 = document.getElementById("btn-mars-p4");
+        if (p1 && !p1.dataset.bound) {
+          p1.dataset.bound = "1";
+          p1.addEventListener("click", () => switchMarsPhase("launch"));
+        }
+        if (p2 && !p2.dataset.bound) {
+          p2.dataset.bound = "1";
+          p2.addEventListener("click", () => switchMarsPhase("cruise"));
+        }
+        if (p3 && !p3.dataset.bound) {
+          p3.dataset.bound = "1";
+          p3.addEventListener("click", () => switchMarsPhase("edl"));
+        }
+        if (p4 && !p4.dataset.bound) {
+          p4.dataset.bound = "1";
+          p4.addEventListener("click", () => switchMarsPhase("surface"));
+        }
+      }
+    } else {
+      const nav = typeof document !== "undefined" ? document.getElementById("mars-phase-nav") : null;
+      if (nav) nav.style.display = "none";
+    }
+
     loop();
   }
 
@@ -670,6 +809,12 @@ window.SpaceFlightGame = (function () {
   function update() {
     if (phase === "launch") {
       updateLaunchPhase();
+    } else if (phase === "cruise") {
+      updateCruisePhase();
+    } else if (phase === "edl") {
+      updateEdlPhase();
+    } else if (phase === "surface") {
+      updateSurfacePhase();
     } else if (phase === "orbit") {
       updateOrbitPhase();
     }
@@ -863,24 +1008,48 @@ window.SpaceFlightGame = (function () {
         }
       }
     } else if (ls.stage === 3 && ls.altitude >= 98) {
-      // Orbital insertion complete! Transition to 3D Orbit Flight
-      phase = "orbit";
-      sfx("playBeep", 950, 0.25);
-      addFloatingText("🎉 ORBIT INSERTION ACHIEVED!", w / 2, 240, "#00e676", 28);
+      if (isMarsMission()) {
+        marsState.activePhase = 1;
+        if (!marsState.tmiIgnited) {
+          ls.stagingPrompt = "PARKING ORBIT ACHIEVED! PRESS [SPACEBAR] OR [W] TO FIRE TRANS-MARS INJECTION (TMI) BURN!";
+          if (input.actionJustPressed || input.up || ls.altitude >= 105) {
+            marsState.tmiIgnited = true;
+          }
+        }
 
-      if (rocket3D) rocket3D.visible = false;
-      if (spacecraft3D) {
-        spacecraft3D.visible = true;
-        spacecraft3D.position.set(0, 0, 55);
-        spacecraft3D.rotation.set(0, 0, 0);
-      }
-      if (window.Space3D) {
-        const m = missionConfig ? missionConfig.mission : null;
-        const o = missionConfig ? missionConfig.orbit : null;
-        const mId = m ? m.id : (state ? state.missionId : null);
-        const oId = o ? o.id : null;
-        window.Space3D.setupCelestialBody(oId, mId, m);
-        window.Space3D.setCameraMode("chase");
+        if (marsState.tmiIgnited) {
+          marsState.tmiDeltaVBurned += 35;
+          ls.velocity += 42;
+          if (using3D && spacecraft3D && window.Space3D && window.THREE) {
+            const nozPos = spacecraft3D.position.clone().add(new window.THREE.Vector3(0, 0, -2.5));
+            window.Space3D.addRocketExhaust(nozPos, new window.THREE.Vector3(0, 0, -1), 3);
+          }
+          if (marsState.tmiDeltaVBurned >= marsState.tmiTargetDeltaV || ls.velocity >= 11200) {
+            marsState.tmiComplete = true;
+            switchMarsPhase("cruise");
+            return;
+          }
+        }
+      } else {
+        // Orbital insertion complete! Transition to 3D Orbit Flight
+        phase = "orbit";
+        sfx("playBeep", 950, 0.25);
+        addFloatingText("🎉 ORBIT INSERTION ACHIEVED!", w / 2, 240, "#00e676", 28);
+
+        if (rocket3D) rocket3D.visible = false;
+        if (spacecraft3D) {
+          spacecraft3D.visible = true;
+          spacecraft3D.position.set(0, 0, 55);
+          spacecraft3D.rotation.set(0, 0, 0);
+        }
+        if (window.Space3D) {
+          const m = missionConfig ? missionConfig.mission : null;
+          const o = missionConfig ? missionConfig.orbit : null;
+          const mId = m ? m.id : (state ? state.missionId : null);
+          const oId = o ? o.id : null;
+          window.Space3D.setupCelestialBody(oId, mId, m);
+          window.Space3D.setCameraMode("chase");
+        }
       }
     }
   }
@@ -1269,12 +1438,277 @@ window.SpaceFlightGame = (function () {
   }
 
   // =========================================================================
+  // UPDATE: PHASE 2 - INTERPLANETARY CRUISE (225M km Deep Space Transit)
+  // =========================================================================
+  function updateCruisePhase() {
+    const ms = marsState;
+    ms.activePhase = 2;
+
+    // Advance transit progress (speed up with [W] / Up)
+    const cruiseDelta = input.up ? 950000 : 220000;
+    ms.cruiseDistanceKm = Math.min(ms.cruiseMaxDistanceKm, ms.cruiseDistanceKm + cruiseDelta);
+    ms.cruiseTransitProgress = ms.cruiseDistanceKm / ms.cruiseMaxDistanceKm;
+
+    // DSN delay: increases from 4.2 mins at Earth to 19.8 mins at Mars
+    ms.dsnDelayMinutes = 4.2 + (ms.cruiseTransitProgress * 15.6);
+
+    // Solar flux: drops via inverse-square law (1 AU = 1361 W/m² down to ~590 W/m² at Mars)
+    const au = 1.0 + (ms.cruiseTransitProgress * 0.524);
+    ms.solarFluxWm2 = Math.round(1361 / (au * au));
+
+    // Trajectory Correction Maneuver (TCM)
+    if (input.actionJustPressed) {
+      ms.tcmCompleted++;
+      if (using3D && window.Space3D && window.THREE) {
+        const sc = window.Space3D.getMarsCruise ? window.Space3D.getMarsCruise() : null;
+        if (sc) {
+          const nozPos = sc.position.clone().add(new window.THREE.Vector3(0, -1, -2));
+          window.Space3D.addRocketExhaust(nozPos, new window.THREE.Vector3(0, 0, -1), 2);
+        }
+      }
+    }
+
+    // Update 3D deep space positions
+    if (using3D && window.Space3D && window.Space3D.updateMarsCruise3D) {
+      window.Space3D.updateMarsCruise3D(ms.cruiseTransitProgress);
+    }
+
+    // Telemetry history sample
+    orbitState.telemetryTick++;
+    if (orbitState.telemetryTick >= 15) {
+      orbitState.telemetryTick = 0;
+      orbitState.telemetryHistory.push({
+        battery: 98,
+        temperature: Math.round(-120 + (ms.cruiseTransitProgress * 30)),
+        downlink: 18.5,
+        deltaV: Math.max(200, 1200 - (ms.tcmCompleted * 80)),
+        apoapsis: Math.round(400 + (ms.cruiseTransitProgress * 5000)),
+        periapsis: 350
+      });
+      if (orbitState.telemetryHistory.length > 60) orbitState.telemetryHistory.shift();
+    }
+
+    // When transit reaches Mars or user confirms arrival
+    if (ms.cruiseTransitProgress >= 1.0) {
+      switchMarsPhase("edl");
+    }
+  }
+
+  // =========================================================================
+  // UPDATE: PHASE 3 - MARS ARRIVAL & EDL ("Seven Minutes of Terror")
+  // =========================================================================
+  function updateEdlPhase() {
+    const ms = marsState;
+    ms.activePhase = 3;
+
+    // Descend from 125 km (Atmospheric Entry Interface) to 0 km (Martian Surface)
+    const descRate = input.up ? 0.42 : 0.22;
+    ms.edlAltitudeKm = Math.max(0, ms.edlAltitudeKm - descRate);
+
+    if (ms.edlAltitudeKm > 22) {
+      ms.edlStage = "entry";
+      ms.edlVelocityMps = Math.round(1400 + (ms.edlAltitudeKm * 32));
+      ms.heatShieldGlow = Math.min(1.0, (125 - ms.edlAltitudeKm) / 35);
+    } else if (ms.edlAltitudeKm > 8) {
+      ms.edlStage = "parachute";
+      ms.parachuteDeployed = true;
+      ms.edlVelocityMps = Math.round(140 + (ms.edlAltitudeKm * 18));
+      ms.heatShieldGlow = Math.max(0, ms.heatShieldGlow - 0.04);
+    } else if (ms.edlAltitudeKm > 2.2) {
+      ms.edlStage = "heatshield_jettison";
+      ms.heatShieldJettisoned = true;
+      ms.edlVelocityMps = Math.round(65 + (ms.edlAltitudeKm * 9));
+      ms.heatShieldGlow = 0;
+    } else if (ms.edlAltitudeKm > 0) {
+      ms.edlStage = "skycrane";
+      ms.skyCraneIgnited = true;
+      ms.edlVelocityMps = Math.max(0.75, Math.round(ms.edlAltitudeKm * 20));
+      // Sky Crane retro rocket exhaust plume
+      if (using3D && window.Space3D && window.THREE) {
+        const edl = window.Space3D.getMarsEDL ? window.Space3D.getMarsEDL() : null;
+        if (edl) {
+          const nozPos = edl.position.clone().add(new window.THREE.Vector3(0, 1.2, 0));
+          window.Space3D.addRocketExhaust(nozPos, new window.THREE.Vector3(0, -1, 0), 2);
+        }
+      }
+    } else {
+      ms.roverTouchdown = true;
+      ms.edlVelocityMps = 0;
+      switchMarsPhase("surface");
+      return;
+    }
+
+    if (using3D && window.Space3D && window.Space3D.updateMarsEDL3D) {
+      window.Space3D.updateMarsEDL3D(ms.edlAltitudeKm, ms.edlStage, ms.heatShieldGlow);
+    }
+
+    // Telemetry history sample
+    orbitState.telemetryTick++;
+    if (orbitState.telemetryTick >= 15) {
+      orbitState.telemetryTick = 0;
+      orbitState.telemetryHistory.push({
+        battery: 95,
+        temperature: Math.round(-60 + (ms.heatShieldGlow * 1400)),
+        downlink: 12.0,
+        deltaV: 850,
+        apoapsis: Math.round(ms.edlAltitudeKm),
+        periapsis: 0
+      });
+      if (orbitState.telemetryHistory.length > 60) orbitState.telemetryHistory.shift();
+    }
+  }
+
+  // =========================================================================
+  // UPDATE: PHASE 4 - MARTIAN SURFACE OPERATIONS (Rover & Ancient Biology)
+  // =========================================================================
+  function updateSurfacePhase() {
+    const ms = marsState;
+    ms.activePhase = 4;
+
+    // Steering (A / D / Left / Right)
+    const steerSpeed = 0.035;
+    if (input.left) {
+      ms.roverAngle += steerSpeed;
+    } else if (input.right) {
+      ms.roverAngle -= steerSpeed;
+    }
+
+    // Drive forward / reverse (W / S / Up / Down)
+    const maxSpeed = 0.22;
+    if (input.up) {
+      ms.roverSpeed = Math.min(maxSpeed, ms.roverSpeed + 0.015);
+    } else if (input.down) {
+      ms.roverSpeed = Math.max(-maxSpeed * 0.6, ms.roverSpeed - 0.015);
+    } else {
+      ms.roverSpeed *= 0.88;
+    }
+
+    // Update rover position on Martian terrain
+    ms.roverX += Math.sin(ms.roverAngle) * ms.roverSpeed;
+    ms.roverZ += Math.cos(ms.roverAngle) * ms.roverSpeed;
+
+    // Rover dust kick-up particles when driving
+    if (Math.abs(ms.roverSpeed) > 0.05 && using3D && window.Space3D && window.THREE) {
+      const dustPos = new window.THREE.Vector3(ms.roverX, 0.2, ms.roverZ);
+      window.Space3D.addRocketExhaust(dustPos, new window.THREE.Vector3(-Math.sin(ms.roverAngle) * 0.3, 0.4, -Math.cos(ms.roverAngle) * 0.3), 1);
+    }
+
+    // Calculate nearest science site
+    let nearestDist = 999;
+    let nearestIdx = -1;
+    ms.sites.forEach((site, idx) => {
+      const dist = Math.hypot(site.x - ms.roverX, site.z - ms.roverZ);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearestIdx = idx;
+      }
+    });
+    ms.nearestSiteDist = nearestDist;
+    ms.nearestSiteIndex = nearestIdx;
+
+    // Deploy Robotic Arm & Drill Rock Sample
+    if (input.actionJustPressed && nearestDist <= 8.5 && !ms.drillingActive) {
+      const targetSite = ms.sites[nearestIdx];
+      if (targetSite && !targetSite.sampled) {
+        ms.drillingActive = true;
+        ms.drillProgress = 0;
+      }
+    }
+
+    if (ms.drillingActive) {
+      ms.drillProgress += 0.018;
+      if (ms.drillProgress >= 1.0) {
+        ms.drillingActive = false;
+        const targetSite = ms.sites[ms.nearestSiteIndex];
+        if (targetSite && !targetSite.sampled) {
+          targetSite.sampled = true;
+          ms.samplesCached++;
+          ms.biosignaturesFound++;
+          ms.sciencePoints += 250;
+          orbitState.scienceScore += 250;
+        }
+      }
+    }
+
+    // Update 3D Rover Model
+    if (using3D && window.Space3D && window.Space3D.updateRover3D) {
+      window.Space3D.updateRover3D(ms.roverX, ms.roverZ, ms.roverAngle, ms.roverSpeed, ms.drillingActive, ms.drillProgress);
+    }
+
+    // Telemetry history sample
+    orbitState.telemetryTick++;
+    if (orbitState.telemetryTick >= 15) {
+      orbitState.telemetryTick = 0;
+      orbitState.telemetryHistory.push({
+        battery: 100,
+        temperature: -62,
+        downlink: 24.0,
+        deltaV: ms.samplesCached * 100,
+        apoapsis: 0,
+        periapsis: 0
+      });
+      if (orbitState.telemetryHistory.length > 60) orbitState.telemetryHistory.shift();
+    }
+  }
+
+  // =========================================================================
+  // SWITCH MARS MISSION PHASE (1 to 4)
+  // =========================================================================
+  function switchMarsPhase(targetPhase) {
+    if (!isMarsMission()) return;
+    phase = targetPhase;
+
+    if (targetPhase === "launch") marsState.activePhase = 1;
+    else if (targetPhase === "cruise") marsState.activePhase = 2;
+    else if (targetPhase === "edl") marsState.activePhase = 3;
+    else if (targetPhase === "surface") marsState.activePhase = 4;
+
+    // Update active class on HTML timeline buttons
+    if (typeof document !== "undefined") {
+      const nav = document.getElementById("mars-phase-nav");
+      if (nav) {
+        const btns = nav.querySelectorAll ? nav.querySelectorAll(".btn-mars-phase") : [];
+        btns.forEach(btn => {
+          btn.classList.toggle("active", btn.getAttribute && btn.getAttribute("data-phase") === targetPhase);
+        });
+      }
+    }
+
+    // Switch 3D WebGL scene
+    if (using3D && window.Space3D) {
+      if (targetPhase === "launch") {
+        window.Space3D.setupCelestialBody("leo");
+        rocket3D = window.Space3D.buildRocket(missionConfig);
+        spacecraft3D = window.Space3D.buildSpacecraft(missionConfig);
+        launchPad3D = window.Space3D.buildLaunchPad3D();
+        const scene = window.Space3D.getScene();
+        if (scene) {
+          if (launchPad3D) scene.add(launchPad3D);
+          scene.add(rocket3D);
+          scene.add(spacecraft3D);
+          spacecraft3D.visible = false;
+        }
+        window.Space3D.setRocketGroup(rocket3D);
+        window.Space3D.setSpacecraftGroup(spacecraft3D);
+        window.Space3D.setCameraMode("chase");
+      } else if (targetPhase === "cruise") {
+        window.Space3D.setupMarsCruiseScene(missionConfig);
+      } else if (targetPhase === "edl") {
+        window.Space3D.setupMarsEDLScene();
+      } else if (targetPhase === "surface") {
+        window.Space3D.setupMarsSurfaceScene();
+      }
+    }
+  }
+
+  // =========================================================================
   // DRAWING / RENDERING
   // =========================================================================
   function draw() {
     // 1. Render 3D WebGL Scene with Solar Shadow & Thermal Lighting
     if (using3D && window.Space3D) {
       window.Space3D.renderFrame({
+        phase,
         attitudeAngle: orbitState.angle,
         eclipseFactor: orbitState.eclipseFactor,
         isSunrise: orbitState.sunriseGlowTimer > 0
@@ -1289,6 +1723,12 @@ window.SpaceFlightGame = (function () {
 
       if (phase === "launch") {
         drawLaunchHUD(w, h);
+      } else if (phase === "cruise") {
+        drawCruiseHUD(w, h);
+      } else if (phase === "edl") {
+        drawEdlHUD(w, h);
+      } else if (phase === "surface") {
+        drawSurfaceHUD(w, h);
       } else if (phase === "orbit") {
         drawOrbitHUD(w, h);
       } else if (phase === "gameover") {
@@ -1322,9 +1762,19 @@ window.SpaceFlightGame = (function () {
     ctx.fillStyle = "#00e5ff";
     ctx.fillText(`VELOCITY: ${Math.round(ls.velocity)} m/s`, 240, 43);
 
-    ctx.fillStyle = ls.fuel < 20 ? "#ff1744" : "#00e676";
-    ctx.textAlign = "right";
-    ctx.fillText(`STAGE ${ls.stage} FUEL: ${Math.round(ls.fuel)}%`, w - 36, 43);
+    if (isMarsMission() && ls.stage === 3 && ls.altitude >= 98) {
+      const burnPct = Math.min(100, Math.round((marsState.tmiDeltaVBurned / marsState.tmiTargetDeltaV) * 100));
+      ctx.fillStyle = "#ffd600";
+      ctx.fillText(`TMI ESCAPE BURN: ${burnPct}%`, 480, 43);
+
+      ctx.fillStyle = marsState.tmiIgnited ? "#00e676" : "#ff9100";
+      ctx.textAlign = "right";
+      ctx.fillText(`STATUS: ${marsState.tmiIgnited ? "FIRING PROGRADE" : "READY [W]"}` , w - 36, 43);
+    } else {
+      ctx.fillStyle = ls.fuel < 20 ? "#ff1744" : "#00e676";
+      ctx.textAlign = "right";
+      ctx.fillText(`STAGE ${ls.stage} FUEL: ${Math.round(ls.fuel)}%`, w - 36, 43);
+    }
   }
 
   // 2. DRAW ORBIT HUD (Clean & Simple)
@@ -1351,6 +1801,108 @@ window.SpaceFlightGame = (function () {
     ctx.fillStyle = os.battery < 25 ? "#ffd600" : "#80deea";
     ctx.textAlign = "right";
     ctx.fillText(`BATTERY: ${Math.round(os.battery)}% ⚡`, w - 36, 43);
+  }
+
+  // 3. DRAW CRUISE HUD (Phase 2: Minimal & Sleek)
+  function drawCruiseHUD(w, h) {
+    const ms = marsState;
+
+    ctx.fillStyle = "rgba(8, 14, 28, 0.75)";
+    ctx.fillRect(20, 16, w - 40, 44);
+    ctx.strokeStyle = "rgba(0, 229, 255, 0.35)";
+    ctx.strokeRect(20, 16, w - 40, 44);
+
+    ctx.font = "bold 13px 'Orbitron', monospace";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "left";
+    ctx.fillText(`TRANSIT: ${(ms.cruiseDistanceKm / 1000000).toFixed(1)}M / 225M km`, 36, 43);
+
+    ctx.fillStyle = "#00e5ff";
+    ctx.fillText(`DSN DELAY: ${Math.floor(ms.dsnDelayMinutes)}m ${Math.round((ms.dsnDelayMinutes % 1) * 60)}s`, 310, 43);
+
+    ctx.fillStyle = "#ffd600";
+    ctx.fillText(`SOLAR FLUX: ${ms.solarFluxWm2} W/m²`, 560, 43);
+
+    ctx.fillStyle = "#00e676";
+    ctx.textAlign = "right";
+    ctx.fillText(`TCM: ${ms.tcmCompleted} NOMINAL`, w - 36, 43);
+  }
+
+  // 4. DRAW EDL HUD (Phase 3: Seven Minutes of Terror)
+  function drawEdlHUD(w, h) {
+    const ms = marsState;
+
+    ctx.fillStyle = "rgba(8, 14, 28, 0.75)";
+    ctx.fillRect(20, 16, w - 40, 44);
+    ctx.strokeStyle = "rgba(255, 110, 64, 0.45)";
+    ctx.strokeRect(20, 16, w - 40, 44);
+
+    ctx.font = "bold 13px 'Orbitron', monospace";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "left";
+    ctx.fillText(`ALTITUDE: ${ms.edlAltitudeKm.toFixed(1)} km`, 36, 43);
+
+    ctx.fillStyle = "#ff8a65";
+    ctx.fillText(`VELOCITY: ${Math.round(ms.edlVelocityMps)} m/s`, 270, 43);
+
+    ctx.fillStyle = "#00e5ff";
+    ctx.fillText(`STAGE: ${ms.edlStage.toUpperCase().replace('_', ' ')}`, 520, 43);
+
+    ctx.fillStyle = "#00e676";
+    ctx.textAlign = "right";
+    ctx.fillText(`SITE: JEZERO CRATER`, w - 36, 43);
+  }
+
+  // 5. DRAW SURFACE HUD (Phase 4: Jezero Crater Rover & Astrobiology)
+  function drawSurfaceHUD(w, h) {
+    const ms = marsState;
+
+    ctx.fillStyle = "rgba(8, 14, 28, 0.75)";
+    ctx.fillRect(20, 16, w - 40, 44);
+    ctx.strokeStyle = "rgba(255, 110, 64, 0.45)";
+    ctx.strokeRect(20, 16, w - 40, 44);
+
+    ctx.font = "bold 13px 'Orbitron', monospace";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "left";
+    ctx.fillText(`SITE: JEZERO CRATER`, 36, 43);
+
+    ctx.fillStyle = "#00e5ff";
+    ctx.fillText(`ROVER: ${(Math.abs(ms.roverSpeed) * 20).toFixed(1)} cm/s`, 250, 43);
+
+    ctx.fillStyle = "#00e676";
+    ctx.fillText(`SAMPLES: ${ms.samplesCached} / 10`, 450, 43);
+
+    ctx.fillStyle = "#ff8a65";
+    ctx.textAlign = "right";
+    ctx.fillText(`ANCIENT BIO: ${ms.biosignaturesFound} FOUND`, w - 36, 43);
+
+    // Subtle bottom-center prompt when near a science outcrop
+    if (ms.nearestSiteDist <= 8.5 && ms.nearestSiteIndex >= 0) {
+      const site = ms.sites[ms.nearestSiteIndex];
+      const boxW = 540;
+      const boxH = 34;
+      const boxX = (w - boxW) / 2;
+      const boxY = h - 55;
+
+      ctx.fillStyle = "rgba(10, 16, 32, 0.85)";
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+      ctx.strokeStyle = site.sampled ? "rgba(0, 230, 118, 0.6)" : "rgba(255, 138, 101, 0.8)";
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+      ctx.font = "bold 12px 'Orbitron', monospace";
+      ctx.textAlign = "center";
+      if (ms.drillingActive) {
+        ctx.fillStyle = "#ffd600";
+        ctx.fillText(`CORE DRILLING & SPECTROSCOPY... [${Math.round(ms.drillProgress * 100)}%]`, w / 2, boxY + 22);
+      } else if (!site.sampled) {
+        ctx.fillStyle = "#ffab91";
+        ctx.fillText(`[SPACEBAR] EXTRACT SAMPLE & SCAN: ${site.name.toUpperCase()}`, w / 2, boxY + 22);
+      } else {
+        ctx.fillStyle = "#00e676";
+        ctx.fillText(`SAMPLED ✔ - ${site.bioType.toUpperCase()}`, w / 2, boxY + 22);
+      }
+    }
   }
 
   // =========================================================================
@@ -1589,7 +2141,8 @@ window.SpaceFlightGame = (function () {
     tCtx.font = isFullscreen ? "bold 12px 'Orbitron', monospace" : "bold 9px 'Orbitron', monospace";
     tCtx.fillStyle = "#00e5ff";
     tCtx.textAlign = "left";
-    tCtx.fillText(isFullscreen ? (phase === "launch" ? "ROCKETCAM • ONBOARD OPTICAL" : "SPACECRAFTCAM • NADIR OPTICAL") : (phase === "launch" ? "ROCKETCAM" : "SPACECRAFTCAM"), x + (isFullscreen ? 26 : 18), y + (barH / 2) + (isFullscreen ? 4 : 3));
+    const camTag = phase === "launch" ? "ROCKETCAM" : (phase === "surface" ? "MASTCAM-Z" : (phase === "edl" ? "DESCENTCAM" : "SPACECRAFTCAM"));
+    tCtx.fillText(isFullscreen ? `${camTag} • ONBOARD OPTICAL` : camTag, x + (isFullscreen ? 26 : 18), y + (barH / 2) + (isFullscreen ? 4 : 3));
 
     tCtx.font = isFullscreen ? "11px monospace" : "8px monospace";
     tCtx.fillStyle = "rgba(255, 255, 255, 0.75)";
@@ -2272,6 +2825,9 @@ window.SpaceFlightGame = (function () {
     getPhase: () => phase,
     getLaunchState: () => launchState,
     getOrbitState: () => orbitState,
+    getMarsState: () => marsState,
+    switchMarsPhase,
+    isMarsMission,
     triggerAnomaly,
     resolveAnomaly: resolveCurrentAnomaly,
     setViewMode,

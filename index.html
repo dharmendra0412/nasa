@@ -979,6 +979,29 @@
           <button id="btn-complete-flight" class="btn btn-primary btn-glow">🏁 Conclude Flight & View NASA Report</button>
         </div>
 
+        <!-- NASA MARS 4-PHASE TIMELINE NAVIGATOR (Visible for Mars Missions) -->
+        <div id="mars-phase-nav" class="mars-phase-nav" style="display: none;">
+          <div class="mars-phase-title-badge">🪐 NASA MARS MISSION TIMELINE</div>
+          <div class="mars-phase-buttons">
+            <button type="button" class="btn-mars-phase active" data-phase="launch" id="btn-mars-p1">
+              <span class="phase-num">01</span>
+              <span class="phase-txt">LAUNCH & TMI</span>
+            </button>
+            <button type="button" class="btn-mars-phase" data-phase="cruise" id="btn-mars-p2">
+              <span class="phase-num">02</span>
+              <span class="phase-txt">CRUISE (225M KM)</span>
+            </button>
+            <button type="button" class="btn-mars-phase" data-phase="edl" id="btn-mars-p3">
+              <span class="phase-num">03</span>
+              <span class="phase-txt">MARS EDL (7 MIN)</span>
+            </button>
+            <button type="button" class="btn-mars-phase" data-phase="surface" id="btn-mars-p4">
+              <span class="phase-num">04</span>
+              <span class="phase-txt">JEZERO ROVER OPS</span>
+            </button>
+          </div>
+        </div>
+
         <div id="arcade-workspace" class="arcade-workspace view-mode-3d">
           <div class="arcade-canvas-wrapper" style="position: relative;">
             <!-- 3D WebGL Canvas -->

@@ -38,6 +38,15 @@ window.Space3D = (function () {
   let orbitLineMesh = null;
   let starfieldPoints = null;
 
+  // Mars 4-Phase Simulation Objects & Scene State
+  let marsSurfaceRover = null;
+  let marsEdlAssembly = null;
+  let marsCruiseCraft = null;
+  let marsCruiseEarth = null;
+  let marsCruiseMars = null;
+  let marsSurfaceGroup = null;
+  let marsActiveScene = "orbit"; // 'orbit', 'cruise', 'edl', 'surface'
+
   // Camera Control state
   let cameraMode = "chase"; // 'chase', 'orbit', 'science', 'pad'
   let camTheta = 0;
@@ -317,6 +326,91 @@ window.Space3D = (function () {
       tex.wrapS = THREE.RepeatWrapping;
       tex.wrapT = THREE.ClampToEdgeWrapping;
       return tex;
+    },
+
+    createMarsRegolith() {
+      const c = document.createElement("canvas");
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext ? c.getContext("2d") : null;
+      if (!ctx) return new THREE.CanvasTexture(c);
+
+      // Base rust-red / iron oxide regolith
+      ctx.fillStyle = "#c1440e";
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Regolith ripples & dune wind-streaks
+      ctx.fillStyle = "rgba(120, 40, 10, 0.22)";
+      for (let y = 0; y < 512; y += 14) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        for (let x = 0; x <= 512; x += 32) {
+          ctx.lineTo(x, y + Math.sin(x * 0.05 + y * 0.02) * 5);
+        }
+        ctx.lineTo(512, y + 4);
+        ctx.lineTo(0, y + 4);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Fine basalt pebble specks
+      ctx.fillStyle = "rgba(50, 15, 5, 0.18)";
+      for (let i = 0; i < 2500; i++) {
+        const rx = Math.random() * 512;
+        const ry = Math.random() * 512;
+        const s = Math.random() * 2.5 + 1;
+        ctx.fillRect(rx, ry, s, s);
+      }
+
+      // Silicate highlights
+      ctx.fillStyle = "rgba(255, 180, 140, 0.12)";
+      for (let i = 0; i < 1500; i++) {
+        const rx = Math.random() * 512;
+        const ry = Math.random() * 512;
+        ctx.fillRect(rx, ry, 1.5, 1.5);
+      }
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(12, 12);
+      return tex;
+    },
+
+    createParachutePattern() {
+      const c = document.createElement("canvas");
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext ? c.getContext("2d") : null;
+      if (!ctx) return new THREE.CanvasTexture(c);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, 512, 512);
+
+      // NASA Perseverance / Curiosity supersonic parachute concentric pattern
+      const cx = 256, cy = 256;
+      const numSlices = 16;
+      ctx.fillStyle = "#e65100";
+      for (let i = 0; i < numSlices; i += 2) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, 256, (i / numSlices) * Math.PI * 2, ((i + 1) / numSlices) * Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Concentric rings
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 18;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 140, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = "#e65100";
+      ctx.lineWidth = 14;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 70, 0, Math.PI * 2);
+      ctx.stroke();
+
+      return new THREE.CanvasTexture(c);
     },
 
     createSolarPanel() {
@@ -1298,6 +1392,627 @@ window.Space3D = (function () {
   }
 
   // =========================================================================
+  // NASA MARS 4-PHASE SIMULATION SCENES & MODELS
+  // =========================================================================
+
+  function clearMarsSceneObjects() {
+    if (!scene) return;
+    const toRemove = [];
+    scene.children.forEach(child => {
+      if (child !== sunLight && child !== ambientLight && child !== starfieldPoints && child !== camera) {
+        toRemove.push(child);
+      }
+    });
+    toRemove.forEach(obj => scene.remove(obj));
+    planetMesh = null;
+    cloudsMesh = null;
+    atmosphereMesh = null;
+    orbitLineMesh = null;
+    reentryPlasmaMesh = null;
+    marsSurfaceRover = null;
+    marsEdlAssembly = null;
+    marsCruiseCraft = null;
+    marsCruiseEarth = null;
+    marsCruiseMars = null;
+    marsSurfaceGroup = null;
+    scene.fog = null;
+  }
+
+  // 1. 3D MARS ROVER MODEL (Perseverance / Curiosity Class 6-Wheel Explorer)
+  function buildMarsRover() {
+    const roverGroup = new THREE.Group();
+    roverGroup.name = "mars_rover";
+
+    const chassisMat = new THREE.MeshStandardMaterial({
+      color: 0xe6e6e6,
+      roughness: 0.45,
+      metalness: 0.65
+    });
+    const goldFoilMat = new THREE.MeshStandardMaterial({
+      map: TextureFactory.createGoldFoil(),
+      roughness: 0.35,
+      metalness: 0.85
+    });
+    const darkMetalMat = new THREE.MeshStandardMaterial({
+      color: 0x212529,
+      roughness: 0.5,
+      metalness: 0.8
+    });
+    const wheelMat = new THREE.MeshStandardMaterial({
+      color: 0x37474f,
+      roughness: 0.6,
+      metalness: 0.75
+    });
+    const lensMat = new THREE.MeshStandardMaterial({
+      color: 0x00e5ff,
+      roughness: 0.1,
+      metalness: 0.9,
+      emissive: 0x004455
+    });
+
+    // Main Chassis: Warm Electronics Box (WEB)
+    const chassisGeo = new THREE.BoxGeometry(2.4, 0.9, 3.2);
+    const chassisMesh = new THREE.Mesh(chassisGeo, chassisMat);
+    chassisMesh.position.y = 1.3;
+    chassisMesh.castShadow = true;
+    chassisMesh.receiveShadow = true;
+    roverGroup.add(chassisMesh);
+
+    // Gold underbelly MLI insulation blanket
+    const bellyGeo = new THREE.BoxGeometry(2.36, 0.25, 3.16);
+    const bellyMesh = new THREE.Mesh(bellyGeo, goldFoilMat);
+    bellyMesh.position.set(0, 0.8, 0);
+    roverGroup.add(bellyMesh);
+
+    // Equipment Deck (Aft and forward sensor mounting plates)
+    const deckGeo = new THREE.BoxGeometry(2.2, 0.08, 3.0);
+    const deckMesh = new THREE.Mesh(deckGeo, darkMetalMat);
+    deckMesh.position.set(0, 1.78, 0);
+    roverGroup.add(deckMesh);
+
+    // MMRTG (Multi-Mission Radioisotope Thermoelectric Generator) Power Unit on Aft Deck
+    const rtgGeo = new THREE.CylinderGeometry(0.35, 0.35, 1.1, 12);
+    const rtgMesh = new THREE.Mesh(rtgGeo, darkMetalMat);
+    rtgMesh.rotation.x = Math.PI / 2;
+    rtgMesh.position.set(0, 1.5, -1.9);
+    roverGroup.add(rtgMesh);
+
+    // MMRTG Black Radial Cooling Fins
+    for (let i = 0; i < 8; i++) {
+      const finGeo = new THREE.BoxGeometry(0.04, 0.25, 0.95);
+      const finMesh = new THREE.Mesh(finGeo, darkMetalMat);
+      const angle = (i / 8) * Math.PI * 2;
+      finMesh.position.set(Math.cos(angle) * 0.45, 1.5 + Math.sin(angle) * 0.45, -1.9);
+      finMesh.rotation.z = angle;
+      roverGroup.add(finMesh);
+    }
+
+    // High Gain Antenna (HGA) Steerable Parabolic Dish
+    const hgaStemMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 8), darkMetalMat);
+    hgaStemMesh.position.set(0.65, 2.1, -0.6);
+    roverGroup.add(hgaStemMesh);
+
+    const hgaDishMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.06, 16), chassisMat);
+    hgaDishMesh.position.set(0.65, 2.4, -0.6);
+    hgaDishMesh.rotation.x = 0.35;
+    roverGroup.add(hgaDishMesh);
+
+    // UHF Mars Relay Antenna (Vertical Cylinder)
+    const uhfMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.8, 8), darkMetalMat);
+    uhfMesh.position.set(-0.7, 2.2, -0.8);
+    roverGroup.add(uhfMesh);
+
+    // Remote Sensing Mast (RSM) with Mastcam-Z and SuperCam Laser Head
+    const mastMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.8, 8), chassisMat);
+    mastMesh.position.set(0.6, 2.65, 1.0);
+    roverGroup.add(mastMesh);
+
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0.6, 3.6, 1.0);
+    const headMesh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.35, 0.4), chassisMat);
+    headGroup.add(headMesh);
+
+    // SuperCam laser aperture window
+    const scMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.12, 12), lensMat);
+    scMesh.rotation.x = Math.PI / 2;
+    scMesh.position.set(0, 0.06, 0.22);
+    headGroup.add(scMesh);
+
+    // Dual Mastcam-Z stereo camera lenses
+    [-0.14, 0.14].forEach(xOff => {
+      const eyeMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.1, 10), darkMetalMat);
+      eyeMesh.rotation.x = Math.PI / 2;
+      eyeMesh.position.set(xOff, -0.07, 0.22);
+      headGroup.add(eyeMesh);
+    });
+    roverGroup.add(headGroup);
+
+    // 6-Wheel Rocker-Bogie Suspension System
+    const wheelRadius = 0.44;
+    const wheelWidth = 0.36;
+    const wheels = [];
+
+    const wheelPositions = [
+      { name: "FL", x: -1.75, y: wheelRadius, z: 1.3, steerable: true },
+      { name: "ML", x: -1.85, y: wheelRadius, z: -0.1, steerable: false },
+      { name: "RL", x: -1.75, y: wheelRadius, z: -1.4, steerable: true },
+      { name: "FR", x: 1.75, y: wheelRadius, z: 1.3, steerable: true },
+      { name: "MR", x: 1.85, y: wheelRadius, z: -0.1, steerable: false },
+      { name: "RR", x: 1.75, y: wheelRadius, z: -1.4, steerable: true }
+    ];
+
+    const trussMat = new THREE.MeshStandardMaterial({ color: 0x424242, roughness: 0.6, metalness: 0.8 });
+    [-1.5, 1.5].forEach(sideX => {
+      const rockerBar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.6, 8), trussMat);
+      rockerBar.rotation.x = Math.PI / 2;
+      rockerBar.position.set(sideX, 1.0, -0.1);
+      roverGroup.add(rockerBar);
+    });
+
+    wheelPositions.forEach(wp => {
+      const wheelPivot = new THREE.Group();
+      wheelPivot.position.set(wp.x, wp.y, wp.z);
+
+      const wheelMesh = new THREE.Mesh(new THREE.CylinderGeometry(wheelRadius, wheelRadius, wheelWidth, 16), wheelMat);
+      wheelMesh.rotation.z = Math.PI / 2;
+      wheelMesh.castShadow = true;
+      wheelMesh.receiveShadow = true;
+      wheelPivot.add(wheelMesh);
+
+      // Aluminum cleat grousers along wheel circumference
+      for (let c = 0; c < 12; c++) {
+        const cleat = new THREE.Mesh(new THREE.BoxGeometry(wheelWidth + 0.02, 0.04, 0.06), darkMetalMat);
+        const cAngle = (c / 12) * Math.PI * 2;
+        cleat.position.set(0, Math.sin(cAngle) * wheelRadius, Math.cos(cAngle) * wheelRadius);
+        wheelMesh.add(cleat);
+      }
+
+      roverGroup.add(wheelPivot);
+      wheels.push({
+        pivot: wheelPivot,
+        mesh: wheelMesh,
+        steerable: wp.steerable,
+        name: wp.name
+      });
+    });
+
+    // 5-DOF Articulated Robotic Arm with Rotary Percussive Drill & Biosignature Turret
+    const armGroup = new THREE.Group();
+    armGroup.position.set(-0.6, 1.4, 1.55);
+
+    // Shoulder Joint
+    const shoulderMesh = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12), darkMetalMat);
+    armGroup.add(shoulderMesh);
+
+    // Upper Arm Boom
+    const upperBoom = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.1, 8), chassisMat);
+    upperBoom.position.set(0, 0.45, 0.3);
+    upperBoom.rotation.x = 0.5;
+    armGroup.add(upperBoom);
+
+    // Forearm
+    const forearmGroup = new THREE.Group();
+    forearmGroup.position.set(0, 0.9, 0.6);
+    const forearmBoom = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.0, 8), chassisMat);
+    forearmBoom.position.set(0, -0.3, 0.4);
+    forearmBoom.rotation.x = -0.7;
+    forearmGroup.add(forearmBoom);
+
+    // Sensor Turret with Core Drill, SHERLOC UV Spectrometer, and PIXL Sensor
+    const turretGroup = new THREE.Group();
+    turretGroup.position.set(0, -0.7, 0.85);
+
+    const turretBody = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.35), darkMetalMat);
+    turretGroup.add(turretBody);
+
+    // Coring Drill Bit
+    const drillBit = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.01, 0.45, 8), new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.2, metalness: 0.95 }));
+    drillBit.position.set(0, -0.35, 0);
+    turretGroup.add(drillBit);
+
+    // SHERLOC Spectrometer Deep-UV Optics Window
+    const sherlocLens = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.1, 8), lensMat);
+    sherlocLens.rotation.x = Math.PI / 2;
+    sherlocLens.position.set(0.12, 0, 0.18);
+    turretGroup.add(sherlocLens);
+
+    forearmGroup.add(turretGroup);
+    armGroup.add(forearmGroup);
+    roverGroup.add(armGroup);
+
+    roverGroup.userData = {
+      wheels,
+      headGroup,
+      armGroup,
+      forearmGroup,
+      turretGroup,
+      drillBit
+    };
+
+    return roverGroup;
+  }
+
+  // 2. 3D MARS EDL AEROSHELL & SUPERSONIC PARACHUTE & SKY CRANE ASSEMBLY
+  function buildAeroshellAndParachute() {
+    const edlGroup = new THREE.Group();
+    edlGroup.name = "mars_edl_assembly";
+
+    const heatShieldMat = new THREE.MeshStandardMaterial({ color: 0x212121, roughness: 0.75, metalness: 0.3 });
+    const backshellMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.5, metalness: 0.4 });
+    const plasmaGlowMat = new THREE.MeshBasicMaterial({ color: 0xff6d00, transparent: true, opacity: 0.0 });
+
+    // Heat Shield (Blunt Cone Ablative PICA-X Tiles)
+    const heatShieldGroup = new THREE.Group();
+    const hsMesh = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 0.3, 1.2, 32), heatShieldMat);
+    hsMesh.position.y = -0.6;
+    heatShieldGroup.add(hsMesh);
+
+    // Hypersonic plasma shockwave mesh underneath
+    const plasmaMesh = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 0.5, 0.8, 32), plasmaGlowMat);
+    plasmaMesh.position.y = -0.9;
+    heatShieldGroup.add(plasmaMesh);
+    edlGroup.add(heatShieldGroup);
+
+    // Backshell (Upper conical aeroshell housing)
+    const backshellGroup = new THREE.Group();
+    const bsMesh = new THREE.Mesh(new THREE.ConeGeometry(3.18, 2.2, 32), backshellMat);
+    bsMesh.position.y = 1.1;
+    backshellGroup.add(bsMesh);
+    edlGroup.add(backshellGroup);
+
+    // Supersonic Parachute with NASA Orange & White Quadrant Pattern
+    const chuteGroup = new THREE.Group();
+    const canopyMat = new THREE.MeshStandardMaterial({
+      map: TextureFactory.createParachutePattern(),
+      roughness: 0.8,
+      side: THREE.DoubleSide
+    });
+    const canopyMesh = new THREE.Mesh(new THREE.SphereGeometry(4.8, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.55), canopyMat);
+    canopyMesh.position.y = 16.0;
+    canopyMesh.rotation.x = Math.PI;
+    chuteGroup.add(canopyMesh);
+
+    // 8 Suspension Lines
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 });
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const rimX = Math.cos(angle) * 4.6;
+      const rimZ = Math.sin(angle) * 4.6;
+      const lineGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(rimX, 16.0, rimZ),
+        new THREE.Vector3(0, 2.2, 0)
+      ]);
+      chuteGroup.add(new THREE.Line(lineGeo, lineMat));
+    }
+    chuteGroup.visible = false;
+    edlGroup.add(chuteGroup);
+
+    // Sky Crane Powered Descent Stage
+    const skyCraneGroup = new THREE.Group();
+    const scBody = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.0, 0.7, 8), backshellMat);
+    scBody.position.y = 1.8;
+    skyCraneGroup.add(scBody);
+
+    // 4 Canted Retro-Rocket Nozzles
+    const nozzleMat = new THREE.MeshStandardMaterial({ color: 0x263238, roughness: 0.4, metalness: 0.8 });
+    const thrusters = [];
+    [
+      { x: 1.6, z: 1.6 },
+      { x: -1.6, z: 1.6 },
+      { x: 1.6, z: -1.6 },
+      { x: -1.6, z: -1.6 }
+    ].forEach(tp => {
+      const noz = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.6, 12), nozzleMat);
+      noz.position.set(tp.x, 1.4, tp.z);
+      noz.rotation.x = tp.z > 0 ? 0.35 : -0.35;
+      noz.rotation.z = tp.x > 0 ? -0.35 : 0.35;
+      skyCraneGroup.add(noz);
+      thrusters.push(noz);
+    });
+
+    // Rover Tether Bridles
+    const tetherMat = new THREE.LineBasicMaterial({ color: 0xffeb3b, transparent: true, opacity: 0.85 });
+    [
+      { x: 0.8, z: 0.8 },
+      { x: -0.8, z: 0.8 },
+      { x: 0, z: -1.0 }
+    ].forEach(tp => {
+      const tetherGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(tp.x, 1.4, tp.z),
+        new THREE.Vector3(tp.x * 0.8, -1.8, tp.z * 0.8)
+      ]);
+      skyCraneGroup.add(new THREE.Line(tetherGeo, tetherMat));
+    });
+
+    skyCraneGroup.visible = false;
+    edlGroup.add(skyCraneGroup);
+
+    edlGroup.userData = {
+      heatShieldGroup,
+      backshellGroup,
+      chuteGroup,
+      skyCraneGroup,
+      plasmaGlowMat,
+      thrusters
+    };
+
+    return edlGroup;
+  }
+
+  // 3. SETUP MARS CRUISE SCENE (Phase 2: Heliocentric Transit across 225M km)
+  function setupMarsCruiseScene(missionConfig) {
+    clearMarsSceneObjects();
+    marsActiveScene = "cruise";
+
+    // Distant receding Earth sphere
+    const earthMat = new THREE.MeshStandardMaterial({
+      map: TextureFactory.getRealEarthDay(),
+      roughness: 0.7
+    });
+    marsCruiseEarth = new THREE.Mesh(new THREE.SphereGeometry(3.5, 32, 32), earthMat);
+    marsCruiseEarth.position.set(-25, -15, -120);
+    scene.add(marsCruiseEarth);
+
+    // Distant approaching Mars sphere
+    const marsMat = new THREE.MeshStandardMaterial({
+      map: TextureFactory.createMars(),
+      roughness: 0.8
+    });
+    marsCruiseMars = new THREE.Mesh(new THREE.SphereGeometry(6.0, 32, 32), marsMat);
+    marsCruiseMars.position.set(20, 10, 110);
+    scene.add(marsCruiseMars);
+
+    // Interplanetary Cruise Spacecraft in center
+    marsCruiseCraft = buildSpacecraft(missionConfig);
+    marsCruiseCraft.position.set(0, 0, 0);
+    scene.add(marsCruiseCraft);
+
+    // Sun Lighting
+    if (sunLight) {
+      sunLight.color.setHex(0xffffff);
+      sunLight.position.set(60, 45, -30);
+      sunLight.intensity = 1.6;
+    }
+    if (ambientLight) {
+      ambientLight.color.setHex(0x334466);
+      ambientLight.intensity = 0.5;
+    }
+
+    setCameraMode("chase");
+    return { earth: marsCruiseEarth, mars: marsCruiseMars, spacecraft: marsCruiseCraft };
+  }
+
+  // 4. SETUP MARS EDL SCENE (Phase 3: Mars Atmospheric Entry & Descent)
+  function setupMarsEDLScene() {
+    clearMarsSceneObjects();
+    marsActiveScene = "edl";
+
+    // Curvature of Mars visible below
+    const planetRadius = 45;
+    const marsMat = new THREE.MeshStandardMaterial({
+      map: TextureFactory.createMars(),
+      roughness: 0.85
+    });
+    planetMesh = new THREE.Mesh(new THREE.SphereGeometry(planetRadius, 48, 48), marsMat);
+    planetMesh.position.set(0, -planetRadius - 18, 0);
+    scene.add(planetMesh);
+
+    // Thin Martian Rayleigh Atmosphere
+    atmosphereMesh = createAtmosphereShader(planetRadius, "mars");
+    atmosphereMesh.position.copy(planetMesh.position);
+    scene.add(atmosphereMesh);
+
+    // Aeroshell, Parachute, and Sky Crane
+    marsEdlAssembly = buildAeroshellAndParachute();
+    marsEdlAssembly.position.set(0, 0, 0);
+    scene.add(marsEdlAssembly);
+
+    if (sunLight) {
+      sunLight.color.setHex(0xffedd0);
+      sunLight.position.set(30, 40, 20);
+      sunLight.intensity = 1.4;
+    }
+    if (ambientLight) {
+      ambientLight.color.setHex(0xb25828);
+      ambientLight.intensity = 0.6;
+    }
+
+    setCameraMode("chase");
+    return marsEdlAssembly;
+  }
+
+  // 5. SETUP MARS SURFACE SCENE (Phase 4: Jezero Crater Regolith & Rover Operations)
+  function setupMarsSurfaceScene() {
+    clearMarsSceneObjects();
+    marsActiveScene = "surface";
+
+    marsSurfaceGroup = new THREE.Group();
+
+    // Red Regolith Ground Plane with gentle dune ripples
+    const groundGeo = new THREE.PlaneGeometry(260, 260, 48, 48);
+    const pos = groundGeo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const vx = pos.getX(i);
+      const vy = pos.getY(i);
+      pos.setZ(i, (Math.sin(vx * 0.08) * 0.7) + (Math.cos(vy * 0.06) * 0.5));
+    }
+    groundGeo.computeVertexNormals();
+
+    const groundMat = new THREE.MeshStandardMaterial({
+      map: TextureFactory.createMarsRegolith(),
+      roughness: 0.9,
+      metalness: 0.05
+    });
+    marsSurfaceGround = new THREE.Mesh(groundGeo, groundMat);
+    marsSurfaceGround.rotation.x = -Math.PI / 2;
+    marsSurfaceGround.position.y = 0;
+    marsSurfaceGround.receiveShadow = true;
+    marsSurfaceGroup.add(marsSurfaceGround);
+
+    // Jezero Crater Rim Mountains in the far distance
+    const rimMesh = new THREE.Mesh(
+      new THREE.CylinderGeometry(140, 140, 24, 48, 1, true),
+      new THREE.MeshStandardMaterial({ color: 0x823214, roughness: 0.95, side: THREE.BackSide })
+    );
+    rimMesh.position.y = 8;
+    marsSurfaceGroup.add(rimMesh);
+
+    // Scattered Basalt / Silicate Boulders
+    const rockMat = new THREE.MeshStandardMaterial({ color: 0x542310, roughness: 0.85, metalness: 0.15 });
+    for (let i = 0; i < 45; i++) {
+      const rSize = Math.random() * 0.9 + 0.35;
+      const rockMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(rSize), rockMat);
+      const rAngle = Math.random() * Math.PI * 2;
+      const rDist = Math.random() * 85 + 7;
+      rockMesh.position.set(Math.cos(rAngle) * rDist, rSize * 0.45, Math.sin(rAngle) * rDist);
+      rockMesh.rotation.set(Math.random(), Math.random(), Math.random());
+      rockMesh.castShadow = true;
+      marsSurfaceGroup.add(rockMesh);
+    }
+
+    // 4 Distinct Science Outcrops with subtle holographic pulsing scan rings
+    const sitePositions = [
+      { name: "Ancient River Delta Outcrop", x: 14, z: -18, color: 0x00e5ff },
+      { name: "Clay-Rich Sedimentary Fan", x: -22, z: 24, color: 0x00e676 },
+      { name: "Subsurface Aquifer Sounding Site", x: 28, z: 32, color: 0x7c4dff },
+      { name: "Basalt Lava Crater Floor", x: -35, z: -16, color: 0xffab00 }
+    ];
+
+    sitePositions.forEach(sp => {
+      // Large rock formation
+      const outMesh = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(2.2),
+        new THREE.MeshStandardMaterial({ color: 0x8a3614, roughness: 0.75 })
+      );
+      outMesh.position.set(sp.x, 1.0, sp.z);
+      outMesh.scale.set(1.5, 0.8, 1.2);
+      outMesh.castShadow = true;
+      marsSurfaceGroup.add(outMesh);
+
+      // Holographic scan indicator ring
+      const ringMesh = new THREE.Mesh(
+        new THREE.RingGeometry(2.4, 2.7, 24),
+        new THREE.MeshBasicMaterial({ color: sp.color, side: THREE.DoubleSide, transparent: true, opacity: 0.65 })
+      );
+      ringMesh.rotation.x = -Math.PI / 2;
+      ringMesh.position.set(sp.x, 0.08, sp.z);
+      marsSurfaceGroup.add(ringMesh);
+    });
+
+    // Add 3D Mars Rover
+    marsSurfaceRover = buildMarsRover();
+    marsSurfaceRover.position.set(0, 0, 0);
+    marsSurfaceGroup.add(marsSurfaceRover);
+
+    scene.add(marsSurfaceGroup);
+
+    // Atmospheric lighting & Martian horizon dust fog
+    scene.fog = new THREE.FogExp2(0xc86432, 0.007);
+    if (ambientLight) {
+      ambientLight.color.setHex(0xd47a40);
+      ambientLight.intensity = 0.75;
+    }
+    if (sunLight) {
+      sunLight.color.setHex(0xffedd0);
+      sunLight.position.set(40, 50, 30);
+      sunLight.intensity = 1.35;
+    }
+
+    setCameraMode("chase");
+    camDist = 11;
+    camPhi = Math.PI * 0.35;
+
+    return { rover: marsSurfaceRover, group: marsSurfaceGroup };
+  }
+
+  // 6. UPDATE 3D MARS ROVER DYNAMICS & DRILL ANIMATION
+  function updateRover3D(x, z, angle, speed, isDrilling, drillProgress) {
+    if (!marsSurfaceRover) return;
+    marsSurfaceRover.position.x = x;
+    marsSurfaceRover.position.z = z;
+    marsSurfaceRover.rotation.y = angle;
+
+    const data = marsSurfaceRover.userData;
+    if (!data) return;
+
+    // Wheel rotation and steering
+    if (data.wheels && speed !== 0) {
+      const wheelRotSpeed = speed * 0.45;
+      data.wheels.forEach(w => {
+        w.mesh.rotation.x += wheelRotSpeed;
+        if (w.steerable) {
+          w.pivot.rotation.y = Math.sin(angle) * 0.35;
+        }
+      });
+    }
+
+    // Robotic Arm and Core Drill Animation
+    if (data.armGroup && data.drillBit) {
+      if (isDrilling) {
+        data.armGroup.rotation.x = 0.45 + (drillProgress * 0.35);
+        data.drillBit.rotation.y += 0.9; // Rapid drill bit rotation
+      } else {
+        data.armGroup.rotation.x = 0;
+      }
+    }
+  }
+
+  // 7. UPDATE MARS EDL DESCENT DYNAMICS
+  function updateMarsEDL3D(altitudeKm, stage, heatShieldGlow, time = 0) {
+    if (!marsEdlAssembly || !marsEdlAssembly.userData) return;
+    const d = marsEdlAssembly.userData;
+
+    if (d.plasmaGlowMat) {
+      d.plasmaGlowMat.opacity = Math.max(0, Math.min(1.0, heatShieldGlow));
+    }
+
+    if (stage === "entry") {
+      d.heatShieldGroup.visible = true;
+      d.backshellGroup.visible = true;
+      d.chuteGroup.visible = false;
+      d.skyCraneGroup.visible = false;
+    } else if (stage === "parachute") {
+      d.heatShieldGroup.visible = true;
+      d.backshellGroup.visible = true;
+      d.chuteGroup.visible = true;
+      d.skyCraneGroup.visible = false;
+      d.chuteGroup.rotation.z = Math.sin(time * 0.1) * 0.04;
+    } else if (stage === "heatshield_jettison") {
+      d.heatShieldGroup.position.y -= 0.6; // Falls downward
+      d.backshellGroup.visible = true;
+      d.chuteGroup.visible = true;
+      d.skyCraneGroup.visible = false;
+    } else if (stage === "skycrane") {
+      d.heatShieldGroup.visible = false;
+      d.backshellGroup.visible = false;
+      d.chuteGroup.visible = false;
+      d.skyCraneGroup.visible = true;
+    }
+  }
+
+  // 8. UPDATE MARS CRUISE TRANSIT DYNAMICS
+  function updateMarsCruise3D(transitProgress) {
+    if (!marsCruiseCraft) return;
+    marsCruiseCraft.rotation.y += 0.003; // Gentle attitude drift
+
+    if (marsCruiseEarth) {
+      // Earth recedes further into distance
+      const earthZ = -120 - (transitProgress * 180);
+      marsCruiseEarth.position.z = earthZ;
+      const s = Math.max(0.2, 1.0 - (transitProgress * 0.75));
+      marsCruiseEarth.scale.set(s, s, s);
+    }
+
+    if (marsCruiseMars) {
+      // Mars grows closer
+      const marsZ = 120 - (transitProgress * 70);
+      marsCruiseMars.position.z = marsZ;
+      const s = 0.5 + (transitProgress * 1.5);
+      marsCruiseMars.scale.set(s, s, s);
+    }
+  }
+
+  // =========================================================================
   // LASER SCAN CONES & DOWNLINK BEAMS
   // =========================================================================
   function showScanCone(originPos, targetPos) {
@@ -1765,8 +2480,16 @@ window.Space3D = (function () {
     }
 
     let targetObj = spacecraftGroup;
-    if (craftState && craftState.phase === "launch" && rocketGroup) {
-      targetObj = rocketGroup;
+    if (craftState) {
+      if (craftState.phase === "launch" && rocketGroup) {
+        targetObj = rocketGroup;
+      } else if (craftState.phase === "surface" && marsSurfaceRover) {
+        targetObj = marsSurfaceRover;
+      } else if (craftState.phase === "edl" && marsEdlAssembly) {
+        targetObj = marsEdlAssembly;
+      } else if (craftState.phase === "cruise" && marsCruiseCraft) {
+        targetObj = marsCruiseCraft;
+      }
     }
 
     if (targetObj) {
@@ -1779,12 +2502,13 @@ window.Space3D = (function () {
       }
 
       const targetPos = targetObj.position;
+      const targetLookY = (targetObj === marsSurfaceRover) ? (targetPos.y + 1.2) : targetPos.y;
       const cx = targetPos.x + camDist * Math.sin(camPhi) * Math.sin(camTheta);
       const cy = targetPos.y + camDist * Math.cos(camPhi);
       const cz = targetPos.z + camDist * Math.sin(camPhi) * Math.cos(camTheta);
 
       camera.position.set(cx, cy, cz);
-      camera.lookAt(targetPos.x, targetPos.y, targetPos.z);
+      camera.lookAt(targetPos.x, targetLookY, targetPos.z);
     }
 
     renderer.render(scene, camera);
@@ -1821,6 +2545,17 @@ window.Space3D = (function () {
     setCameraMode,
     renderFrame,
     handleResize,
+    setupMarsCruiseScene,
+    setupMarsEDLScene,
+    setupMarsSurfaceScene,
+    updateRover3D,
+    updateMarsEDL3D,
+    updateMarsCruise3D,
+    buildMarsRover,
+    buildAeroshellAndParachute,
+    getMarsRover: () => marsSurfaceRover,
+    getMarsEDL: () => marsEdlAssembly,
+    getMarsCruise: () => marsCruiseCraft,
     getScene: () => scene,
     getRenderer: () => renderer,
     getCamera: () => camera,

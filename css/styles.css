@@ -2863,6 +2863,75 @@ body {
   color: var(--accent-cyan);
 }
 
+/* NASA Mars 4-Phase Timeline Bar */
+.mars-phase-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(10, 16, 32, 0.94);
+  border: 1px solid rgba(255, 110, 64, 0.35);
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin: 10px 0 12px 0;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65), 0 0 12px rgba(255, 110, 64, 0.12);
+}
+
+.mars-phase-title-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #ff8a65;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mars-phase-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-mars-phase {
+  background: rgba(18, 25, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #b0bec5;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-mars-phase .phase-num {
+  color: #ff7043;
+  font-weight: 700;
+}
+
+.btn-mars-phase:hover {
+  background: rgba(255, 112, 67, 0.18);
+  border-color: #ff7043;
+  color: #ffffff;
+}
+
+.btn-mars-phase.active {
+  background: linear-gradient(135deg, rgba(230, 81, 0, 0.85), rgba(191, 54, 12, 0.9));
+  border-color: #ffab91;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 112, 67, 0.45);
+}
+
 /* Master Flight Console View Switcher Bar (Sticky Top) */
 .flight-view-mode-bar {
   display: flex;
