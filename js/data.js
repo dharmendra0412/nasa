@@ -13,8 +13,23 @@ window.GameData = {
       difficulty: 1,
       destination: "Earth (Polar / Low Earth Orbit)",
       type: "Earth Observation",
+      categoryTag: "EARTH OBSERVATION • CLASS-B",
       duration: 730, // 2 years in days
+      craftImg: "assets/brief/sentinel-e_craft_trans.png",
+      artImg: "assets/brief/sentinel-e_art.jpg",
       briefing: "Rising sea surface temperatures, polar ice sheet melt, and rapid deforestation demand high-cadence multispectral surveillance. Your team must design an Earth-observing satellite in a Sun-Synchronous Orbit (SSO) capable of returning optical and radar telemetry daily. High data throughput and consistent solar power during sunlit orbital passes are critical.",
+      objectiveBullets: [
+        { verb: "Monitor", text: "Sea surface temperature" },
+        { verb: "Track", text: "Polar ice sheet melt" },
+        { verb: "Analyze", text: "Deforestation changes" },
+        { verb: "Use", text: "Multispectral data" },
+        { verb: "Ensure", text: "Continuous solar power" }
+      ],
+      milestoneCards: [
+        { theme: "blue", icon: "🏔️", title: "Polar Ice Cap Mapping", tags: ["Ice extent", "Arctic & Antarctic", "Sub-50m"] },
+        { theme: "green", icon: "🍃", title: "Global Canopy & Deforestation", tags: ["Canopy change", "Carbon index"] },
+        { theme: "purple", icon: "🌊", title: "Sea Level & Altimetry", tags: ["Ocean topography", "Thermal swell"] }
+      ],
       objectives: [
         { id: "obj-ice", name: "Polar Ice Cap Mapping", description: "Map changes in arctic and antarctic ice extent at sub-50m resolution.", scienceWeight: 0.35 },
         { id: "obj-forest", name: "Global Canopy & Deforestation", description: "Track tropical canopy changes and carbon sequestration index.", scienceWeight: 0.35 },
@@ -34,8 +49,22 @@ window.GameData = {
       difficulty: 1,
       destination: "Earth (Geostationary Orbit)",
       type: "Weather & Atmospheric",
+      categoryTag: "WEATHER & ATMOSPHERIC • CLASS-B",
       duration: 1095, // 3 years in days
+      craftImg: "assets/brief/stormwatch_craft_trans.png",
+      artImg: "assets/brief/stormwatch_art.jpg",
       briefing: "Severe storms, hurricanes, and rapid cyclogenesis require continuous, stationary observation of an entire planetary hemisphere. Operating in Geostationary Orbit (GEO at ~35,786 km), your spacecraft will maintain a fixed vantage point. GEO requires substantial launch propulsion to reach high altitude, but delivers 24/7 continuous direct-to-ground downlink.",
+      objectiveBullets: [
+        { verb: "Monitor", text: "Severe storms & hurricanes" },
+        { verb: "Observe", text: "Whole planetary hemisphere" },
+        { verb: "Maintain", text: "Fixed GEO vantage (~35,786 km)" },
+        { verb: "Ensure", text: "24/7 data downlink" }
+      ],
+      milestoneCards: [
+        { theme: "blue", icon: "🌀", title: "Severe Hurricane Tracking", tags: ["Real-time", "15-min refresh", "Eye wall"] },
+        { theme: "green", icon: "💧", title: "Atmospheric Water Vapor Profiling", tags: ["Infrared", "Vertical profiles", "Humidity/Wind"] },
+        { theme: "purple", icon: "⚡", title: "Lightning Flash Mapping", tags: ["Detect flashes", "Forecast storms", "Intensity"] }
+      ],
       objectives: [
         { id: "obj-cyclone", name: "Severe Hurricane Tracking", description: "Provide real-time 15-minute refresh loops of storm eye wall dynamics.", scienceWeight: 0.40 },
         { id: "obj-atmos", name: "Atmospheric Water Vapor Profiling", description: "Sample infrared vertical sounding columns for humidity and wind shear.", scienceWeight: 0.35 },
@@ -55,8 +84,23 @@ window.GameData = {
       difficulty: 2,
       destination: "Moon (Low Lunar Polar Orbit)",
       type: "Lunar Science & ISRU",
+      categoryTag: "LUNAR SCIENCE & ISRU • CLASS-B",
       duration: 365, // 1 year
+      craftImg: "assets/brief/artemis-scout_craft_trans.png",
+      artImg: "assets/brief/artemis-scout_art.jpg",
       briefing: "NASA's Artemis program requires high-resolution volatile prospecting before landing crews at the South Pole. Permanently Shadowed Regions (PSRs) in craters like Shackleton hide water ice essential for rocket propellant and life support. Your probe must orbit at just 100 km altitude, surviving harsh thermal swings and mascon gravitational perturbations while peering into pitch-black craters with active radar and spectrometry.",
+      objectiveBullets: [
+        { verb: "Prospect", text: "Volatiles (water ice, hydrogen)" },
+        { verb: "Map", text: "Permanently Shadowed Regions (PSRs)" },
+        { verb: "Assess", text: "Landing zone hazards" },
+        { verb: "Analyze", text: "Rare-earth & ilmenite deposits" },
+        { verb: "Support", text: "Future crewed landings" }
+      ],
+      milestoneCards: [
+        { theme: "blue", icon: "💎", title: "Volatile & Water Ice Mapping", tags: ["Water ice", "Hydrogen", "PSRs"] },
+        { theme: "green", icon: "📡", title: "Landing Zone Hazard Assessment", tags: ["Terrain", "Slope", "Elevation"] },
+        { theme: "purple", icon: "🪨", title: "Rare-Earth & Ilmenite Assay", tags: ["Titanium", "Ilmenite", "Resource use"] }
+      ],
       objectives: [
         { id: "obj-ice-find", name: "Volatile & Water Ice Mapping", description: "Locate subsurface hydrogen deposits in permanently shadowed craters.", scienceWeight: 0.45 },
         { id: "obj-topo", name: "Landing Zone Hazard Assessment", description: "Produce sub-meter digital elevation models for future crewed landers.", scienceWeight: 0.30 },
@@ -76,8 +120,23 @@ window.GameData = {
       difficulty: 3,
       destination: "Mars (Low Mars Orbit)",
       type: "Planetary Exploration",
+      categoryTag: "PLANETARY EXPLORATION • CLASS-B",
       duration: 1095, // 3 years
+      craftImg: "assets/brief/red-pioneer_craft_trans.png",
+      artImg: "assets/brief/red-pioneer_art.jpg",
       briefing: "Embark on an interplanetary voyage across 225 million kilometers. Red Pioneer will search for ancient biosignatures, subsurface aquifers, and monitor the dynamic Martian CO2 cycle. Sunlight intensity at Mars is less than half of Earth's (~590 W/m² vs 1361 W/m²), so solar arrays must be oversized or an RTG employed. Signal propagation delays (up to 20 minutes each way) demand high onboard autonomy.",
+      objectiveBullets: [
+        { verb: "Explore", text: "225 million km interplanetary journey" },
+        { verb: "Search", text: "Biosignatures & subsurface aquifers" },
+        { verb: "Monitor", text: "Martian CO2 cycle" },
+        { verb: "Measure", text: "Low sunlight & solar array design" },
+        { verb: "Ensure", text: "High onboard autonomy (≤ 20 min delay)" }
+      ],
+      milestoneCards: [
+        { theme: "blue", icon: "📶", title: "Subsurface Radar Aquifer Sounding", tags: ["≤ 2 km depth", "Brine lenses", "Water ice"] },
+        { theme: "green", icon: "🧪", title: "Atmospheric Methane & Organics", tags: ["Trace gases", "CH4 detection", "Biological hints"] },
+        { theme: "purple", icon: "🖼️", title: "Future Human Landing Site Imagery", tags: ["High-res imaging", "Jezero", "Valles Marineris"] }
+      ],
       objectives: [
         { id: "obj-mars-water", name: "Subsurface Radar Aquifer Sounding", description: "Penetrate up to 2 km below the Martian regolith to detect liquid brine lenses.", scienceWeight: 0.40 },
         { id: "obj-methane", name: "Atmospheric Methane & Organics", description: "Sniff trace atmospheric emissions for potential subsurface biological activity.", scienceWeight: 0.35 },
@@ -97,8 +156,23 @@ window.GameData = {
       difficulty: 2,
       destination: "Deep Space / Highly Elliptical Orbit",
       type: "Planetary Defense",
+      categoryTag: "PLANETARY DEFENSE • CLASS-B",
       duration: 1460, // 4 years
+      craftImg: "assets/brief/asteroid-guard_craft_trans.png",
+      artImg: "assets/brief/asteroid-guard_art.jpg",
       briefing: "Planetary Defense requires detecting dark Near-Earth Objects (NEOs) before they pose an impact threat. Ground telescopes are blind to asteroids approaching from the direction of the Sun. Operating in an eccentric orbit with thermal infrared sensors, Aegis will survey the inner solar system, cataloging chondritic and metallic impactors months to years in advance.",
+      objectiveBullets: [
+        { verb: "Detect", text: "Dark Near-Earth Objects (NEOs)" },
+        { verb: "Survey", text: "Inner solar system" },
+        { verb: "Catalog", text: "Chondritic & metallic impactors" },
+        { verb: "Assess", text: "Impact risk & probability" },
+        { verb: "Enable", text: "Early warning & interceptor planning" }
+      ],
+      milestoneCards: [
+        { theme: "blue", icon: "📡", title: "Dark Asteroid Thermal Detection", tags: [">140 m", "Thermal IR", "Solar glare"] },
+        { theme: "green", icon: "⚛️", title: "Precision Orbit Determination", tags: ["Orbit modeling", "Risk window", "High-risk"] },
+        { theme: "purple", icon: "📚", title: "Spectral Classification (C/S/M Types)", tags: ["Mineralogy", "Composition", "Kinetic study"] }
+      ],
       objectives: [
         { id: "obj-neo-detect", name: "Dark Asteroid Thermal Detection", description: "Detect >140m diameter hazardous asteroids in the solar glare zone.", scienceWeight: 0.50 },
         { id: "obj-orbit-prop", name: "Precision Orbit Determination", description: "Compute impact risk probability windows for high-risk targets.", scienceWeight: 0.30 },
@@ -116,10 +190,25 @@ window.GameData = {
       name: "DeepView Cosmic Dawn Space Observatory",
       icon: "🔭",
       difficulty: 3,
-      destination: "Sun-Earth Lagrange Point 2 (L2)",
+      destination: "Sun–Earth Lagrange Point 2 (L2)",
       type: "Astrophysics Flagship",
+      categoryTag: "ASTROPHYSICS FLAGSHIP • CLASS-B",
       duration: 1825, // 5 years
+      craftImg: "assets/brief/deepview_craft_trans.png",
+      artImg: "assets/brief/deepview_art.jpg",
       briefing: "Peering back 13.5 billion years to the formation of the very first stars and galaxies requires an ultra-stable thermal haven 1.5 million kilometers away: Sun-Earth L2. Free from Earth's thermal glow, your flagship observatory needs cryogenic cooling, arcsecond pointing stability, and ultra-high bandwidth to downlink gigapixel deep-field survey data.",
+      objectiveBullets: [
+        { verb: "Observe", text: "First light galaxies & redshift (z > 12)" },
+        { verb: "Analyze", text: "Exoplanet atmospheric spectra" },
+        { verb: "Map", text: "Cosmic web & dark energy effects" },
+        { verb: "Maintain", text: "Cryogenic stability & pointing" },
+        { verb: "Deliver", text: "High-bandwidth deep-field data" }
+      ],
+      milestoneCards: [
+        { theme: "blue", icon: "🌌", title: "First Light Galaxies & Redshift", tags: ["Pop III stars", "z > 12", "Early galaxies"] },
+        { theme: "green", icon: "🪐", title: "Exoplanet Atmospheric Spectroscopy", tags: ["Transit curves", "Habitability", "Rocky worlds"] },
+        { theme: "purple", icon: "〰️", title: "Gravitational Lensing & Dark Energy", tags: ["Cosmic web", "Shear mapping", "Dark energy"] }
+      ],
       objectives: [
         { id: "obj-galaxies", name: "First Light Galaxies & Redshift", description: "Detect primordial Population III star clusters at z > 12.", scienceWeight: 0.40 },
         { id: "obj-exoplanet", name: "Exoplanet Atmospheric Spectroscopy", description: "Analyze transit light curves of habitable-zone rocky exoplanets.", scienceWeight: 0.35 },

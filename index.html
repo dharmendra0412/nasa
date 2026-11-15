@@ -1691,67 +1691,105 @@
     <!-- CHALLENGE MISSION BRIEFING & OPERATIONS MODAL -->
     <div id="modal-challenge-brief" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="brief-mission-name">
       <div class="modal-card modal-brief-card">
-        <div class="modal-header brief-modal-header">
-          <div class="modal-title-wrap">
-            <span id="brief-mission-icon" class="modal-alert-icon">🌍</span>
-            <div>
-              <div class="brief-category-badge" id="brief-mission-category">EARTH SCIENCE · CLASS-B</div>
-              <h3 id="brief-mission-name" class="modal-title-text">Sentinel-Earth Climate Monitor</h3>
+        
+        <!-- Header: Icon, Category, Title, Underline | Spacecraft Art | Close Button -->
+        <div class="brief-header">
+          <div class="brief-header-left">
+            <div id="brief-mission-icon-box" class="brief-icon-box">
+              <span id="brief-mission-icon" class="brief-icon">🌍</span>
+            </div>
+            <div class="brief-header-text">
+              <div id="brief-mission-category" class="brief-category-badge">EARTH OBSERVATION • CLASS-B</div>
+              <h2 id="brief-mission-name" class="brief-mission-title">Sentinel-Earth Climate Monitor</h2>
+              <div class="brief-title-bar"></div>
             </div>
           </div>
-          <button id="btn-close-challenge-brief" type="button" class="btn-modal-close" data-close-modal="modal-challenge-brief" title="Close Mission Briefing">✖</button>
+
+          <div class="brief-header-right">
+            <div class="brief-spacecraft-wrap">
+              <img id="brief-spacecraft-img" class="brief-spacecraft-img" src="assets/brief/sentinel-e_craft_trans.png" alt="Spacecraft" />
+            </div>
+            <button id="btn-close-challenge-brief" type="button" class="btn-modal-close" data-close-modal="modal-challenge-brief" title="Close Mission Briefing">✖</button>
+          </div>
         </div>
 
-        <div class="modal-hub-body brief-modal-body">
-          <!-- Meta chips: Destination, Difficulty, Duration -->
-          <div class="brief-meta-chips">
-            <div class="brief-chip">
-              <span class="chip-label">DESTINATION</span>
-              <span class="chip-val" id="brief-destination">Low Earth Orbit (400 km SSO)</span>
+        <div class="brief-content-body">
+          <!-- Row 1: 3 Meta Pills (Destination, Difficulty, Mission Duration) -->
+          <div class="brief-meta-row">
+            <!-- Destination -->
+            <div class="brief-meta-pill brief-dest-pill">
+              <div class="meta-pill-icon">📍</div>
+              <div class="meta-pill-content">
+                <span class="meta-pill-label">Destination</span>
+                <span id="brief-destination" class="meta-pill-val">Earth (Polar / Low Earth Orbit)</span>
+              </div>
             </div>
-            <div class="brief-chip">
-              <span class="chip-label">DIFFICULTY</span>
-              <span class="chip-val" id="brief-difficulty">⭐⭐ Cadet (2/5)</span>
+
+            <!-- Difficulty (Gold Accent Box) -->
+            <div class="brief-meta-pill brief-diff-pill">
+              <div id="brief-stars" class="meta-pill-stars">⭐</div>
+              <div class="meta-pill-content">
+                <span class="meta-pill-label">Difficulty</span>
+                <span id="brief-difficulty" class="meta-pill-val">1 / 5</span>
+              </div>
             </div>
-            <div class="brief-chip">
-              <span class="chip-label">MISSION DURATION</span>
-              <span class="chip-val" id="brief-duration">~720 Days (2 Years)</span>
+
+            <!-- Duration -->
+            <div class="brief-meta-pill brief-dur-pill">
+              <div class="meta-pill-icon">📅</div>
+              <div class="meta-pill-content">
+                <span class="meta-pill-label">Mission Duration</span>
+                <span id="brief-duration" class="meta-pill-val">~730 Days</span>
+              </div>
             </div>
           </div>
 
-          <!-- Mission Directive Narrative -->
-          <div class="brief-section">
-            <h4 class="brief-section-title">MISSION DIRECTIVE & FLIGHT OBJECTIVES</h4>
-            <p id="brief-narrative" class="brief-narrative-text">
-              Track global polar ice melting rates, tropical canopy deforestation, and sea surface height variations using multispectral radar imaging.
-            </p>
+          <!-- Row 2: 2 Columns (Mission Objective Bullets & Artwork Photo) -->
+          <div class="brief-main-grid">
+            <!-- Left: Mission Objective -->
+            <div class="brief-objectives-box">
+              <div class="brief-box-header">
+                <span class="brief-box-icon">🎯</span>
+                <span class="brief-box-title">Mission Objective</span>
+              </div>
+              <div id="brief-objectives-list" class="brief-bullets-list">
+                <!-- Dynamically populated bullets with checkmarks -->
+              </div>
+            </div>
+
+            <!-- Right: Artwork Photo -->
+            <div class="brief-art-box">
+              <img id="brief-artwork-img" class="brief-art-photo" src="assets/brief/sentinel-e_art.jpg" alt="Mission Artwork" />
+            </div>
           </div>
 
-          <!-- Scientific Directives List -->
-          <div class="brief-section">
-            <h4 class="brief-section-title">KEY SCIENTIFIC MILESTONES</h4>
-            <div id="brief-objectives-list" class="brief-objectives-list">
-              <!-- Dynamically populated -->
+          <!-- Row 3: Key Scientific Milestones (3 Cards) -->
+          <div class="brief-milestones-section">
+            <div class="brief-milestones-header">
+              <span class="milestones-icon">⛁</span>
+              <span class="milestones-title">Key Scientific Milestones</span>
+              <div class="milestones-line"></div>
+            </div>
+            <div id="brief-milestones-grid" class="brief-milestones-grid">
+              <!-- Dynamically populated 3 milestone cards -->
             </div>
           </div>
 
-          <!-- Launch Choice Action Bar -->
-          <div class="brief-action-box">
-            <div class="brief-action-desc">
-              Choose your operational approach: Launch straight into real-time 3D flight operations or customize your spacecraft payload and telemetry bus in the engineering studio.
-            </div>
-            <div class="brief-actions-row">
-              <button id="btn-brief-launch-flight" type="button" class="btn btn-primary btn-glow brief-launch-btn">
-                <span class="btn-main-label">🚀 LAUNCH FLIGHT OPERATIONS</span>
-                <span class="btn-subtext">3D WebGL Liftoff from Pad 39A</span>
-              </button>
-              <button id="btn-brief-enter-studio" type="button" class="btn btn-secondary brief-studio-btn">
-                <span class="btn-main-label">🛠️ SPACECRAFT DESIGN STUDIO</span>
-                <span class="btn-subtext">Configure Antennas, Solar & Instruments</span>
-              </button>
-            </div>
+          <!-- Row 4: Action Buttons (Launch & Design Studio) -->
+          <div class="brief-footer-actions">
+            <button id="btn-brief-launch-flight" type="button" class="brief-btn brief-btn-launch">
+              <span class="btn-icon">🚀</span>
+              <span class="btn-text">Launch Flight Operations</span>
+              <span class="btn-arrow">→</span>
+            </button>
+            <button id="btn-brief-enter-studio" type="button" class="brief-btn brief-btn-studio">
+              <span class="btn-icon">⬡</span>
+              <span class="btn-text">Spacecraft Design Studio</span>
+              <span class="btn-arrow">→</span>
+            </button>
           </div>
         </div>
+
       </div>
     </div>
 

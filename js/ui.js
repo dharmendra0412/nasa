@@ -360,35 +360,68 @@ window.GameUI = (function () {
       const categoryEl = document.getElementById("brief-mission-category");
       const destEl = document.getElementById("brief-destination");
       const diffEl = document.getElementById("brief-difficulty");
+      const starsEl = document.getElementById("brief-stars");
       const durEl = document.getElementById("brief-duration");
-      const narrativeEl = document.getElementById("brief-narrative");
+      const craftEl = document.getElementById("brief-spacecraft-img");
+      const artEl = document.getElementById("brief-artwork-img");
       const objectivesList = document.getElementById("brief-objectives-list");
+      const milestonesGrid = document.getElementById("brief-milestones-grid");
 
       if (iconEl) iconEl.textContent = mission.icon || "🚀";
       if (nameEl) nameEl.textContent = mission.name || "NASA Mission Challenge";
-      if (categoryEl) categoryEl.textContent = `${(mission.type || "NASA Spaceflight").toUpperCase()} · CLASS-B`;
+      if (categoryEl) categoryEl.textContent = mission.categoryTag || `${(mission.type || "NASA Spaceflight").toUpperCase()} · CLASS-B`;
       if (destEl) destEl.textContent = mission.destination || "Planetary Orbit";
       if (diffEl) {
-        const d = mission.difficulty || 2;
-        const stars = "⭐".repeat(Math.min(5, d));
-        diffEl.textContent = `${stars} (${d}/5)`;
+        const d = mission.difficulty || 1;
+        diffEl.textContent = `${d} / 5`;
+      }
+      if (starsEl) {
+        const d = mission.difficulty || 1;
+        starsEl.textContent = "⭐".repeat(Math.min(5, Math.max(1, d)));
       }
       if (durEl) durEl.textContent = `~${mission.duration || 365} Days`;
-      if (narrativeEl) narrativeEl.textContent = mission.briefing || "Telemetry indicates high priority science exploration. Configure subsystems or initiate orbital launch.";
+      if (craftEl) {
+        craftEl.src = mission.craftImg || "assets/brief/sentinel-e_craft_trans.png";
+        craftEl.alt = `${mission.name} Spacecraft`;
+      }
+      if (artEl) {
+        artEl.src = mission.artImg || "assets/brief/sentinel-e_art.jpg";
+        artEl.alt = `${mission.name} Artwork`;
+      }
 
       if (objectivesList) {
         objectivesList.innerHTML = "";
-        if (mission.objectives && mission.objectives.length > 0) {
-          mission.objectives.forEach(obj => {
-            const item = document.createElement("div");
-            item.className = "brief-obj-item";
-            item.innerHTML = `
-              <div class="brief-obj-title">🎯 ${obj.name}</div>
-              <div class="brief-obj-desc">${obj.description}</div>
-            `;
-            objectivesList.appendChild(item);
-          });
-        }
+        const bullets = mission.objectiveBullets || (mission.objectives ? mission.objectives.map(o => ({ verb: o.name.split(" ")[0], text: o.description })) : []);
+        bullets.forEach(b => {
+          const row = document.createElement("div");
+          row.className = "brief-bullet-row";
+          row.innerHTML = `
+            <span class="brief-bullet-check">✔</span>
+            <div class="brief-bullet-text">
+              <strong class="bullet-verb">${b.verb}</strong> — <span class="bullet-desc">${b.text}</span>
+            </div>
+          `;
+          objectivesList.appendChild(row);
+        });
+      }
+
+      if (milestonesGrid) {
+        milestonesGrid.innerHTML = "";
+        const milestones = mission.milestoneCards || [];
+        milestones.forEach(m => {
+          const card = document.createElement("div");
+          card.className = `brief-milestone-card theme-${m.theme || "blue"}`;
+          card.innerHTML = `
+            <div class="milestone-card-top">
+              <span class="milestone-icon-wrap">${m.icon}</span>
+              <span class="milestone-title">${m.title}</span>
+            </div>
+            <div class="milestone-tags-row">
+              ${(m.tags || []).map(t => `<span class="milestone-tag-pill">${t}</span>`).join("")}
+            </div>
+          `;
+          milestonesGrid.appendChild(card);
+        });
       }
 
       if (modalChallengeBrief) {
