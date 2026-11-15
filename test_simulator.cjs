@@ -42,6 +42,7 @@ class MockContext2D {
   lineTo() {}
   arc() {}
   ellipse() {}
+  bezierCurveTo() {}
   stroke() {}
   fill() {}
   fillText() {}

@@ -441,6 +441,11 @@ window.SpaceFlightGame = (function () {
     if (txt) txt.textContent = "🛡️ SAFE VIEW: ON";
     sfx("playBeep", 1200, 0.2);
     addFloatingText("🔄 SPACECRAFT RESTORED! SAFE MODE ENGAGED", canvasHUD ? canvasHUD.width / 2 : 480, 200, "#00e676", 26);
+    if (window.Space3D && missionConfig) {
+      const m = missionConfig.mission;
+      const o = missionConfig.orbit;
+      window.Space3D.setupCelestialBody(o ? o.id : null, m ? m.id : null, m);
+    }
   }
 
   function setCameraPreset(mode) {
@@ -484,7 +489,8 @@ window.SpaceFlightGame = (function () {
     if (window.Space3D && canvas3D) {
       using3D = window.Space3D.init(canvas3D);
       const orbitId = orbit ? orbit.id : "leo";
-      window.Space3D.setupCelestialBody(orbitId);
+      const missionId = mission ? mission.id : (state ? state.missionId : "sentinel-e");
+      window.Space3D.setupCelestialBody(orbitId, missionId, mission);
       window.Space3D.setupOrbitLine(55, 55);
 
       rocket3D = window.Space3D.buildRocket(missionConfig);
@@ -868,7 +874,14 @@ window.SpaceFlightGame = (function () {
         spacecraft3D.position.set(0, 0, 55);
         spacecraft3D.rotation.set(0, 0, 0);
       }
-      if (window.Space3D) window.Space3D.setCameraMode("chase");
+      if (window.Space3D) {
+        const m = missionConfig ? missionConfig.mission : null;
+        const o = missionConfig ? missionConfig.orbit : null;
+        const mId = m ? m.id : (state ? state.missionId : null);
+        const oId = o ? o.id : null;
+        window.Space3D.setupCelestialBody(oId, mId, m);
+        window.Space3D.setCameraMode("chase");
+      }
     }
   }
 

@@ -140,13 +140,183 @@ window.Space3D = (function () {
     createMars() {
       const c = document.createElement("canvas");
       c.width = 1024; c.height = 512;
-      const ctx = c.getContext("2d");
-      ctx.fillStyle = "#c1440e"; ctx.fillRect(0, 0, 1024, 512);
-      ctx.fillStyle = "#7e2d09";
-      ctx.beginPath(); ctx.ellipse(450, 260, 180, 80, -0.1, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, 1024, 25); ctx.fillRect(0, 487, 1024, 25);
-      return new THREE.CanvasTexture(c);
+      const ctx = c.getContext ? c.getContext("2d") : null;
+      if (!ctx) return new THREE.CanvasTexture(c);
+
+      // 1. Base Martian Regolith & Iron Oxide Terrain
+      const grad = ctx.createLinearGradient(0, 0, 0, 512);
+      grad.addColorStop(0, "#d46b38");
+      grad.addColorStop(0.2, "#be4e20");
+      grad.addColorStop(0.5, "#a63d15");
+      grad.addColorStop(0.8, "#b94c1f");
+      grad.addColorStop(1, "#d46b38");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 1024, 512);
+
+      // 2. High-Frequency Regolith Speckle & Noise
+      ctx.fillStyle = "rgba(70, 20, 5, 0.08)";
+      for (let i = 0; i < 4000; i++) {
+        const nx = Math.random() * 1024;
+        const ny = Math.random() * 512;
+        const nr = Math.random() * 3 + 1;
+        ctx.fillRect(nx, ny, nr, nr);
+      }
+      ctx.fillStyle = "rgba(255, 170, 120, 0.06)";
+      for (let i = 0; i < 2500; i++) {
+        const nx = Math.random() * 1024;
+        const ny = Math.random() * 512;
+        const nr = Math.random() * 2 + 1;
+        ctx.fillRect(nx, ny, nr, nr);
+      }
+
+      // 3. Major Dark Basalt Albedo Provinces (Syrtis Major, Acidalia, Sinus Sabaeus, Mare Cimmerium)
+      ctx.fillStyle = "#5c2008";
+      // Syrtis Major (dark triangular volcanic shield)
+      ctx.beginPath();
+      ctx.moveTo(820, 180);
+      ctx.lineTo(890, 280);
+      ctx.lineTo(770, 310);
+      ctx.closePath();
+      ctx.fill();
+
+      // Acidalia Planitia (dark northern lowland)
+      ctx.beginPath();
+      ctx.ellipse(320, 140, 140, 70, 0.15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sinus Sabaeus & Meridiani Planum (equatorial dark belt)
+      ctx.beginPath();
+      ctx.ellipse(540, 290, 180, 55, -0.05, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mare Tyrrhenum & Terra Cimmeria (southern dark highlands)
+      ctx.beginPath();
+      ctx.ellipse(750, 350, 210, 65, 0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Utopia Planitia & Elysium (eastern dark contours)
+      ctx.beginPath();
+      ctx.ellipse(140, 210, 110, 60, -0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. Valles Marineris (The Grand Canyon of Mars - 4,000 km rift)
+      ctx.strokeStyle = "#381204";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(270, 285);
+      if (ctx.bezierCurveTo) {
+        ctx.bezierCurveTo(340, 295, 410, 275, 480, 290);
+      } else {
+        ctx.lineTo(480, 290);
+      }
+      ctx.stroke();
+      // Secondary rift troughs (Candor & Melas Chasma)
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(330, 280);
+      ctx.lineTo(440, 305);
+      ctx.moveTo(310, 292);
+      ctx.lineTo(460, 282);
+      ctx.stroke();
+
+      // 5. Giant Shield Volcanoes: Olympus Mons & Tharsis Montes
+      // Olympus Mons (elevated volcanic caldera)
+      const oGrad = ctx.createRadialGradient(230, 220, 4, 230, 220, 35);
+      oGrad.addColorStop(0, "#2c0e04"); // central caldera
+      oGrad.addColorStop(0.3, "#823112"); // caldera rim
+      oGrad.addColorStop(0.7, "#cf632e"); // volcanic shield flanks
+      oGrad.addColorStop(1, "rgba(190, 78, 32, 0)"); // base
+      ctx.fillStyle = oGrad;
+      ctx.beginPath();
+      ctx.arc(230, 220, 35, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tharsis Montes (Ascraeus, Pavonis, Arsia Mons)
+      [
+        { x: 310, y: 195, r: 20 },
+        { x: 295, y: 245, r: 22 },
+        { x: 280, y: 295, r: 24 }
+      ].forEach(m => {
+        const mGrad = ctx.createRadialGradient(m.x, m.y, 2, m.x, m.y, m.r);
+        mGrad.addColorStop(0, "#331105");
+        mGrad.addColorStop(0.4, "#8a3514");
+        mGrad.addColorStop(1, "rgba(180, 70, 28, 0)");
+        ctx.fillStyle = mGrad;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 6. Impact Basins: Hellas & Argyre Planitia
+      const hGrad = ctx.createRadialGradient(780, 395, 10, 780, 395, 65);
+      hGrad.addColorStop(0, "#cc7a4a"); // dusty floor
+      hGrad.addColorStop(0.8, "#803212"); // rim
+      hGrad.addColorStop(1, "rgba(92, 32, 8, 0)");
+      ctx.fillStyle = hGrad;
+      ctx.beginPath();
+      ctx.arc(780, 395, 65, 0, Math.PI * 2);
+      ctx.fill();
+
+      const aGrad = ctx.createRadialGradient(420, 415, 8, 420, 415, 45);
+      aGrad.addColorStop(0, "#c97446");
+      aGrad.addColorStop(0.85, "#7a2e0f");
+      aGrad.addColorStop(1, "rgba(92, 32, 8, 0)");
+      ctx.fillStyle = aGrad;
+      ctx.beginPath();
+      ctx.arc(420, 415, 45, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 7. Impact Crater Rings scattered across Southern Highlands
+      ctx.strokeStyle = "rgba(40, 10, 3, 0.6)";
+      ctx.lineWidth = 1.5;
+      [
+        { x: 620, y: 360, r: 18 }, { x: 580, y: 420, r: 14 },
+        { x: 660, y: 410, r: 22 }, { x: 500, y: 380, r: 16 },
+        { x: 920, y: 350, r: 20 }, { x: 180, y: 360, r: 15 }
+      ].forEach(cr => {
+        ctx.beginPath();
+        ctx.arc(cr.x, cr.y, cr.r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255, 200, 160, 0.25)";
+        ctx.beginPath();
+        ctx.arc(cr.x - 1, cr.y - 1, cr.r * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 8. Polar Ice Caps (Planum Boreum at North & Planum Australe at South)
+      const nCap = ctx.createLinearGradient(0, 0, 0, 40);
+      nCap.addColorStop(0, "#ffffff");
+      nCap.addColorStop(0.7, "#edf2f7");
+      nCap.addColorStop(1, "rgba(220, 230, 242, 0)");
+      ctx.fillStyle = nCap;
+      ctx.fillRect(0, 0, 1024, 40);
+
+      // Spiral troughs in North polar cap
+      ctx.strokeStyle = "rgba(160, 60, 20, 0.4)";
+      ctx.lineWidth = 2;
+      for (let x = 80; x < 1024; x += 160) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        if (ctx.bezierCurveTo) {
+          ctx.bezierCurveTo(x + 30, 15, x - 20, 28, x + 10, 38);
+        } else {
+          ctx.lineTo(x + 10, 38);
+        }
+        ctx.stroke();
+      }
+
+      // South Polar Ice Cap
+      const sCap = ctx.createLinearGradient(0, 470, 0, 512);
+      sCap.addColorStop(0, "rgba(220, 230, 242, 0)");
+      sCap.addColorStop(0.3, "#e2e8f0");
+      sCap.addColorStop(1, "#ffffff");
+      ctx.fillStyle = sCap;
+      ctx.fillRect(0, 470, 1024, 42);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.ClampToEdgeWrapping;
+      return tex;
     },
 
     createSolarPanel() {
@@ -250,7 +420,8 @@ window.Space3D = (function () {
   }
 
   // ATMOSPHERE RAYLEIGH SCATTERING SHADER
-  function createAtmosphereShader(radius) {
+  function createAtmosphereShader(radius, type = "earth") {
+    const isMars = (type === "mars");
     const vertexShader = `
       varying vec3 vNormal;
       void main() {
@@ -263,7 +434,7 @@ window.Space3D = (function () {
       varying vec3 vNormal;
       void main() {
         float intensity = pow(0.70 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.2);
-        gl_FragColor = vec4(0.0, 0.72, 1.0, 1.0) * intensity * 0.75;
+        gl_FragColor = vec4(${isMars ? "0.96, 0.46, 0.22, 1.0" : "0.0, 0.72, 1.0, 1.0"}) * intensity * ${isMars ? "0.55" : "0.75"};
       }
     `;
 
@@ -275,7 +446,7 @@ window.Space3D = (function () {
       transparent: true
     });
 
-    return new THREE.Mesh(new THREE.SphereGeometry(radius * 1.025, 48, 48), mat);
+    return new THREE.Mesh(new THREE.SphereGeometry(radius * (isMars ? 1.018 : 1.025), 48, 48), mat);
   }
 
   // =========================================================================
@@ -965,14 +1136,44 @@ window.Space3D = (function () {
   // =========================================================================
   // SETUP CELESTIAL ENVIRONMENT (EARTH / MOON / MARS)
   // =========================================================================
-  function setupCelestialBody(orbitType) {
-    if (planetMesh) scene.remove(planetMesh);
-    if (cloudsMesh) scene.remove(cloudsMesh);
-    if (atmosphereMesh) scene.remove(atmosphereMesh);
+  function setupCelestialBody(orbitType, missionId, missionObj) {
+    if (planetMesh) {
+      scene.remove(planetMesh);
+      planetMesh = null;
+    }
+    if (cloudsMesh) {
+      scene.remove(cloudsMesh);
+      cloudsMesh = null;
+    }
+    if (atmosphereMesh) {
+      scene.remove(atmosphereMesh);
+      atmosphereMesh = null;
+    }
 
     const planetRadius = 40;
 
-    if (orbitType === "lunar") {
+    const isMars = (
+      orbitType === "mars" ||
+      orbitType === "red-pioneer" ||
+      missionId === "red-pioneer" ||
+      (missionObj && missionObj.id === "red-pioneer") ||
+      (missionObj && missionObj.destination && missionObj.destination.toLowerCase().includes("mars")) ||
+      (typeof missionId === "string" && missionId.toLowerCase().includes("mars"))
+    );
+
+    const isMoon = (
+      !isMars && (
+        orbitType === "lunar" ||
+        missionId === "artemis-scout" ||
+        (missionObj && missionObj.id === "artemis-scout") ||
+        (missionObj && missionObj.destination && (
+          missionObj.destination.toLowerCase().includes("moon") ||
+          missionObj.destination.toLowerCase().includes("lunar")
+        ))
+      )
+    );
+
+    if (isMoon) {
       const moonMat = new THREE.MeshStandardMaterial({
         map: TextureFactory.getRealMoon(),
         roughness: 0.85,
@@ -983,18 +1184,18 @@ window.Space3D = (function () {
       planetMesh.receiveShadow = true;
       scene.add(planetMesh);
 
-    } else if (orbitType === "mars" || orbitType === "red-pioneer") {
+    } else if (isMars) {
       const marsMat = new THREE.MeshStandardMaterial({
         map: TextureFactory.createMars(),
-        roughness: 0.8,
-        metalness: 0.15
+        roughness: 0.82,
+        metalness: 0.12
       });
-      planetMesh = new THREE.Mesh(new THREE.SphereGeometry(planetRadius, 48, 48), marsMat);
+      planetMesh = new THREE.Mesh(new THREE.SphereGeometry(planetRadius, 64, 64), marsMat);
       planetMesh.position.set(0, -planetRadius - 15, 0);
       planetMesh.receiveShadow = true;
       scene.add(planetMesh);
 
-      atmosphereMesh = createAtmosphereShader(planetRadius);
+      atmosphereMesh = createAtmosphereShader(planetRadius, "mars");
       atmosphereMesh.position.copy(planetMesh.position);
       scene.add(atmosphereMesh);
 
@@ -1022,7 +1223,7 @@ window.Space3D = (function () {
       scene.add(cloudsMesh);
 
       // Atmosphere Glow
-      atmosphereMesh = createAtmosphereShader(planetRadius);
+      atmosphereMesh = createAtmosphereShader(planetRadius, "earth");
       atmosphereMesh.position.copy(planetMesh.position);
       scene.add(atmosphereMesh);
     }
