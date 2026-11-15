@@ -575,3 +575,168 @@
   box-shadow: 0 0 32px rgba(0, 230, 118, 0.75);
   transform: translateY(-2px);
 }
+
+/* Real-World Flight Trajectory Predictor Card */
+.custom-trajectory-card {
+  background: rgba(10, 18, 38, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.traj-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.traj-metric-box {
+  background: rgba(6, 12, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.traj-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.traj-val {
+  font-family: var(--font-heading, 'Orbitron', monospace);
+  font-size: 15px;
+  font-weight: 800;
+  color: #00e5ff;
+}
+
+.traj-val.val-go { color: #00e676; }
+.traj-val.val-warn { color: #ff9100; }
+.traj-val.val-fail { color: #ff1744; }
+
+.traj-sub {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+/* Kaise Jayega Timeline Track */
+.traj-flight-path {
+  background: rgba(6, 12, 26, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.traj-section-title {
+  display: block;
+  font-family: var(--font-heading, 'Orbitron', monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: #00e5ff;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.traj-steps-track {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  padding-left: 10px;
+}
+
+.traj-steps-track::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: rgba(0, 229, 255, 0.25);
+}
+
+.traj-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.step-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #00e5ff;
+  border: 2px solid #060c1a;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.traj-step.step-fail .step-dot {
+  background: #ff1744;
+  box-shadow: 0 0 10px rgba(255, 23, 68, 0.8);
+}
+
+.step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.step-num {
+  font-family: var(--font-heading, 'Orbitron', monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: #e2e8f0;
+  letter-spacing: 0.05em;
+}
+
+.traj-step.step-fail .step-num {
+  color: #ff1744;
+}
+
+.step-info {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* FDO Physics Analysis Box */
+.traj-fdo-brief {
+  background: rgba(4, 9, 20, 0.9);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.fdo-header {
+  margin-bottom: 6px;
+}
+
+.fdo-badge {
+  font-family: var(--font-heading, 'Orbitron', monospace);
+  font-size: 9px;
+  font-weight: 800;
+  color: #00e5ff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fdo-text {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  color: #cbd5e1;
+}

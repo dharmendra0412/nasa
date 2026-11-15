@@ -481,6 +481,81 @@ window.CustomDesigner = (function () {
             </button>
           </div>
 
+          <!-- REAL-WORLD FLIGHT TRAJECTORY & APOGEE PREDICTOR -->
+          <div class="custom-card custom-trajectory-card">
+            <div class="custom-card-header">
+              <div class="custom-card-title"><span>🪐</span> REAL-WORLD FLIGHT TRAJECTORY PREDICTOR</div>
+              <span class="custom-card-tag" id="traj-status-tag">ORBITAL INSERTION</span>
+            </div>
+
+            <!-- 4 Core Real-World Physics Metrics -->
+            <div class="traj-metrics-grid">
+              <div class="traj-metric-box">
+                <span class="traj-label">📈 KITNA UPAR JAYEGA (PEAK ALTITUDE)</span>
+                <span class="traj-val" id="traj-peak-alt">400 km</span>
+                <span class="traj-sub" id="traj-peak-sub">Target LEO Orbit Achieved</span>
+              </div>
+              <div class="traj-metric-box">
+                <span class="traj-label">🎯 JAYEGA YA NAHI (STATUS)</span>
+                <span class="traj-val" id="traj-feasibility-val">✔ GO (STABLE ORBIT)</span>
+                <span class="traj-sub" id="traj-feasibility-sub">Payload Margin: +15,632 kg</span>
+              </div>
+              <div class="traj-metric-box">
+                <span class="traj-label">🚀 LIFTOFF TWR (THRUST-TO-WEIGHT)</span>
+                <span class="traj-val" id="traj-twr-val">1.45 TWR</span>
+                <span class="traj-sub" id="traj-twr-sub">Nominal Liftoff (&gt; 1.25)</span>
+              </div>
+              <div class="traj-metric-box">
+                <span class="traj-label">⚡ ORBITAL VELOCITY BUDGET</span>
+                <span class="traj-val" id="traj-velocity-val">9,550 m/s</span>
+                <span class="traj-sub" id="traj-velocity-sub">Needed: 9,400 m/s</span>
+              </div>
+            </div>
+
+            <!-- KAISE JAYEGA (Ascent Profile Timeline) -->
+            <div class="traj-flight-path">
+              <span class="traj-section-title">🛣️ KAISE JAYEGA (REAL-WORLD ASCENT STAGES)</span>
+              <div class="traj-steps-track">
+                <div class="traj-step" id="step-liftoff">
+                  <div class="step-dot"></div>
+                  <div class="step-body">
+                    <span class="step-num">STAGE 01 • LIFTOFF</span>
+                    <span class="step-info" id="step-liftoff-info">LC-39A vertical climb at 1.45 TWR</span>
+                  </div>
+                </div>
+                <div class="traj-step" id="step-gravity">
+                  <div class="step-dot"></div>
+                  <div class="step-body">
+                    <span class="step-num">STAGE 02 • GRAVITY TURN</span>
+                    <span class="step-info" id="step-gravity-info">Eastward pitch maneuver, Max-Q at 14 km</span>
+                  </div>
+                </div>
+                <div class="traj-step" id="step-staging">
+                  <div class="step-dot"></div>
+                  <div class="step-body">
+                    <span class="step-num">STAGE 03 • MECO & STAGING</span>
+                    <span class="step-info" id="step-staging-info">Stage 1 booster separation at 65 km</span>
+                  </div>
+                </div>
+                <div class="traj-step" id="step-orbit">
+                  <div class="step-dot"></div>
+                  <div class="step-body">
+                    <span class="step-num">STAGE 04 • ORBIT INSERTION</span>
+                    <span class="step-info" id="step-orbit-info">Upper stage burns to 7,800 m/s at target altitude</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- NASA FDO Physics Briefing -->
+            <div class="traj-fdo-brief">
+              <div class="fdo-header">
+                <span class="fdo-badge">NASA FDO FLIGHT DYNAMICS REPORT</span>
+              </div>
+              <p class="fdo-text" id="traj-fdo-text">Calculating trajectory dynamics...</p>
+            </div>
+          </div>
+
         </div>
       </div>
     `;
@@ -713,6 +788,159 @@ window.CustomDesigner = (function () {
       } else {
         statusBadge.className = "status-badge-warn";
         statusBadge.textContent = `⚠️ WARNING: POWER DEFICIT (${powerBalance} W) — EXPAND POWER SYSTEM`;
+      }
+    }
+
+    // -------------------------------------------------------------
+    // REAL-WORLD ASTRODYNAMICS & TRAJECTORY PREDICTOR
+    // -------------------------------------------------------------
+    const isHighEnergy = ["geo", "heo", "lunar", "l2"].includes(orbit.id);
+    const capacityKg = isHighEnergy ? (lv.payloadGTO || Math.round((lv.payloadLEO || 4000) * 0.4)) : (lv.payloadLEO || 4000);
+    const payloadMargin = capacityKg - wetMass;
+    const payloadRatio = wetMass / Math.max(1, capacityKg);
+
+    // Liftoff Thrust-to-Weight Ratio
+    const baseTWR = lv.id === "scout" ? 1.42 : lv.id === "pathfinder" ? 1.45 : lv.id === "workhorse" ? 1.42 : lv.id === "titan" ? 1.38 : 1.36;
+    const liftoffTWR = +(baseTWR * Math.min(1.25, Math.max(0.65, 1 / (0.85 + 0.15 * payloadRatio)))).toFixed(2);
+
+    // Target orbit altitude in km
+    const targetAltKm = parseInt(orbit.altitudeKm) || (orbit.id === "lunar" ? 384400 : orbit.id === "l2" ? 1500000 : 400);
+
+    // Orbital velocity budget needed vs available
+    const reqDeltaV = orbit.id === "leo" ? 9400 : orbit.id === "sso" ? 9800 : orbit.id === "meo" ? 10600 : orbit.id === "geo" ? 12800 : orbit.id === "heo" ? 12200 : orbit.id === "lunar" ? 13200 : 13500;
+    const boosterDeltaVCap = Math.round(9400 / Math.max(0.75, Math.pow(payloadRatio, 0.5)));
+    const totalVelocityBudget = boosterDeltaVCap + deltaV;
+
+    // "Kitna Upar Jayega" & "Jayega Ya Nahi"
+    let flightStatus = "ORBIT_ACHIEVED"; // 'ORBIT_ACHIEVED', 'SUBORBITAL_CRASH', 'LIFTOFF_FAIL', 'POWER_BLACKOUT'
+    let peakAltDisplay = `${targetAltKm.toLocaleString()} km`;
+    let peakSubDisplay = `Target ${orbit.type || "LEO"} Orbit Achieved`;
+    let feasibilityText = `✔ GO (STABLE ORBIT)`;
+    let feasibilitySub = `Payload Margin: +${Math.round(payloadMargin)} kg`;
+    let tagText = "ORBITAL INSERTION";
+    let tagColor = "#00e676";
+
+    if (liftoffTWR < 1.0) {
+      flightStatus = "LIFTOFF_FAIL";
+      peakAltDisplay = `0 km (PAD 39A)`;
+      peakSubDisplay = `Thrust < Gravity • Vehicle Stalls on Pad`;
+      feasibilityText = `⛔ LIFTOFF FAILURE`;
+      feasibilitySub = `TWR ${liftoffTWR} < 1.0 (Insufficient Thrust)`;
+      tagText = "LIFTOFF FAILURE";
+      tagColor = "#ff1744";
+    } else if (payloadRatio > 1.0) {
+      flightStatus = "SUBORBITAL_CRASH";
+      const hPeak = Math.max(38, Math.min(125, Math.round(110 * Math.pow(1 / payloadRatio, 1.6))));
+      peakAltDisplay = `${hPeak} km (SUBORBITAL)`;
+      peakSubDisplay = `Burnout at ${hPeak} km (Below Orbital Velocity)`;
+      feasibilityText = `⛔ SUBORBITAL BURNOUT`;
+      feasibilitySub = `Overweight by +${Math.round(wetMass - capacityKg)} kg for ${lv.name}`;
+      tagText = "SUBORBITAL CRASH";
+      tagColor = "#ff1744";
+    } else if (powerBalance < 0) {
+      flightStatus = "POWER_BLACKOUT";
+      peakAltDisplay = `${targetAltKm.toLocaleString()} km`;
+      peakSubDisplay = `Orbit reached, but shuts down in shadow`;
+      feasibilityText = `⚠️ POWER DEFICIT`;
+      feasibilitySub = `Deficit: ${powerBalance} W during eclipse`;
+      tagText = "ORBITAL BLACKOUT";
+      tagColor = "#ff9100";
+    }
+
+    // Update Predictor Metric DOM
+    const peakAltEl = document.getElementById("traj-peak-alt");
+    if (peakAltEl) {
+      peakAltEl.textContent = peakAltDisplay;
+      peakAltEl.className = `traj-val ${flightStatus === "ORBIT_ACHIEVED" ? "val-go" : flightStatus === "POWER_BLACKOUT" ? "val-warn" : "val-fail"}`;
+    }
+    const peakSubEl = document.getElementById("traj-peak-sub");
+    if (peakSubEl) peakSubEl.textContent = peakSubDisplay;
+
+    const feasValEl = document.getElementById("traj-feasibility-val");
+    if (feasValEl) {
+      feasValEl.textContent = feasibilityText;
+      feasValEl.className = `traj-val ${flightStatus === "ORBIT_ACHIEVED" ? "val-go" : flightStatus === "POWER_BLACKOUT" ? "val-warn" : "val-fail"}`;
+    }
+    const feasSubEl = document.getElementById("traj-feasibility-sub");
+    if (feasSubEl) feasSubEl.textContent = feasibilitySub;
+
+    const twrValEl = document.getElementById("traj-twr-val");
+    if (twrValEl) {
+      twrValEl.textContent = `${liftoffTWR} TWR`;
+      twrValEl.className = `traj-val ${liftoffTWR >= 1.25 ? "val-go" : liftoffTWR >= 1.05 ? "val-warn" : "val-fail"}`;
+    }
+    const twrSubEl = document.getElementById("traj-twr-sub");
+    if (twrSubEl) twrSubEl.textContent = liftoffTWR >= 1.25 ? `Nominal Liftoff (> 1.25)` : liftoffTWR >= 1.0 ? `Sluggish Ascent (< 1.25)` : `Cannot Lift Off (< 1.0)`;
+
+    const velValEl = document.getElementById("traj-velocity-val");
+    if (velValEl) {
+      velValEl.textContent = `${totalVelocityBudget.toLocaleString()} m/s`;
+      velValEl.className = `traj-val ${totalVelocityBudget >= reqDeltaV ? "val-go" : "val-fail"}`;
+    }
+    const velSubEl = document.getElementById("traj-velocity-sub");
+    if (velSubEl) velSubEl.textContent = `Needed for ${orbit.type || "LEO"}: ${reqDeltaV.toLocaleString()} m/s (${totalVelocityBudget >= reqDeltaV ? "+" : ""}${totalVelocityBudget - reqDeltaV} m/s)`;
+
+    const tagEl = document.getElementById("traj-status-tag");
+    if (tagEl) {
+      tagEl.textContent = tagText;
+      tagEl.style.borderColor = tagColor;
+      tagEl.style.color = tagColor;
+    }
+
+    // "Kaise Jayega" - Update Ascent Milestones
+    const stepLiftoffEl = document.getElementById("step-liftoff-info");
+    if (stepLiftoffEl) {
+      stepLiftoffEl.textContent = liftoffTWR >= 1.0 
+        ? `Cape Canaveral LC-39A vertical climb at ${liftoffTWR} TWR` 
+        : `Vehicle engines ignite but fail to lift rocket mass off Pad 39A`;
+    }
+
+    const stepGravityEl = document.getElementById("step-gravity-info");
+    if (stepGravityEl) {
+      stepGravityEl.textContent = liftoffTWR >= 1.0
+        ? `Eastward pitchover into orbital corridor, Max-Q aerodynamic pressure at 14 km (Mach 1.3)`
+        : `Vehicle pad abort or structural collapse under gravity load`;
+    }
+
+    const stepStaging = document.getElementById("step-staging");
+    const stepStagingEl = document.getElementById("step-staging-info");
+    const stepOrbit = document.getElementById("step-orbit");
+    const stepOrbitEl = document.getElementById("step-orbit-info");
+
+    if (flightStatus === "SUBORBITAL_CRASH") {
+      if (stepStaging) stepStaging.classList.add("step-fail");
+      if (stepStagingEl) stepStagingEl.textContent = `❌ Propellant Exhausted at ${peakAltDisplay}: Rocket burns out before attaining 7,800 m/s orbital speed`;
+      
+      if (stepOrbit) stepOrbit.classList.add("step-fail");
+      if (stepOrbitEl) stepOrbitEl.textContent = `❌ Suborbital Ballistic Arc: Gravitational re-entry plunge and ocean impact`;
+    } else if (flightStatus === "LIFTOFF_FAIL") {
+      if (stepStaging) stepStaging.classList.add("step-fail");
+      if (stepStagingEl) stepStagingEl.textContent = `❌ Launch Abort: Rocket remains anchored on pad`;
+      if (stepOrbit) stepOrbit.classList.add("step-fail");
+      if (stepOrbitEl) stepOrbitEl.textContent = `❌ Mission scrubbed: Zero altitude attained`;
+    } else if (flightStatus === "POWER_BLACKOUT") {
+      if (stepStaging) stepStaging.classList.remove("step-fail");
+      if (stepStagingEl) stepStagingEl.textContent = `Stage 1 booster cutoff at 65 km (2,400 m/s), fairing separated at 110 km`;
+      if (stepOrbit) stepOrbit.classList.add("step-fail");
+      if (stepOrbitEl) stepOrbitEl.textContent = `⚠️ Upper stage circularizes at ${targetAltKm.toLocaleString()} km, but satellite suffers electrical blackout in Earth shadow`;
+    } else {
+      if (stepStaging) stepStaging.classList.remove("step-fail");
+      if (stepStagingEl) stepStagingEl.textContent = `Stage 1 booster cutoff at 65 km (2,400 m/s), fairing separated at 110 km`;
+      if (stepOrbit) stepOrbit.classList.remove("step-fail");
+      if (stepOrbitEl) stepOrbitEl.textContent = `Upper stage circularization burn to 7,800 m/s. Spacecraft deployed at ${targetAltKm.toLocaleString()} km`;
+    }
+
+    // Update FDO Physics Report Text
+    const fdoTextEl = document.getElementById("traj-fdo-text");
+    if (fdoTextEl) {
+      if (flightStatus === "ORBIT_ACHIEVED") {
+        fdoTextEl.innerHTML = `<strong>NOMINAL TRAJECTORY CONFIRMED:</strong> With a <strong>${Math.round(wetMass)} kg</strong> payload on the <strong>${lv.name}</strong>, liftoff TWR is an optimal <strong>${liftoffTWR}</strong> with <strong>+${Math.round(payloadMargin)} kg</strong> of lift margin. The booster delivers <strong>${totalVelocityBudget.toLocaleString()} m/s</strong> of velocity budget, executing a clean gravity turn, staging at 65 km, and circularizing into <strong>${orbit.name}</strong> at 7,800 m/s. Positive power balance (<strong>+${powerBalance} W</strong>) guarantees continuous survival across all orbital daylight and eclipse passes.`;
+      } else if (flightStatus === "SUBORBITAL_CRASH") {
+        fdoTextEl.innerHTML = `<span style="color:#ff5252;"><strong>CRITICAL ASCENT FAILURE:</strong></span> The spacecraft mass (<strong>${Math.round(wetMass)} kg</strong>) exceeds the <strong>${lv.name}</strong>'s limit (<strong>${capacityKg} kg</strong>) by <strong>${Math.round(wetMass - capacityKg)} kg</strong>. The rocket will run out of fuel prematurely at <strong>~${peakAltDisplay}</strong> at only ~3,200 m/s (far below the 7,800 m/s needed to stay in orbit). Gravity will pull the vehicle back down in a suborbital ballistic arc, causing it to burn up or crash into the Atlantic Ocean. <br><br>👉 <em>Recommendation: Upgrade to a heavier launcher (e.g. Pathfinder or Workhorse Heavy) or reduce payload instruments.</em>`;
+      } else if (flightStatus === "LIFTOFF_FAIL") {
+        fdoTextEl.innerHTML = `<span style="color:#ff5252;"><strong>LIFTOFF PAD ABORT:</strong></span> Rocket thrust is unable to overcome total spacecraft and booster wet mass (<strong>TWR ${liftoffTWR} &lt; 1.0</strong>). The vehicle cannot physically leave Launch Complex 39A. <br><br>👉 <em>Recommendation: Switch to a rocket with higher liftoff thrust.</em>`;
+      } else {
+        fdoTextEl.innerHTML = `<span style="color:#ffab00;"><strong>ELECTRICAL BLACKOUT HAZARD:</strong></span> The rocket can deliver your spacecraft to <strong>${orbit.name}</strong>, but onboard electrical consumption (<strong>${powerLoad} W</strong>) exceeds generation (<strong>${powerGen} W</strong>) by <strong>${Math.abs(powerBalance)} W</strong>. During orbital eclipse (night pass), the batteries will drain rapidly, freezing the payload and permanently terminating telemetry. <br><br>👉 <em>Recommendation: Upgrade solar array size or select an RTG nuclear generator.</em>`;
       }
     }
   }
