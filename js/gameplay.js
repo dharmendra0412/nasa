@@ -85,29 +85,14 @@ window.SpaceFlightGame = (function () {
     // All game audio silenced per user request
   }
 
-  // Floating score popups (+50 Science, x2 Combo!)
+  // Floating text popups disabled per user request for pure simple clean simulation
   const floatingTexts = [];
   function addFloatingText(text, x, y, color = "#00e5ff", size = 18) {
-    floatingTexts.push({ text, x, y, vy: -1.2, life: 60, maxLife: 60, color, size });
+    // Disabled
   }
 
   function updateAndDrawFloatingTexts() {
-    if (!ctx) return;
-    for (let i = floatingTexts.length - 1; i >= 0; i--) {
-      const ft = floatingTexts[i];
-      ft.y += ft.vy;
-      ft.life--;
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, ft.life / ft.maxLife);
-      ctx.font = `bold ${ft.size}px 'Rajdhani', sans-serif`;
-      ctx.fillStyle = ft.color;
-      ctx.textAlign = "center";
-      ctx.shadowColor = ft.color;
-      ctx.shadowBlur = 10;
-      ctx.fillText(ft.text, ft.x, ft.y);
-      ctx.restore();
-      if (ft.life <= 0) floatingTexts.splice(i, 1);
-    }
+    // Disabled
   }
 
   // =========================================================================
@@ -1324,53 +1309,6 @@ window.SpaceFlightGame = (function () {
     ctx.fillStyle = ls.fuel < 20 ? "#ff1744" : "#00e676";
     ctx.textAlign = "right";
     ctx.fillText(`STAGE ${ls.stage} FUEL: ${Math.round(ls.fuel)}%`, w - 36, 43);
-
-    // Center Staging Prompt Banner
-    if (ls.stagingPrompt && !ls.isCountingDown) {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-      ctx.fillRect(w / 2 - 240, 72, 480, 32);
-      ctx.strokeStyle = "#00e5ff";
-      ctx.strokeRect(w / 2 - 240, 72, 480, 32);
-
-      ctx.font = "bold 13px 'Rajdhani', sans-serif";
-      ctx.fillStyle = "#00e5ff";
-      ctx.textAlign = "center";
-      ctx.fillText(ls.stagingPrompt, w / 2, 93);
-    }
-
-    // NASA T-Minus Digital Countdown Overlay
-    if (ls.isCountingDown) {
-      const sec = Math.max(0, Math.ceil(ls.countdown));
-      ctx.fillStyle = "rgba(2, 8, 20, 0.88)";
-      ctx.fillRect(w / 2 - 250, h / 2 - 95, 500, 190);
-      ctx.strokeStyle = "rgba(0, 229, 255, 0.6)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(w / 2 - 250, h / 2 - 95, 500, 190);
-
-      // Header
-      ctx.font = "bold 13px 'Orbitron', monospace";
-      ctx.fillStyle = "#00e5ff";
-      ctx.textAlign = "center";
-      ctx.fillText("KENNEDY SPACE CENTER LC-39A • COUNTDOWN", w / 2, h / 2 - 65);
-
-      // Digital Timer
-      ctx.font = "bold 56px 'Orbitron', monospace";
-      ctx.fillStyle = sec <= 3 ? "#ff1744" : (sec <= 6 ? "#ffd600" : "#00e676");
-      ctx.shadowColor = ctx.fillStyle;
-      ctx.shadowBlur = 15;
-      ctx.fillText(`T - 00:0${sec}`, w / 2, h / 2);
-      ctx.shadowBlur = 0;
-
-      // Status line
-      ctx.font = "bold 14px 'Rajdhani', sans-serif";
-      ctx.fillStyle = "#ffffff";
-      ctx.fillText(sec > 6 ? "SOUND SUPPRESSION WATER DELUGE ACTIVE" : "MAIN ENGINES IGNITED • ALL SYSTEMS GO", w / 2, h / 2 + 35);
-
-      // Skip prompt
-      ctx.font = "12px 'Rajdhani', sans-serif";
-      ctx.fillStyle = "rgba(0, 229, 255, 0.8)";
-      ctx.fillText("PRESS [SPACEBAR] OR TAP TO SKIP TO IMMEDIATE LIFTOFF", w / 2, h / 2 + 65);
-    }
   }
 
   // 2. DRAW ORBIT HUD (Clean & Simple)
@@ -1397,20 +1335,6 @@ window.SpaceFlightGame = (function () {
     ctx.fillStyle = os.battery < 25 ? "#ffd600" : "#80deea";
     ctx.textAlign = "right";
     ctx.fillText(`BATTERY: ${Math.round(os.battery)}% ⚡`, w - 36, 43);
-
-    // Target scanning prompt when target in boresight
-    const activeTarget = os.targets.find(t => Math.abs(t.x - (w / 2)) < 85 && !t.scanned);
-    if (activeTarget) {
-      ctx.fillStyle = "rgba(0, 229, 255, 0.25)";
-      ctx.fillRect(w / 2 - 220, 72, 440, 32);
-      ctx.strokeStyle = "#00e5ff";
-      ctx.strokeRect(w / 2 - 220, 72, 440, 32);
-
-      ctx.font = "bold 13px 'Rajdhani', sans-serif";
-      ctx.fillStyle = "#00e5ff";
-      ctx.textAlign = "center";
-      ctx.fillText(`🎯 ${activeTarget.name.toUpperCase()} IN SIGHT: PRESS [SPACE] TO SCAN!`, w / 2, 93);
-    }
   }
 
   // =========================================================================
