@@ -1289,7 +1289,7 @@ body {
 
 .design-screen-header {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -1369,6 +1369,8 @@ body {
   border-radius: 20px;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
+  z-index: 10;
   box-shadow: 0 0 16px rgba(14, 165, 233, 0.4);
   transition: all 0.2s ease;
 }
@@ -2014,15 +2016,21 @@ body {
 }
 
 .hw-stats-badges {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 6px;
 }
 
+#orbit-cards .hw-stats-badges {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
 .stat-chip {
-  padding: 2.5px 4px;
+  padding: 2.5px 6px;
   border-radius: 4px;
   font-size: 9px;
   font-weight: 700;
@@ -2033,6 +2041,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 4px;
+  flex: 0 1 auto;
 }
 
 .stat-chip.chip-deltav {

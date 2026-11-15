@@ -455,6 +455,7 @@ window.GameUI = (function () {
         closeChallengeBrief();
         window.GameEngine.init(selectedDifficulty || "engineer");
         window.GameEngine.selectMission(selectedQuickMissionId);
+        renderDesignStudio();
         showScreen("screen-design");
       });
     }
@@ -1068,7 +1069,20 @@ window.GameUI = (function () {
     }
 
     if (el.btnBackDesign) {
-      el.btnBackDesign.addEventListener("click", () => showScreen("screen-mission"));
+      el.btnBackDesign.addEventListener("click", () => {
+        renderMissionSelection();
+        const st = window.GameEngine.getState();
+        if (st.missionId) {
+          selectMissionCard(st.missionId);
+        }
+        showScreen("screen-mission");
+      });
+    }
+
+    if (el.btnBackMission) {
+      el.btnBackMission.addEventListener("click", () => {
+        showScreen("screen-design");
+      });
     }
 
     const btnBackDesignToHub = document.getElementById("btn-back-design-to-hub");

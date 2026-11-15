@@ -391,16 +391,50 @@ window.Space3D = (function () {
 
     // 1. Bus Core Dimensions based on selected bus
     let busW = 3.0, busH = 3.0, busL = 3.8;
-    if (comps.bus === "cubesat") { busW = 1.6; busH = 1.6; busL = 2.4; }
-    else if (comps.bus === "small-sat") { busW = 2.4; busH = 2.4; busL = 3.0; }
-    else if (comps.bus === "medium-sat") { busW = 3.0; busH = 3.0; busL = 3.8; }
-    else if (comps.bus === "large-sat") { busW = 4.2; busH = 4.2; busL = 5.2; }
+    let busScale = 1.0;
+    if (comps.bus === "cubesat") { busW = 1.6; busH = 1.6; busL = 2.4; busScale = 1.25; }
+    else if (comps.bus === "small-sat") { busW = 2.4; busH = 2.4; busL = 3.0; busScale = 1.05; }
+    else if (comps.bus === "medium-sat") { busW = 3.0; busH = 3.0; busL = 3.8; busScale = 0.92; }
+    else if (comps.bus === "large-sat") { busW = 3.8; busH = 3.8; busL = 4.6; busScale = 0.78; }
 
     const busGeo = new THREE.BoxGeometry(busW, busH, busL);
     const busMesh = new THREE.Mesh(busGeo, goldMat);
     busMesh.castShadow = true;
     busMesh.receiveShadow = true;
     group.add(busMesh);
+
+    // 4 Corner Structural Rails / Longerons (Aerospace Grade Aluminium)
+    const railThick = Math.max(0.08, busW * 0.04);
+    const railGeo = new THREE.BoxGeometry(railThick, busH * 1.02, railThick);
+    const halfW = busW * 0.5;
+    const halfL = busL * 0.5;
+    const cornerPositions = [
+      [-halfW, 0, -halfL],
+      [halfW, 0, -halfL],
+      [-halfW, 0, halfL],
+      [halfW, 0, halfL]
+    ];
+    cornerPositions.forEach(([rx, ry, rz]) => {
+      const rail = new THREE.Mesh(railGeo, metalMat);
+      rail.position.set(rx, ry, rz);
+      group.add(rail);
+    });
+
+    // Top & Bottom Equipment Deck Plates
+    const deckGeo = new THREE.BoxGeometry(busW * 0.92, 0.08, busL * 0.92);
+    const topDeck = new THREE.Mesh(deckGeo, metalMat);
+    topDeck.position.set(0, busH * 0.5 + 0.04, 0);
+    group.add(topDeck);
+
+    // Side Thermal Radiator Louver Panels (White Ceramic MLI)
+    const radMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.2, metalness: 0.8 });
+    const radGeo = new THREE.BoxGeometry(0.05, busH * 0.6, busL * 0.6);
+    const radLeft = new THREE.Mesh(radGeo, radMat);
+    radLeft.position.set(-busW * 0.5 - 0.02, 0, 0);
+    group.add(radLeft);
+    const radRight = new THREE.Mesh(radGeo, radMat);
+    radRight.position.set(busW * 0.5 + 0.02, 0, 0);
+    group.add(radRight);
 
     // Equipment Deck Ring
     const ringGeo = new THREE.TorusGeometry(busW * 0.55, 0.08, 12, 24);
@@ -415,6 +449,16 @@ window.Space3D = (function () {
     const cradleBase = new THREE.Mesh(cradleBaseGeo, cradleBaseMat);
     cradleBase.position.y = -busH * 0.5 - 0.12;
     group.add(cradleBase);
+
+    // Subtle Glowing Turntable Ring beneath bus
+    const turnRingGeo = new THREE.RingGeometry(busW * 0.65, busW * 0.72, 32);
+    const turnRingMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, side: THREE.DoubleSide });
+    const turnRing = new THREE.Mesh(turnRingGeo, turnRingMat);
+    turnRing.rotation.x = Math.PI / 2;
+    turnRing.position.y = -busH * 0.5 - 0.18;
+    group.add(turnRing);
+
+    group.scale.set(busScale, busScale, busScale);
 
     // 2. Power Subsystem (Solar Arrays vs RTG) - ONLY rendered if chosen!
     let leftWing = null, rightWing = null;
@@ -1331,16 +1375,22 @@ window.Space3D = (function () {
     cadCamera.position.set(0, 3, 14);
     cadCamera.lookAt(0, 0, 0);
 
-    const amb = new THREE.AmbientLight(0x334455, 0.9);
+    const amb = new THREE.AmbientLight(0x475569, 0.85);
     cadScene.add(amb);
 
-    const light1 = new THREE.DirectionalLight(0xffffff, 1.8);
-    light1.position.set(20, 25, 30);
+    const light1 = new THREE.DirectionalLight(0xffffff, 1.6);
+    light1.position.set(20, 25, 25);
     cadScene.add(light1);
 
-    const light2 = new THREE.DirectionalLight(0x00e5ff, 0.7);
-    light2.position.set(-20, -10, -20);
+    // Soft neutral studio fill light (cool white)
+    const light2 = new THREE.DirectionalLight(0xe2e8f0, 0.65);
+    light2.position.set(-20, 15, 20);
     cadScene.add(light2);
+
+    // Subtle aerospace blue rim/specular accent from behind
+    const light3 = new THREE.DirectionalLight(0x60a5fa, 0.35);
+    light3.position.set(-15, -15, -25);
+    cadScene.add(light3);
 
     // Initial spacecraft strictly reflects current engine state
     const curState = (window.GameEngine && typeof window.GameEngine.getState === "function") 
