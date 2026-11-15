@@ -34,35 +34,34 @@ class MockContext2D {
     this.textAlign = 'left';
     this.lineDash = [];
   }
-  fillRect() {}
-  clearRect() {}
-  strokeRect() {}
-  beginPath() {}
-  moveTo() {}
-  lineTo() {}
-  arc() {}
-  ellipse() {}
-  bezierCurveTo() {}
-  stroke() {}
-  fill() {}
-  fillText() {}
+  fillRect() { }
+  clearRect() { }
+  strokeRect() { }
+  beginPath() { }
+  moveTo() { }
+  lineTo() { }
+  arc() { }
+  ellipse() { }
+  stroke() { }
+  fill() { }
+  fillText() { }
   setLineDash(arr) { this.lineDash = arr; }
-  rect() {}
+  rect() { }
   createRadialGradient() {
-    return { addColorStop() {} };
+    return { addColorStop() { } };
   }
   createLinearGradient() {
-    return { addColorStop() {} };
+    return { addColorStop() { } };
   }
-  clip() {}
-  closePath() {}
+  clip() { }
+  closePath() { }
   measureText() { return { width: 50 }; }
-  scale() {}
-  translate() {}
-  rotate() {}
-  drawImage() {}
-  save() {}
-  restore() {}
+  scale() { }
+  translate() { }
+  rotate() { }
+  drawImage() { }
+  save() { }
+  restore() { }
 }
 
 class MockElement {
@@ -90,7 +89,7 @@ class MockElement {
   getAttribute(attr) {
     return this.dataset[attr] || '';
   }
-  scrollIntoView() {}
+  scrollIntoView() { }
   classList = {
     add: (c) => { this.className += ' ' + c; },
     remove: (c) => { this.className = this.className.replace(c, '').trim(); },
@@ -137,16 +136,16 @@ global.requestAnimationFrame = (cb) => setTimeout(cb, 16);
 global.cancelAnimationFrame = (id) => clearTimeout(id);
 
 global.window = {
-  addEventListener: () => {},
+  addEventListener: () => { },
   innerWidth: 1920,
   innerHeight: 1080,
-  scrollTo: () => {},
+  scrollTo: () => { },
   requestAnimationFrame: global.requestAnimationFrame,
   cancelAnimationFrame: global.cancelAnimationFrame,
   THREE: null, // Will run gracefully without WebGL in headless node
-  speechSynthesis: { speak: () => {} }
+  speechSynthesis: { speak: () => { } }
 };
-global.SpeechSynthesisUtterance = function(t) { this.text = t; };
+global.SpeechSynthesisUtterance = function (t) { this.text = t; };
 
 // Load modules
 const dataCode = fs.readFileSync(path.join(__dirname, 'js', 'data.js'), 'utf8');
@@ -266,7 +265,7 @@ for (const mid of testMissions) {
 // 13. Test NASA Mars 4-Phase Flight Operations (Red Pioneer)
 console.log("\n=== TESTING NASA RED PIONEER MARS 4-PHASE TIMELINE ===");
 window.GameEngine.autoConfigure('red-pioneer');
-flight.start(mockElements['game-canvas-3d'], () => {});
+flight.start(mockElements['game-canvas-3d'], () => { });
 
 if (!flight.isMarsMission()) {
   console.error("[FAIL] isMarsMission() returned false for Red Pioneer!");

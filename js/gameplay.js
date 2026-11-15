@@ -795,8 +795,12 @@ window.SpaceFlightGame = (function () {
   function loop() {
     if (!isRunning) return;
 
-    update();
-    draw();
+    try {
+      update();
+      draw();
+    } catch (loopErr) {
+      console.error("[SpaceFlightGame] Frame loop error:", loopErr);
+    }
 
     input.actionJustPressed = false;
     animId = requestAnimationFrame(loop);
@@ -1675,28 +1679,32 @@ window.SpaceFlightGame = (function () {
 
     // Switch 3D WebGL scene
     if (using3D && window.Space3D) {
-      if (targetPhase === "launch") {
-        if (window.Space3D.clearMarsSceneObjects) window.Space3D.clearMarsSceneObjects();
-        window.Space3D.setupCelestialBody("leo");
-        rocket3D = window.Space3D.buildRocket(missionConfig);
-        spacecraft3D = window.Space3D.buildSpacecraft(missionConfig);
-        launchPad3D = window.Space3D.buildLaunchPad3D();
-        const scene = window.Space3D.getScene();
-        if (scene) {
-          if (launchPad3D) scene.add(launchPad3D);
-          scene.add(rocket3D);
-          scene.add(spacecraft3D);
-          spacecraft3D.visible = false;
+      try {
+        if (targetPhase === "launch") {
+          if (window.Space3D.clearMarsSceneObjects) window.Space3D.clearMarsSceneObjects();
+          window.Space3D.setupCelestialBody("leo");
+          rocket3D = window.Space3D.buildRocket(missionConfig);
+          spacecraft3D = window.Space3D.buildSpacecraft(missionConfig);
+          launchPad3D = window.Space3D.buildLaunchPad3D();
+          const scene = window.Space3D.getScene();
+          if (scene) {
+            if (launchPad3D) scene.add(launchPad3D);
+            scene.add(rocket3D);
+            scene.add(spacecraft3D);
+            spacecraft3D.visible = false;
+          }
+          window.Space3D.setRocketGroup(rocket3D);
+          window.Space3D.setSpacecraftGroup(spacecraft3D);
+          window.Space3D.setCameraMode("chase");
+        } else if (targetPhase === "cruise") {
+          window.Space3D.setupMarsCruiseScene(missionConfig);
+        } else if (targetPhase === "edl") {
+          window.Space3D.setupMarsEDLScene();
+        } else if (targetPhase === "surface") {
+          window.Space3D.setupMarsSurfaceScene();
         }
-        window.Space3D.setRocketGroup(rocket3D);
-        window.Space3D.setSpacecraftGroup(spacecraft3D);
-        window.Space3D.setCameraMode("chase");
-      } else if (targetPhase === "cruise") {
-        window.Space3D.setupMarsCruiseScene(missionConfig);
-      } else if (targetPhase === "edl") {
-        window.Space3D.setupMarsEDLScene();
-      } else if (targetPhase === "surface") {
-        window.Space3D.setupMarsSurfaceScene();
+      } catch (sceneErr) {
+        console.error("[SpaceFlightGame] 3D Mars scene switch error:", sceneErr);
       }
     }
   }

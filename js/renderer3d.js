@@ -45,6 +45,7 @@ window.Space3D = (function () {
   let marsCruiseEarth = null;
   let marsCruiseMars = null;
   let marsSurfaceGroup = null;
+  let marsSurfaceGround = null;
   let marsActiveScene = "orbit"; // 'orbit', 'cruise', 'edl', 'surface'
 
   // Camera Control state
@@ -1432,6 +1433,7 @@ window.Space3D = (function () {
     marsCruiseEarth = null;
     marsCruiseMars = null;
     marsSurfaceGroup = null;
+    marsSurfaceGround = null;
     scene.fog = null;
   }
 
@@ -1758,6 +1760,7 @@ window.Space3D = (function () {
 
   // 3. SETUP MARS CRUISE SCENE (Phase 2: Heliocentric Transit across 225M km)
   function setupMarsCruiseScene(missionConfig) {
+    if (!scene) return;
     clearMarsSceneObjects();
     marsActiveScene = "cruise";
 
@@ -1801,6 +1804,7 @@ window.Space3D = (function () {
 
   // 4. SETUP MARS EDL SCENE (Phase 3: Mars Atmospheric Entry & Descent)
   function setupMarsEDLScene() {
+    if (!scene) return;
     clearMarsSceneObjects();
     marsActiveScene = "edl";
 
@@ -1840,6 +1844,7 @@ window.Space3D = (function () {
 
   // 5. SETUP MARS SURFACE SCENE (Phase 4: Jezero Crater Regolith & Rover Operations)
   function setupMarsSurfaceScene() {
+    if (!scene) return;
     clearMarsSceneObjects();
     marsActiveScene = "surface";
 
