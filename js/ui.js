@@ -1687,6 +1687,14 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
       });
     }
 
+    const mpBrand = document.querySelector(".mp-nav-brand");
+    if (mpBrand) {
+      mpBrand.addEventListener("click", () => {
+        showScreen("screen-title");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    }
+
     // Top navbar navigation links inside screen-multiplayer
     document.querySelectorAll(".mp-nav-link").forEach(link => {
       link.addEventListener("click", () => {

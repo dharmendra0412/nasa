@@ -3508,6 +3508,7 @@ body {
   align-items: center;
   gap: 12px;
   cursor: pointer;
+  flex: 1;
 }
 
 .mp-brand-text {
@@ -3568,6 +3569,10 @@ body {
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.mp-nav-spacer {
+  flex: 1;
 }
 
 .mp-nav-right {
