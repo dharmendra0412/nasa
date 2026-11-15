@@ -657,12 +657,21 @@
       <!-- SCREEN 4: SPACECRAFT & MISSION DESIGN STUDIO -->
       <section id="screen-design" class="screen">
         <div class="screen-header design-screen-header">
-          <button id="btn-back-design-to-hub" type="button" class="btn btn-outline btn-small" title="Return to NASA Mission Hub">⬅ NASA Hub</button>
-          <div class="screen-title-group">
-            <h2 id="design-header-mission-title">🛠️ SPACECRAFT & MISSION DESIGN STUDIO</h2>
-            <p class="screen-subtitle">NASA Systems Engineering & Subsystem Sizing</p>
+          <div class="design-header-left">
+            <button id="btn-back-design-to-hub" type="button" class="design-back-pill" title="Return to NASA Mission Hub">
+              <span class="arrow">←</span> NASA HUB
+            </button>
+            <div class="design-nasa-meatball">
+              <img src="assets/nasa_meatball.jpg" alt="NASA Logo" class="nasa-logo-img" />
+            </div>
+            <div class="screen-title-group">
+              <h2 id="design-header-mission-title">SENTINEL-EARTH CLIMATE MONITOR — DESIGN STUDIO</h2>
+              <p class="screen-subtitle">NASA Systems Engineering & Subsystem Sizing</p>
+            </div>
           </div>
-          <button id="btn-quick-launch-from-design" type="button" class="btn btn-primary btn-glow btn-small" title="Launch 3D WebGL Flight">🚀 Launch Flight (Pad 39A)</button>
+          <button id="btn-quick-launch-from-design" type="button" class="btn-design-launch" title="Launch 3D WebGL Flight">
+            <span class="icon">🚀</span> Launch Flight (PAD 39A)
+          </button>
         </div>
 
         <div class="design-layout">
@@ -670,7 +679,7 @@
           <!-- Left Systems Engineering Sidebar (Resource Margins & Warnings) -->
           <aside class="design-sidebar">
             <div class="sidebar-header">
-              <div class="sidebar-title">SYSTEMS MARGINS</div>
+              <div class="sidebar-title"><span class="sidebar-title-icon">⛁</span> SYSTEMS MARGINS</div>
               <div class="sidebar-sub">REAL-TIME BUDGET TRACKER</div>
             </div>
 
@@ -688,7 +697,7 @@
             <!-- Resource 2: Mass -->
             <div class="resource-block">
               <div class="resource-header">
-                <span class="resource-label">⚖️ Spacecraft Wet Mass</span>
+                <span class="resource-label">🔒 Spacecraft Wet Mass</span>
                 <span id="res-mass-text" class="resource-val">0 / 9999 kg</span>
               </div>
               <div class="resource-track">
@@ -721,7 +730,7 @@
             <!-- Warnings / Diagnostics Panel -->
             <div class="warnings-box">
               <div class="warnings-header">
-                <span>⚠️ ENGINEERING DIAGNOSTICS</span>
+                <span class="warn-title">⚠️ ENGINEERING DIAGNOSTICS</span>
                 <span id="warnings-count" class="badge-counter">0</span>
               </div>
               <div id="warnings-panel" class="warnings-list">
@@ -730,11 +739,15 @@
             </div>
 
             <div class="sidebar-actions">
-              <button id="btn-auto-configure" type="button" class="btn btn-secondary full-width" style="margin-bottom: 8px;">
-                ⚡ AUTO-RECOMMEND NASA CONFIG
+              <button id="btn-auto-configure" type="button" class="btn btn-secondary btn-auto-config full-width">
+                <span class="icon">⚡</span> AUTO-RECOMMEND NASA CONFIG
               </button>
-              <button id="btn-review" class="btn btn-primary btn-glow full-width">FLIGHT READINESS REVIEW ➔</button>
-              <button id="btn-back-design" class="btn btn-outline btn-small full-width">Change Mission</button>
+              <button id="btn-review" class="btn btn-primary btn-glow btn-review-blue full-width">
+                <span class="icon">📋</span> FLIGHT READINESS REVIEW →
+              </button>
+              <button id="btn-back-design" class="btn btn-outline btn-change-mission full-width">
+                <span class="icon">⚙️</span> CHANGE MISSION
+              </button>
             </div>
           </aside>
 
@@ -751,37 +764,43 @@
                 <div class="cad-controls">
                   <span class="cad-hint"><kbd>🖱️ Drag</kbd> Rotate 360° &bull; <kbd>Scroll</kbd> Zoom</span>
                   <button type="button" id="btn-cad-wireframe" class="btn-cad-toggle" title="Toggle Wireframe Blueprint CAD Mode">
-                    <span class="icon">📐</span> Wireframe CAD
+                    <span class="icon">⬡</span> Wireframe CAD
                   </button>
                 </div>
               </div>
               <div class="cad-canvas-wrapper">
                 <canvas id="design-cad-canvas" width="800" height="220"></canvas>
-                <div class="cad-overlay-badges">
-                  <span id="cad-bus-badge" class="cad-badge">BUS: NONE</span>
-                  <span id="cad-power-badge" class="cad-badge">PWR: NONE</span>
-                  <span id="cad-instruments-badge" class="cad-badge">PAYLOAD: 0 UNITS</span>
+                <div class="cad-schematics-overlay" aria-hidden="true">
+                  <img src="assets/cad_schematics.png" alt="Blueprint Schematics" class="cad-schematics-img" />
                 </div>
-                <div id="cad-status-line" class="cad-watermark">AWAITING HARDWARE INTEGRATION · SELECT BUS & SUBSYSTEMS BELOW</div>
+                <div class="cad-overlay-badges">
+                  <span id="cad-bus-badge" class="cad-badge"><span class="badge-ico">⬡</span> BUS: NONE</span>
+                  <span id="cad-power-badge" class="cad-badge"><span class="badge-ico">⚡</span> PWR: NONE</span>
+                  <span id="cad-instruments-badge" class="cad-badge"><span class="badge-ico">⬡</span> PAYLOAD: 0 UNITS</span>
+                </div>
+                <div id="cad-status-line" class="cad-watermark">AWAITING HARDWARE INTEGRATION — SELECT BUS & SUBSYSTEMS BELOW</div>
               </div>
             </div>
 
             <!-- Discipline Tabs -->
             <nav class="design-tabs-nav">
-              <button class="tab-btn active" data-tab="orbit">🌍 1. Orbit</button>
-              <button class="tab-btn" data-tab="spacecraft">🛰️ 2. Bus & Prop</button>
-              <button class="tab-btn" data-tab="systems">⚙️ 3. Avionics & Power</button>
-              <button class="tab-btn" data-tab="comms">📡 4. Comms & Ground</button>
-              <button class="tab-btn" data-tab="instruments">🔬 5. Science Payload</button>
-              <button class="tab-btn" data-tab="launch">🚀 6. Launch Vehicle</button>
+              <button class="tab-btn active" data-tab="orbit">🪐 1. ORBIT</button>
+              <button class="tab-btn" data-tab="spacecraft">⬡ 2. BUS & PROP</button>
+              <button class="tab-btn" data-tab="systems">⚙️ 3. AVIONICS & POWER</button>
+              <button class="tab-btn" data-tab="comms">📡 4. COMMS & GROUND</button>
+              <button class="tab-btn" data-tab="instruments">🔬 5. SCIENCE PAYLOAD</button>
+              <button class="tab-btn" data-tab="launch">🚀 6. LAUNCH VEHICLE</button>
             </nav>
 
             <div class="tab-panels-viewport">
               
               <!-- Tab 1: Orbit Selection -->
               <div id="panel-orbit" class="design-panel active">
-                <div class="panel-intro">
-                  <h3>SELECT MISSION ORBITAL REGIME</h3>
+                <div class="panel-intro orbit-panel-intro">
+                  <div class="panel-intro-header">
+                    <span class="panel-icon">⛁</span>
+                    <h3>SELECT MISSION ORBITAL REGIME</h3>
+                  </div>
                   <p>Orbital altitude and inclination govern science observation opportunities, ground pass geometry, delta-V requirements, and the radiation environment.</p>
                 </div>
                 <div id="orbit-cards" class="card-grid"></div>

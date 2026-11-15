@@ -1328,8 +1328,8 @@ window.Space3D = (function () {
 
     cadScene = new THREE.Scene();
     cadCamera = new THREE.PerspectiveCamera(40, w / h, 0.1, 500);
-    cadCamera.position.set(0, 3, 14);
-    cadCamera.lookAt(0, 0, 0);
+    cadCamera.position.set(-1.8, 2.5, 13);
+    cadCamera.lookAt(-1.2, 0, 0);
 
     const amb = new THREE.AmbientLight(0x334455, 0.9);
     cadScene.add(amb);
@@ -1424,7 +1424,24 @@ window.Space3D = (function () {
     checkCADResize();
     if (cadSpacecraft) cadScene.remove(cadSpacecraft);
 
-    cadSpacecraft = buildSpacecraft(config || {});
+    // If user has not selected a bus yet, provide a baseline satellite preview
+    // matching the high-fidelity mockups (so user sees realistic CAD preview)
+    const comps = (config && config.components) ? config.components : {};
+    let effectiveConfig = config;
+    if (!comps.bus) {
+      effectiveConfig = {
+        components: {
+          bus: "medium-sat",
+          power: "medium-solar",
+          antenna: "hga",
+          propulsion: "chemical",
+          ...comps
+        },
+        instruments: (config && config.instruments && config.instruments.length) ? config.instruments : ["hires-cam", "spectrometer"]
+      };
+    }
+
+    cadSpacecraft = buildSpacecraft(effectiveConfig || {});
     if (cadIsWireframe) applyWireframeMode(cadSpacecraft);
     cadScene.add(cadSpacecraft);
   }
