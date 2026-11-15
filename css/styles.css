@@ -3477,9 +3477,9 @@ body {
 #screen-multiplayer {
   position: relative;
   min-height: 100vh;
-  background: radial-gradient(ellipse 120% 75% at 50% 100%, rgba(14, 116, 233, 0.45) 0%, rgba(3, 30, 80, 0.5) 35%, rgba(4, 9, 24, 0.95) 75%, #030712 100%),
-              url('../assets/mp_screen_bg.jpg') no-repeat center bottom / cover;
-  background-attachment: fixed;
+  background: 
+    radial-gradient(ellipse 100% 40% at 50% 100%, rgba(30, 144, 255, 0.22) 0%, rgba(14, 116, 233, 0.1) 35%, transparent 70%),
+    radial-gradient(circle at 50% 25%, rgba(15, 23, 42, 0.65) 0%, transparent 80%);
   display: flex;
   flex-direction: column;
   padding: 0 0 50px 0;
@@ -3678,7 +3678,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  font-family: var(--font-display, sans-serif);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   letter-spacing: 0.5px;
 }
 
@@ -3804,7 +3804,7 @@ body {
   font-weight: 700;
   color: #ffffff;
   margin: 0;
-  font-family: var(--font-display, sans-serif);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   letter-spacing: 0.5px;
   white-space: nowrap;
   flex: 1;
@@ -3891,7 +3891,7 @@ body {
 }
 
 .mp-code-styled {
-  font-family: var(--font-display, sans-serif);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   letter-spacing: 2px;
   text-transform: uppercase;
 }
@@ -3918,7 +3918,7 @@ body {
   border-radius: 12px;
   font-size: 16px;
   font-weight: 700;
-  font-family: var(--font-display, sans-serif);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   letter-spacing: 0.5px;
   cursor: pointer;
   display: flex;
