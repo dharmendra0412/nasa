@@ -1371,71 +1371,39 @@ window.SpaceFlightGame = (function () {
     drawOpticalFeedCanvas();
   }
 
-  // 1. DRAW LAUNCH HUD
+  // 1. DRAW LAUNCH HUD (Clean & Simple)
   function drawLaunchHUD(w, h) {
     const ls = launchState;
 
-    // Green Flight Corridor Reticle Overlay
-    ctx.strokeStyle = "rgba(0, 230, 118, 0.45)";
-    ctx.lineWidth = 2.5;
-    ctx.setLineDash([8, 8]);
-    ctx.beginPath();
-    ctx.moveTo(ls.corridorX - 70, 0);
-    ctx.lineTo(ls.corridorX - 70, h);
-    ctx.moveTo(ls.corridorX + 70, 0);
-    ctx.lineTo(ls.corridorX + 70, h);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    // Sleek minimal top telemetry bar
+    ctx.fillStyle = "rgba(8, 14, 28, 0.75)";
+    ctx.fillRect(20, 16, w - 40, 44);
+    ctx.strokeStyle = "rgba(0, 229, 255, 0.35)";
+    ctx.strokeRect(20, 16, w - 40, 44);
 
-    ctx.fillStyle = "rgba(0, 230, 118, 0.06)";
-    ctx.fillRect(ls.corridorX - 70, 0, 140, h);
-
-    // Top Telemetry Bar
-    ctx.fillStyle = "rgba(10, 15, 30, 0.85)";
-    ctx.fillRect(20, 16, w - 40, 52);
-    ctx.strokeStyle = "rgba(0, 229, 255, 0.4)";
-    ctx.strokeRect(20, 16, w - 40, 52);
-
-    ctx.font = "bold 15px 'Orbitron', monospace";
+    ctx.font = "bold 14px 'Orbitron', monospace";
     ctx.fillStyle = "#ffffff";
     ctx.textAlign = "left";
-    ctx.fillText(`ALTITUDE: ${Math.round(ls.altitude)} km (Kármán: 100 km)`, 36, 40);
+    ctx.fillText(`ALTITUDE: ${Math.round(ls.altitude)} km`, 36, 43);
 
     ctx.fillStyle = "#00e5ff";
-    ctx.fillText(`VELOCITY: ${Math.round(ls.velocity)} m/s`, 36, 58);
+    ctx.fillText(`VELOCITY: ${Math.round(ls.velocity)} m/s`, 240, 43);
 
-    ctx.fillStyle = ls.fuel < 20 ? "#ff1744" : "#ffd600";
+    ctx.fillStyle = ls.fuel < 20 ? "#ff1744" : "#00e676";
     ctx.textAlign = "right";
-    ctx.fillText(`STAGE ${ls.stage} FUEL: ${Math.round(ls.fuel)}%`, w - 36, 40);
-
-    ctx.fillStyle = ls.heat > 50 ? "#ff5722" : "#a5d6a7";
-    ctx.fillText(`MAX-Q HEAT: ${Math.round(ls.heat)}%`, w - 36, 58);
-
-    // Transonic Mach 1.0 Vapor Shock Cone Alert Banner
-    if (ls.isTransonic) {
-      ctx.fillStyle = "rgba(0, 229, 255, 0.25)";
-      ctx.fillRect(w / 2 - 270, 74, 540, 30);
-      ctx.strokeStyle = "#00e5ff";
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(w / 2 - 270, 74, 540, 30);
-
-      ctx.font = "bold 13px 'Orbitron', monospace";
-      ctx.fillStyle = "#ffffff";
-      ctx.textAlign = "center";
-      ctx.fillText("⚡ TRANSONIC REGIME: MACH 1.0 • VAPOR SHOCK CONE ACTIVE", w / 2, 94);
-    }
+    ctx.fillText(`STAGE ${ls.stage} FUEL: ${Math.round(ls.fuel)}%`, w - 36, 43);
 
     // Center Staging Prompt Banner
     if (ls.stagingPrompt && !ls.isCountingDown) {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-      ctx.fillRect(w / 2 - 280, 80, 560, 36);
-      ctx.strokeStyle = "#ffd600";
-      ctx.strokeRect(w / 2 - 280, 80, 560, 36);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+      ctx.fillRect(w / 2 - 240, 72, 480, 32);
+      ctx.strokeStyle = "#00e5ff";
+      ctx.strokeRect(w / 2 - 240, 72, 480, 32);
 
-      ctx.font = "bold 14px 'Rajdhani', sans-serif";
-      ctx.fillStyle = "#ffd600";
+      ctx.font = "bold 13px 'Rajdhani', sans-serif";
+      ctx.fillStyle = "#00e5ff";
       ctx.textAlign = "center";
-      ctx.fillText(ls.stagingPrompt, w / 2, 103);
+      ctx.fillText(ls.stagingPrompt, w / 2, 93);
     }
 
     // NASA T-Minus Digital Countdown Overlay
@@ -1471,178 +1439,46 @@ window.SpaceFlightGame = (function () {
       ctx.fillStyle = "rgba(0, 229, 255, 0.8)";
       ctx.fillText("PRESS [SPACEBAR] OR TAP TO SKIP TO IMMEDIATE LIFTOFF", w / 2, h / 2 + 65);
     }
-
-    // Onboard RocketCam PIP Optical Monitor
-    drawOnboardPIP(w - 215, 78, 195, 110);
   }
 
-  // 2. DRAW ORBIT HUD
+  // 2. DRAW ORBIT HUD (Clean & Simple)
   function drawOrbitHUD(w, h) {
     const os = orbitState;
 
-    // Top Telemetry Bar
-    ctx.fillStyle = "rgba(10, 15, 30, 0.88)";
-    ctx.fillRect(20, 14, w - 40, 58);
-    ctx.strokeStyle = "rgba(0, 229, 255, 0.4)";
-    ctx.strokeRect(20, 14, w - 40, 58);
+    // Sleek minimal top telemetry bar
+    ctx.fillStyle = "rgba(8, 14, 28, 0.75)";
+    ctx.fillRect(20, 16, w - 40, 44);
+    ctx.strokeStyle = "rgba(0, 229, 255, 0.35)";
+    ctx.strokeRect(20, 16, w - 40, 44);
 
     ctx.font = "bold 14px 'Orbitron', monospace";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "left";
+    ctx.fillText(`ALTITUDE: ${Math.round(os.apoapsis)} km`, 36, 43);
+
+    ctx.fillStyle = "#00e5ff";
+    ctx.fillText(`VELOCITY: ${Math.round(os.velocity || 7670)} m/s`, 240, 43);
+
     ctx.fillStyle = "#00e676";
-    ctx.textAlign = "left";
-    ctx.fillText(`SCIENCE RETURN: ${Math.round(os.scienceScore)} PTS`, 36, 36);
+    ctx.fillText(`SCIENCE: ${Math.round(os.scienceScore)} PTS`, 460, 43);
 
-    ctx.fillStyle = os.combo > 1 ? "#ffd600" : "#80deea";
-    ctx.font = "12px 'Rajdhani', sans-serif";
-    ctx.fillText(`COMBO MULTIPLIER: x${os.combo}`, 36, 56);
-
-    // Battery & RCS
-    ctx.textAlign = "center";
-    ctx.font = "bold 13px 'Orbitron', monospace";
-    if (os.eclipsePhase === "sunlight") {
-      ctx.fillStyle = "#00e676";
-      ctx.fillText(`BATTERY: ${Math.round(os.battery)}% ⚡ [▲ CHARGING]`, w / 2 - 90, 36);
-    } else {
-      ctx.fillStyle = "#ffd600";
-      ctx.fillText(`BATTERY: ${Math.round(os.battery)}% ⚡ [▼ DRAIN ${os.heatersActive ? "HEATERS" : ""}]`, w / 2 - 90, 36);
-    }
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "12px 'Rajdhani', sans-serif";
-    ctx.fillText(`RCS FUEL: ${Math.round(os.fuel)}% ⛽`, w / 2 - 90, 56);
-
-    // Thermal & Eclipse Status
-    ctx.font = "bold 13px 'Orbitron', monospace";
-    if (os.eclipsePhase === "umbra") {
-      ctx.fillStyle = "#e040fb";
-      ctx.fillText(`THERMAL: ${Math.round(os.temperature)}°C [🌑 UMBRA]`, w / 2 + 105, 36);
-    } else if (os.eclipsePhase === "penumbra") {
-      ctx.fillStyle = "#ffab00";
-      ctx.fillText(`THERMAL: ${Math.round(os.temperature)}°C [🌓 PENUMBRA]`, w / 2 + 105, 36);
-    } else {
-      ctx.fillStyle = "#81d4fa";
-      ctx.fillText(`THERMAL: +${Math.round(os.temperature)}°C [☀️ SUN]`, w / 2 + 105, 36);
-    }
-
-    ctx.font = "12px 'Rajdhani', sans-serif";
-    ctx.fillStyle = os.currentStation ? "#00e676" : "#ffd600";
-    ctx.fillText(`DOWNLINK: ${Math.round(os.dataDownlinked)} GB 📡 ${os.currentStation ? "(" + os.currentStation.code + " AOS)" : "(LOS)"}`, w / 2 + 105, 56);
-
-    // Right Side: Health & Action
+    ctx.fillStyle = os.battery < 25 ? "#ffd600" : "#80deea";
     ctx.textAlign = "right";
-    ctx.font = "bold 13px 'Orbitron', monospace";
-    ctx.fillStyle = os.health > 40 ? "#00e676" : "#ff1744";
-    ctx.fillText(`HEALTH: ${Math.round(os.health)}% 🛡️`, w - 36, 36);
-
-    ctx.font = "12px 'Rajdhani', sans-serif";
-    ctx.fillStyle = "#81d4fa";
-    ctx.fillText("SPACE: SCAN / STAGE", w - 36, 56);
-
-    // Keplerian Orbit Dynamics Telemetry Sub-bar
-    ctx.fillStyle = "rgba(4, 12, 28, 0.88)";
-    ctx.fillRect(20, 74, w - 40, 24);
-    ctx.strokeStyle = "rgba(0, 229, 255, 0.3)";
-    ctx.strokeRect(20, 74, w - 40, 24);
-
-    ctx.font = "bold 11px 'Orbitron', monospace";
-    ctx.textAlign = "left";
-    ctx.fillStyle = "#00e5ff";
-    ctx.fillText(`APOAPSIS (Ap): ${Math.round(os.apoapsis)} km`, 36, 90);
-
-    ctx.fillStyle = os.periapsis < 100 ? "#ff3d00" : "#ffd600";
-    ctx.fillText(`PERIAPSIS (Pe): ${Math.round(os.periapsis)} km ${os.periapsis < 100 ? "⚠️ [ATMOSPHERE]" : ""}`, 260, 90);
-
-    ctx.fillStyle = "#ff9100";
-    ctx.fillText(`REMAINING ΔV: ${Math.round(os.deltaV)} m/s`, 520, 90);
-
-    ctx.fillStyle = "#a5d6a7";
-    ctx.textAlign = "right";
-    ctx.fillText("MANEUVERS: [W] PROGRADE (Ap▲) • [S] RETROGRADE (Pe▼)", w - 36, 90);
-
-    // Hypersonic Re-entry Alert Banner
-    if (os.isReentry) {
-      ctx.fillStyle = "rgba(255, 61, 0, 0.35)";
-      ctx.fillRect(w / 2 - 270, 102, 540, 28);
-      ctx.strokeStyle = "#ff3d00";
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(w / 2 - 270, 102, 540, 28);
-
-      ctx.font = "bold 12px 'Orbitron', monospace";
-      ctx.fillStyle = "#ffffff";
-      ctx.textAlign = "center";
-      ctx.fillText(`🔥 HYPERSONIC RE-ENTRY ACTIVE • ABLATIVE HEAT: ${Math.round(os.reentryHeat)}% • RF BLACKOUT`, w / 2, 121);
-    }
-
-    // Mini Houston MCC Orbit Track HUD Radar (Bottom-Left)
-    ctx.fillStyle = "rgba(4, 10, 24, 0.85)";
-    ctx.fillRect(20, h - 116, 225, 96);
-    ctx.strokeStyle = "rgba(0, 229, 255, 0.45)";
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(20, h - 116, 225, 96);
-
-    ctx.font = "bold 10px 'Orbitron', monospace";
-    ctx.fillStyle = "#00e5ff";
-    ctx.textAlign = "left";
-    ctx.fillText("🛰️ HOUSTON MCC ORBIT RADAR", 30, h - 98);
-
-    ctx.font = "bold 11px 'Rajdhani', sans-serif";
-    ctx.fillStyle = os.currentStation ? "#00e676" : "#ffab00";
-    ctx.fillText(os.currentStation ? `● AOS: ${os.currentStation.name} [LOCKED]` : `● LOS [NEXT: ${os.nextStationName}]`, 30, h - 80);
-
-    const latDir = os.subSatLat >= 0 ? "N" : "S";
-    const lonDir = os.subSatLon >= 0 ? "E" : "W";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`SSP: ${Math.abs(os.subSatLat).toFixed(1)}°${latDir}, ${Math.abs(os.subSatLon).toFixed(1)}°${lonDir}`, 30, h - 63);
-
-    ctx.fillStyle = os.temperature < 0 ? "#80deea" : "#ffd600";
-    ctx.fillText(`CORE: ${os.temperature > 0 ? "+" : ""}${Math.round(os.temperature)}°C [${os.eclipsePhase.toUpperCase()}]`, 30, h - 46);
-
-    ctx.fillStyle = "rgba(0, 229, 255, 0.75)";
-    ctx.font = "10px 'Rajdhani', sans-serif";
-    ctx.fillText("⌨️ [M] SCROLL TO 2D WORLD MAP", 30, h - 29);
+    ctx.fillText(`BATTERY: ${Math.round(os.battery)}% ⚡`, w - 36, 43);
 
     // Target scanning prompt when target in boresight
     const activeTarget = os.targets.find(t => Math.abs(t.x - (w / 2)) < 85 && !t.scanned);
     if (activeTarget) {
       ctx.fillStyle = "rgba(0, 229, 255, 0.25)";
-      ctx.fillRect(w / 2 - 220, 80, 440, 36);
+      ctx.fillRect(w / 2 - 220, 72, 440, 32);
       ctx.strokeStyle = "#00e5ff";
-      ctx.strokeRect(w / 2 - 220, 80, 440, 36);
+      ctx.strokeRect(w / 2 - 220, 72, 440, 32);
 
-      ctx.font = "bold 15px 'Rajdhani', sans-serif";
+      ctx.font = "bold 13px 'Rajdhani', sans-serif";
       ctx.fillStyle = "#00e5ff";
       ctx.textAlign = "center";
-      ctx.fillText(`🎯 ${activeTarget.name.toUpperCase()} IN SIGHT: PRESS [SPACE] TO SCAN!`, w / 2, 103);
+      ctx.fillText(`🎯 ${activeTarget.name.toUpperCase()} IN SIGHT: PRESS [SPACE] TO SCAN!`, w / 2, 93);
     }
-
-    // Solar Storm Alert
-    if (os.solarFlared) {
-      ctx.fillStyle = "rgba(255, 87, 34, 0.2)";
-      ctx.fillRect(0, 0, w, h);
-
-      ctx.fillStyle = "#ff5722";
-      ctx.font = "bold 18px 'Orbitron', monospace";
-      ctx.textAlign = "center";
-      ctx.fillText("⚠️ SOLAR FLARE CORONA ACTIVE - ROTATE PANELS EDGE-ON!", w / 2, 140);
-    }
-
-    // Sunrise Lens Flare / Atmospheric Horizon Bloom
-    if (os.sunriseGlowTimer > 0) {
-      const alpha = Math.min(0.8, os.sunriseGlowTimer / 60);
-      const grad = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, w * 0.75);
-      grad.addColorStop(0, `rgba(255, 245, 180, ${alpha * 0.95})`);
-      grad.addColorStop(0.25, `rgba(255, 200, 60, ${alpha * 0.7})`);
-      grad.addColorStop(0.65, `rgba(0, 229, 255, ${alpha * 0.35})`);
-      grad.addColorStop(1, "rgba(0, 0, 0, 0)");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, w, h);
-      os.sunriseGlowTimer--;
-    }
-
-    // Authentic ADI Flight Navball (Bottom-Center)
-    drawNavball(w / 2, h - 62, 38);
-
-    // Onboard SpacecraftCam PIP Optical Monitor (Top-Right)
-    drawOnboardPIP(w - 215, 104, 195, 110);
   }
 
   // =========================================================================

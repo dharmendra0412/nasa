@@ -945,68 +945,15 @@
         </div>
       </section>
 
-      <!-- SCREEN: INTERACTIVE ARCADE FLIGHT & MISSION OPERATIONS -->
+      <!-- SCREEN: INTERACTIVE 3D FLIGHT SIMULATION -->
       <section id="screen-arcade" class="screen">
         <div class="arcade-header">
           <button id="btn-back-to-hub" type="button" class="btn btn-outline btn-small" title="Return to NASA App Challenge Hub">⬅ NASA Hub</button>
           <div class="arcade-title-group">
-            <h2 id="arcade-mission-title">🎮 FLIGHT OPERATIONS: ASCENT & ORBITAL MISSION</h2>
-            <p>Control rocket ascent, execute staging burns, navigate orbit, dodge hazards, and scan planetary science targets!</p>
+            <h2 id="arcade-mission-title">🎮 3D SPACE FLIGHT SIMULATION</h2>
+            <p>Interactive 3D Simulation • Drag mouse to rotate view • Scroll to zoom</p>
           </div>
           <button id="btn-complete-flight" class="btn btn-primary btn-glow">🏁 Conclude Flight & View NASA Report</button>
-        </div>
-
-        <!-- MASTER CONSOLE VIEW SWITCHER & EXPLORATION MODES -->
-        <div class="flight-view-mode-bar">
-          <div class="view-mode-tabs">
-            <span class="view-mode-label">🖥️ CONSOLE VIEW:</span>
-            <button type="button" class="view-mode-btn active" data-view-mode="3d" title="Full 3D WebGL Flight Simulator View">
-              <span class="v-icon">🚀</span> 3D Simulator
-            </button>
-            <button type="button" class="view-mode-btn" data-view-mode="optical" title="Onboard RocketCam / SpacecraftCam Full Optical View">
-              <span class="v-icon">📹</span> RocketCam Optical
-            </button>
-          </div>
-
-          <div class="flight-mode-toggles">
-            <button type="button" id="btn-toggle-safe-mode" class="btn-safe-mode active" title="Toggle Safe Exploration Mode (Prevents Game Over while inspecting views)">
-              <span class="mode-status-dot"></span>
-              <span id="safe-mode-text">🛡️ SAFE VIEW: ON</span>
-            </button>
-            <button type="button" id="btn-restart-flight" class="btn-flight-restart" title="Restart Flight Sequence">
-              🔄 Restart
-            </button>
-          </div>
-        </div>
-
-        <!-- MULTIPLAYER IN-FLIGHT CREW HUD OVERLAY (Visible during multiplayer flight) -->
-        <div id="flight-multiplayer-hud" class="flight-multiplayer-hud" style="display: none;">
-          <div class="mp-hud-left">
-            <span class="mp-hud-room-tag">CREW ROOM: <strong id="hud-room-code">APOLLO</strong></span>
-            <div id="hud-crew-chips" class="mp-hud-crew-chips"></div>
-          </div>
-          <div class="mp-hud-center">
-            <span id="hud-action-ticker" class="mp-hud-ticker">● ALL CREW CONSOLES NOMINAL</span>
-          </div>
-          <div class="mp-hud-right">
-            <button type="button" id="btn-toggle-flight-comms" class="btn btn-small btn-comms-toggle" title="Toggle Flight Intercom [C]">
-              💬 COMMS LOOP
-            </button>
-          </div>
-        </div>
-
-        <!-- 3D Camera Controls Toolbar -->
-        <div class="camera-mode-toolbar" id="camera-mode-toolbar">
-          <div class="cam-btn-group">
-            <span class="toolbar-label">🎥 3D CAMERA:</span>
-            <button type="button" class="cam-btn active" data-cam="chase" title="Chase Cam: Behind Spacecraft [1]">🛰️ Chase [1]</button>
-            <button type="button" class="cam-btn" data-cam="orbit" title="Orbit View: Wide Celestial Overview [2]">🌍 Orbit [2]</button>
-            <button type="button" class="cam-btn" data-cam="science" title="Science Cam: Nadir Pointing to Earth [3]">🔭 Science [3]</button>
-            <button type="button" class="cam-btn" data-cam="fpv" title="Cockpit Cam: Forward Velocity Vector [4]">🚀 Cockpit [4]</button>
-            <button type="button" class="cam-btn" data-cam="earth" title="Earth Panoramic: Full Globe [5]">🌐 Earth [5]</button>
-            <button type="button" class="cam-btn" data-cam="autorotate" title="Cinematic 360° Auto-Orbit [6]">🔄 360° Orbit [6]</button>
-          </div>
-          <span class="toolbar-hint">🖱️ Drag mouse to rotate in 3D • Scroll to zoom</span>
         </div>
 
         <div id="arcade-workspace" class="arcade-workspace view-mode-3d">
@@ -1015,69 +962,7 @@
             <canvas id="game-canvas-3d" width="960" height="540"></canvas>
             <!-- 2D Telemetry & HUD Overlay Canvas -->
             <canvas id="game-canvas-hud" width="960" height="540" style="position: absolute; top: 0; left: 0;"></canvas>
-
-            <!-- In-Flight Emergency Anomaly HUD Alert Banner -->
-            <div id="flight-anomaly-banner" class="flight-anomaly-banner" style="display: none;">
-              <div class="anomaly-icon-box">⚠️</div>
-              <div class="anomaly-body">
-                <div class="anomaly-header">
-                  <span class="anomaly-alert-tag">RED-TEAM EMERGENCY ANOMALY</span>
-                  <span id="anomaly-countdown" class="anomaly-timer-pill">T-14s</span>
-                </div>
-                <div id="anomaly-title" class="anomaly-headline">REACTION WHEEL SATURATION</div>
-                <div id="anomaly-desc" class="anomaly-detail">Wheel angular momentum at 100% capacity! Spacecraft attitude control locked. Execute RCS momentum dump immediately!</div>
-              </div>
-              <div class="anomaly-action-pane">
-                <button type="button" id="btn-resolve-anomaly" class="btn-anomaly-solve">
-                  <span class="solve-icon">⚡</span>
-                  <span id="anomaly-action-text">EXECUTE MOMENTUM DUMP [R]</span>
-                </button>
-              </div>
-            </div>
           </div>
-
-          <!-- Dedicated Full-View Onboard RocketCam / Optical Feed Card -->
-          <div id="optical-feed-card" class="optical-feed-card" style="display: none;">
-            <div class="optical-feed-header">
-              <div class="optical-feed-title">
-                <span class="optical-rec-pulse">● LIVE</span>
-                <span>ONBOARD HIGH-RESOLUTION OPTICAL DOWNLINK &bull; FOV 65°</span>
-              </div>
-              <span class="optical-feed-meta">FRAME: 1080p 60FPS &bull; SENSOR: VIS-IR BAYER CMOS &bull; LOW-LATENCY DSN</span>
-            </div>
-            <div class="optical-canvas-wrapper">
-              <canvas id="optical-feed-canvas" width="960" height="480"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- On-Screen Controls for Touch / Mouse + Keyboard Guide -->
-        <div class="arcade-controls-container">
-          <div class="controls-guide-text">
-            <strong>⌨️ ADVANCED FLIGHT CONTROLS:</strong> [A] / [D] Rotate & Pitch • [W] Prograde Burn (Raise Orbit) • [S] Retrograde Burn (De-Orbit) • [SPACEBAR] Stage / Science Scan • [R] Emergency Reboot
-          </div>
-          
-          <div class="arcade-touch-pad">
-            <button id="ctrl-left" class="btn-touch">◀ ROTATE LEFT [A]</button>
-            <button id="ctrl-up" class="btn-touch btn-burn-pro">▲ PROGRADE BURN [W]</button>
-            <button id="ctrl-action" class="btn-touch btn-touch-action">🎯 STAGE / SCAN [SPACE]</button>
-            <button id="ctrl-down" class="btn-touch btn-burn-retro">▼ RETROGRADE BURN [S]</button>
-            <button id="ctrl-right" class="btn-touch">ROTATE RIGHT ▶ [D]</button>
-            <button id="ctrl-anomaly" class="btn-touch btn-touch-danger" style="display: none;">⚠️ SOLVE ANOMALY [R]</button>
-          </div>
-        </div>
-
-        <!-- Flight Comms Slide-Out Drawer -->
-        <div id="flight-comms-drawer" class="flight-comms-drawer" style="display: none;">
-          <div class="drawer-header">
-            <span>💬 FLIGHT COMMS INTERCOM</span>
-            <button type="button" id="btn-close-flight-comms" class="btn-close-drawer">✖</button>
-          </div>
-          <div id="flight-drawer-messages" class="drawer-messages"></div>
-          <form id="flight-drawer-form" class="drawer-input-row">
-            <input type="text" id="flight-drawer-input" placeholder="Radio call to crew..." maxlength="120" />
-            <button type="submit">Send</button>
-          </form>
         </div>
       </section>
 
