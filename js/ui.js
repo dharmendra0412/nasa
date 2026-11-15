@@ -1714,11 +1714,44 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
           const modal = document.getElementById("modal-about-challenge");
           if (modal) modal.classList.remove("hidden");
         } else if (tab === "guide") {
-          const modal = document.getElementById("modal-how-to-play");
-          if (modal) modal.classList.remove("hidden");
+          const mpModal = document.getElementById("modal-mp-guide");
+          if (mpModal) mpModal.classList.remove("hidden");
+          else {
+            const modal = document.getElementById("modal-how-to-play");
+            if (modal) modal.classList.remove("hidden");
+          }
         }
       });
     });
+
+    // MULTIPLAYER FLIGHT GUIDE MODAL CONTROLS
+    const modalMpGuide = document.getElementById("modal-mp-guide");
+    const btnMpGuidePill = document.getElementById("btn-mp-guide-pill");
+    const btnOpenFullGuide = document.getElementById("btn-open-full-guide");
+    const btnMpLobbyGuide = document.getElementById("btn-mp-lobby-guide");
+    const btnCloseMpGuide = document.getElementById("btn-close-mp-guide");
+    const btnStartFromMpGuide = document.getElementById("btn-start-from-mp-guide");
+
+    const openMpGuide = () => {
+      if (modalMpGuide) modalMpGuide.classList.remove("hidden");
+      if (window.SoundFX) window.SoundFX.playBeep(850, 0.04);
+    };
+
+    const closeMpGuide = () => {
+      if (modalMpGuide) modalMpGuide.classList.add("hidden");
+    };
+
+    if (btnMpGuidePill) btnMpGuidePill.addEventListener("click", openMpGuide);
+    if (btnOpenFullGuide) btnOpenFullGuide.addEventListener("click", openMpGuide);
+    if (btnMpLobbyGuide) btnMpLobbyGuide.addEventListener("click", openMpGuide);
+    if (btnCloseMpGuide) btnCloseMpGuide.addEventListener("click", closeMpGuide);
+    if (btnStartFromMpGuide) btnStartFromMpGuide.addEventListener("click", closeMpGuide);
+
+    if (modalMpGuide) {
+      modalMpGuide.addEventListener("click", (e) => {
+        if (e.target === modalMpGuide) closeMpGuide();
+      });
+    }
 
     // CREATE ROOM
     if (btnMpCreate) {

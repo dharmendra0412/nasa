@@ -279,12 +279,16 @@
               <span class="mp-nav-icon">👥</span>
               <span>Multiplayer</span>
             </button>
+            <button type="button" class="mp-nav-link" data-tab="guide">
+              <span class="mp-nav-icon">📖</span>
+              <span>Guide</span>
+            </button>
           </div>
 
           <div class="mp-nav-spacer"></div>
         </nav>
 
-        <!-- Sub-Header Bar (← Dashboard | 🎮 Multiplayer Co-Op | 🟢 Server Online) -->
+        <!-- Sub-Header Bar (← Dashboard | 🎮 Multiplayer Co-Op | 📖 Flight Guide | 🟢 Server Online) -->
         <div class="mp-sub-header">
           <button id="btn-back-multiplayer" type="button" class="mp-back-pill" title="Return to Dashboard">
             <span class="mp-arrow">←</span> Dashboard
@@ -294,9 +298,14 @@
               <span class="mp-title-icon">🎮</span> Multiplayer <span class="mp-title-highlight">Co-Op</span>
             </h1>
           </div>
-          <div class="mp-status-pill">
-            <span class="mp-status-dot"></span>
-            <span id="mp-conn-status">Server Online</span>
+          <div class="mp-header-actions">
+            <button id="btn-mp-guide-pill" type="button" class="mp-guide-pill" title="View Multiplayer Flight Guide">
+              <span class="mp-guide-icon">📖</span> Flight Guide
+            </button>
+            <div class="mp-status-pill">
+              <span class="mp-status-dot"></span>
+              <span id="mp-conn-status">Server Online</span>
+            </div>
           </div>
         </div>
 
@@ -400,6 +409,56 @@
               <span class="btn-icon">👥</span> Join Room
             </button>
           </div>
+
+          <!-- MULTIPLAYER QUICK OPERATIONS GUIDE BANNER -->
+          <div class="mp-guide-banner">
+            <div class="mp-guide-banner-header">
+              <div class="mp-guide-banner-title">
+                <span class="guide-badge-icon">📖</span>
+                <div>
+                  <h3 class="guide-banner-h3">FLIGHT CREW OPERATIONS GUIDE</h3>
+                  <p class="guide-banner-sub">How to play real-time cooperative NASA space missions with your crew</p>
+                </div>
+              </div>
+              <button type="button" id="btn-open-full-guide" class="btn btn-outline btn-small">
+                📖 View Full Flight Manual
+              </button>
+            </div>
+
+            <div class="mp-guide-steps-grid">
+              <div class="mp-guide-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                  <div class="step-title">Host or Join Mission</div>
+                  <div class="step-desc">Create a room with your callsign & target destination, or enter the 6-character Room Code (or invite link) to join friends.</div>
+                </div>
+              </div>
+
+              <div class="mp-guide-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                  <div class="step-title">Choose Your Station</div>
+                  <div class="step-desc">Claim 1 of 4 specialized flight consoles: Flight Director, Propulsion Engineer, Lead Science Officer, or Comms Specialist.</div>
+                </div>
+              </div>
+
+              <div class="mp-guide-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                  <div class="step-title">GO / NO-GO Poll</div>
+                  <div class="step-desc">Verify sub-systems and click "Toggle Ready". When all stations are Green, Flight Director starts the synchronized T-0 launch.</div>
+                </div>
+              </div>
+
+              <div class="mp-guide-step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                  <div class="step-title">Fly & Solve Anomalies</div>
+                  <div class="step-desc">Steer ascent, burn thrusters [W/S], scan planetary data [SPACEBAR], broadcast radio intercom, and resolve red-team alarms together!</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- VIEW 2: ACTIVE ROOM LOBBY COCKPIT -->
@@ -416,6 +475,9 @@
             </div>
 
             <div class="mp-lobby-meta-group">
+              <button type="button" id="btn-mp-lobby-guide" class="btn btn-outline btn-small" title="How to Play Co-Op Guide">
+                📖 Guide
+              </button>
               <span id="mp-lobby-mission-tag" class="mp-meta-tag">Earth Sentinel (LEO 400 km)</span>
               <span id="mp-lobby-diff-tag" class="mp-meta-tag">Engineer Difficulty</span>
               <span class="mp-meta-tag text-green"><span class="green-blink">●</span> <span id="mp-lobby-ping">PING: --</span></span>
@@ -1358,6 +1420,86 @@
         <div class="modal-footer">
           <button id="btn-start-from-guide" type="button" class="btn btn-primary btn-glow">
             🚀 GOT IT! LET'S FLY!
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MULTIPLAYER CO-OP OPERATIONS GUIDE MODAL -->
+    <div id="modal-mp-guide" class="modal-overlay hidden">
+      <div class="modal-card how-to-play-card mp-guide-modal-card">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-alert-icon">🎮</span>
+            <div>
+              <h3 class="modal-title-text">MULTIPLAYER CO-OP FLIGHT MANUAL</h3>
+              <p class="modal-sub-text">NASA Houston Mission Control & Flight Crew Cooperative Operations Guide</p>
+            </div>
+          </div>
+          <button id="btn-close-mp-guide" type="button" class="btn-modal-close" title="Close Guide">✖</button>
+        </div>
+
+        <div class="how-to-play-grid mp-guide-grid">
+          <!-- Card 1: Setup & Connect -->
+          <div class="guide-card">
+            <div class="guide-card-header">
+              <span class="guide-icon">🌐</span>
+              <h4>1. Mission Setup & Room Invite</h4>
+            </div>
+            <ul class="guide-list">
+              <li><strong>Host a Mission:</strong> Enter your Call Sign (e.g. Flight Director), select your target spacecraft destination (Earth Sentinel, StormWatch, Artemis, Red Pioneer) and difficulty level. Click <strong>Create Room</strong>.</li>
+              <li><strong>Invite Your Crew:</strong> Share your unique 6-character <strong>Room Code</strong> (e.g. <span class="kbd-pill">APOLLO</span>) or click <strong>📋 Copy Invite Link</strong> to send a direct 1-click URL to your friends.</li>
+              <li><strong>Join as Flight Crew:</strong> Friends paste the Room Code, enter their Call Sign, and click <strong>Join Room</strong> to enter your Mission Control lobby.</li>
+              <li><strong>Network Connection:</strong> Connect seamlessly over the same Wi-Fi router or across the world over global Internet!</li>
+            </ul>
+          </div>
+
+          <!-- Card 2: 4 Specialized Flight Consoles -->
+          <div class="guide-card">
+            <div class="guide-card-header">
+              <span class="guide-icon">🎛️</span>
+              <h4>2. Pick Your Console Role</h4>
+            </div>
+            <ul class="guide-list">
+              <li><strong class="role-text-gold">🚀 Flight Director (FLIGHT):</strong> Overall mission commander. Calls the pre-flight GO/NO-GO poll, triggers booster stage separations, and commands emergency abort or safe mode.</li>
+              <li><strong class="role-text-blue">⚡ Propulsion & Systems (EECOM):</strong> Orbital pilot. Steers attitude corridor <kbd>[A]</kbd>/<kbd>[D]</kbd>, fires <kbd>[W]</kbd> Prograde burns to raise orbit or <kbd>[S]</kbd> Retrograde burns to de-orbit, and manages power bus.</li>
+              <li><strong class="role-text-cyan">🔬 Lead Science Officer (SCIENCE):</strong> Scientific instrumentation lead. Executes planetary surface sensor sweeps with <kbd>[SPACEBAR]</kbd> over Earth targets to harvest critical climate/orbital research data.</li>
+              <li><strong class="role-text-purple">📡 Comms & Telemetry (INCO / FDO):</strong> Deep Space Network controller. Manages ground station tracking locks, monitors Doppler shift & signal-to-noise ratio, and directs optical camera views.</li>
+            </ul>
+          </div>
+
+          <!-- Card 3: Pre-Launch Readiness & GO Poll -->
+          <div class="guide-card">
+            <div class="guide-card-header">
+              <span class="guide-icon">🚦</span>
+              <h4>3. Pre-Flight GO / NO-GO Poll</h4>
+            </div>
+            <ul class="guide-list">
+              <li>Each crew member clicks <strong>CLAIM STATION</strong> on an open console. Multiple roles can be claimed, or fewer players can operate together.</li>
+              <li>Each player reviews their sub-system checks and clicks <strong>TOGGLE READY (STATUS: GREEN)</strong>.</li>
+              <li>The Flight Director monitors all 4 console statuses on the live telemetry board.</li>
+              <li>Once all crew members report <strong>READY</strong>, the Flight Director clicks <strong>START MISSION (T-0)</strong> to initiate synchronized liftoff!</li>
+            </ul>
+          </div>
+
+          <!-- Card 4: In-Flight Real-Time Operations -->
+          <div class="guide-card">
+            <div class="guide-card-header">
+              <span class="guide-icon">🚨</span>
+              <h4>4. Live Flight & Co-Op Emergency Solving</h4>
+            </div>
+            <ul class="guide-list">
+              <li><strong>Ascent Corridor:</strong> Keep the spacecraft aligned inside the green velocity vector corridor to survive Max-Q atmospheric drag.</li>
+              <li><strong>Orbital Insertion:</strong> Burn Prograde at apoapsis to circularize orbital trajectory (350–450 km).</li>
+              <li><strong>Emergency Red-Team Anomalies:</strong> Unexpected alerts (solar flares, thruster valve pressure, gyro drift) will flash red alarms. The responsible specialist must diagnose and resolve the emergency before health reaches 0%!</li>
+              <li><strong>Comms Intercom Loop:</strong> Use 1-click tactical radio callouts (<em>"GO FOR LAUNCH"</em>, <em>"ALL SYSTEMS NOMINAL"</em>, <em>"READY FOR STAGING"</em>) or live chat to stay synchronized!</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-start-from-mp-guide" type="button" class="btn btn-primary btn-glow">
+            🚀 READY FOR LAUNCH! ENTER MISSION CONTROL
           </button>
         </div>
       </div>
