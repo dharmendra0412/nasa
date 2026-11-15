@@ -203,7 +203,7 @@ window.SpaceFlightGame = (function () {
 
     // --- CONSOLE VIEW MODES & SAFE EXPLORATION ---
     safeMode: true,          // Default ON: safe exploration of all views
-    viewMode: "split"        // 'split', '3d', 'track', 'telemetry', 'optical'
+    viewMode: "3d"           // '3d', 'optical', 'split', 'track', 'telemetry'
   };
 
   // Input Listeners
@@ -318,7 +318,7 @@ window.SpaceFlightGame = (function () {
         const mouseY = (e.clientY - rect.top) * (hudEl.height / rect.height);
         // Top-right onboard camera PIP area
         if (mouseX >= hudEl.width - 230 && mouseY >= 70 && mouseY <= 230) {
-          setViewMode(orbitState.viewMode === "optical" ? "split" : "optical");
+          setViewMode(orbitState.viewMode === "optical" ? "3d" : "optical");
         }
       });
     }
@@ -619,14 +619,14 @@ window.SpaceFlightGame = (function () {
     ];
     orbitState.telemetryTick = 0;
     orbitState.safeMode = true;
-    orbitState.viewMode = "split";
+    orbitState.viewMode = "3d";
 
     const btnSafe = document.getElementById("btn-toggle-safe-mode");
     const txtSafe = document.getElementById("safe-mode-text");
     if (btnSafe) btnSafe.classList.remove("inactive");
     if (txtSafe) txtSafe.textContent = "🛡️ SAFE VIEW: ON";
     const workspace = document.getElementById("arcade-workspace");
-    if (workspace) workspace.className = "arcade-workspace view-mode-split";
+    if (workspace) workspace.className = "arcade-workspace view-mode-3d";
 
     const anomalyBanner = document.getElementById("flight-anomaly-banner");
     if (anomalyBanner) anomalyBanner.style.display = "none";

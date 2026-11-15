@@ -960,17 +960,8 @@
         <div class="flight-view-mode-bar">
           <div class="view-mode-tabs">
             <span class="view-mode-label">🖥️ CONSOLE VIEW:</span>
-            <button type="button" class="view-mode-btn active" data-view-mode="split" title="Multi-Screen Dashboard: 3D Flight + Ground Track + Oscilloscope together">
-              <span class="v-icon">🖥️</span> Split Console
-            </button>
-            <button type="button" class="view-mode-btn" data-view-mode="3d" title="Full 3D WebGL Flight Simulator View">
+            <button type="button" class="view-mode-btn active" data-view-mode="3d" title="Full 3D WebGL Flight Simulator View">
               <span class="v-icon">🚀</span> 3D Simulator
-            </button>
-            <button type="button" class="view-mode-btn" data-view-mode="track" title="Houston MCC 2D World Ground Track Map [M]">
-              <span class="v-icon">🗺️</span> Ground Track [M]
-            </button>
-            <button type="button" class="view-mode-btn" data-view-mode="telemetry" title="Houston MOC 4-Channel Oscilloscope Strip Chart">
-              <span class="v-icon">📈</span> Oscilloscope
             </button>
             <button type="button" class="view-mode-btn" data-view-mode="optical" title="Onboard RocketCam / SpacecraftCam Full Optical View">
               <span class="v-icon">📹</span> RocketCam Optical
@@ -1018,7 +1009,7 @@
           <span class="toolbar-hint">🖱️ Drag mouse to rotate in 3D • Scroll to zoom</span>
         </div>
 
-        <div id="arcade-workspace" class="arcade-workspace view-mode-split">
+        <div id="arcade-workspace" class="arcade-workspace view-mode-3d">
           <div class="arcade-canvas-wrapper" style="position: relative;">
             <!-- 3D WebGL Canvas -->
             <canvas id="game-canvas-3d" width="960" height="540"></canvas>
@@ -1058,62 +1049,12 @@
               <canvas id="optical-feed-canvas" width="960" height="480"></canvas>
             </div>
           </div>
-
-          <!-- NASA Houston MCC 2D Orbital Ground Track & AOS/LOS Telemetry Console -->
-          <div id="mcc-groundtrack-card" class="mcc-groundtrack-card">
-            <div class="mcc-header">
-              <div class="mcc-title-group">
-                <span class="mcc-live-pulse"></span>
-                <span class="mcc-title">HOUSTON MCC &bull; FLIGHT DYNAMICS 2D ORBIT GROUND TRACK</span>
-                <span id="mcc-pass-badge" class="mcc-badge badge-los">LOS (LOSS OF SIGNAL)</span>
-              </div>
-              <div class="mcc-telemetry-pills">
-                <span id="mcc-subsat-coords" class="mcc-telemetry-item">LAT: 28.5° N | LON: 80.6° W</span>
-                <span id="mcc-next-station" class="mcc-telemetry-item">NEXT AOS: MADRID (04:15)</span>
-                <button type="button" id="btn-toggle-groundtrack-size" class="btn-mcc-toggle" title="Maximize or Minimize Ground Track Map">↕ Toggle Size</button>
-              </div>
-            </div>
-            <div class="mcc-canvas-wrapper">
-              <canvas id="mcc-groundtrack-canvas" width="960" height="300"></canvas>
-            </div>
-            <div class="mcc-footer-bar">
-              <div class="mcc-stations-legend">
-                <span class="legend-station"><span class="dot dsn-gold"></span> 📡 GDS (Goldstone 34M)</span>
-                <span class="legend-station"><span class="dot dsn-madrid"></span> 📡 MDS (Madrid 70M)</span>
-                <span class="legend-station"><span class="dot dsn-canberra"></span> 📡 CDS (Canberra 34M)</span>
-                <span class="legend-station"><span class="dot polar-svalbard"></span> 📡 SGS (Svalbard Polar)</span>
-                <span class="legend-station"><span class="dot ne-wallops"></span> 📡 WFF (Wallops Flight)</span>
-              </div>
-              <div id="mcc-thermal-indicator" class="mcc-thermal-indicator">
-                THERMAL: <strong id="mcc-temp-val">+114°C</strong> | ECLIPSE: <strong id="mcc-eclipse-val" class="text-green">☀️ SUNLIGHT</strong> | BATTERY: <strong id="mcc-battery-val">100%</strong>
-              </div>
-            </div>
-          </div>
-
-          <!-- NASA Houston MOC Multi-Channel Rolling Telemetry Strip Chart -->
-          <div id="mcc-telemetry-card" class="mcc-telemetry-card">
-            <div class="mcc-telemetry-header">
-              <div class="mcc-chart-title">
-                <span class="mcc-live-pulse"></span>
-                <span>HOUSTON MOC &bull; MULTI-CHANNEL TELEMETRY OSCILLOSCOPE (ROLLING 60-SEC STRIP CHART)</span>
-              </div>
-              <div class="mcc-chart-channels">
-                <span class="channel-pill ch-battery"><span class="dot"></span> CH-1: BATTERY (100%)</span>
-                <span class="channel-pill ch-temp"><span class="dot"></span> CH-2: CORE TEMP (+115°C)</span>
-                <span class="channel-pill ch-rf"><span class="dot"></span> CH-3: RF DOWNLINK (Mbps)</span>
-                <span class="channel-pill ch-deltav"><span class="dot"></span> CH-4: DELTA-V (1250 m/s)</span>
-              </div>
-            </div>
-            <div class="mcc-chart-wrapper">
-              <canvas id="mcc-stripchart-canvas" width="960" height="120"></canvas>
-            </div>
-          </div>
         </div>
 
         <!-- On-Screen Controls for Touch / Mouse + Keyboard Guide -->
         <div class="arcade-controls-container">
           <div class="controls-guide-text">
-            <strong>⌨️ ADVANCED FLIGHT CONTROLS:</strong> [A] / [D] Rotate & Pitch • [W] Prograde Burn (Raise Orbit) • [S] Retrograde Burn (De-Orbit) • [SPACEBAR] Stage / Science Scan • [M] Ground Track • [R] Emergency Reboot
+            <strong>⌨️ ADVANCED FLIGHT CONTROLS:</strong> [A] / [D] Rotate & Pitch • [W] Prograde Burn (Raise Orbit) • [S] Retrograde Burn (De-Orbit) • [SPACEBAR] Stage / Science Scan • [R] Emergency Reboot
           </div>
           
           <div class="arcade-touch-pad">
