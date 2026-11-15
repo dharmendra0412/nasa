@@ -1285,18 +1285,6 @@ body {
   padding: 16px 20px 40px 20px;
   box-sizing: border-box;
   position: relative;
-  background-image: 
-    url('../assets/design_earth_top.png'),
-    url('../assets/design_earth_bottom.png');
-  background-position: 
-    top right,
-    bottom left;
-  background-repeat: 
-    no-repeat,
-    no-repeat;
-  background-size: 
-    clamp(350px, 45vw, 550px) auto,
-    clamp(300px, 40vw, 480px) auto;
 }
 
 .design-screen-header {
