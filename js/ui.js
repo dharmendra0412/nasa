@@ -2245,6 +2245,9 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
   };
 })();
 
+// Provide window.UI alias for GameUI
+window.UI = window.GameUI;
+
 // DOM Content Loaded Handler
 document.addEventListener("DOMContentLoaded", function () {
   window.GameUI.init();

@@ -50,6 +50,7 @@ window.GameEngine = (function () {
   }
 
   function getMissionObj() {
+    if (state.customMission) return state.customMission;
     return findItem(window.GameData.missions, state.missionId);
   }
 

@@ -136,6 +136,20 @@ window.CustomDesigner = (function () {
       designSwitchBtn.dataset.bound = "1";
       designSwitchBtn.addEventListener("click", () => open());
     }
+
+    // 5. Studio Header Launch Button (Top-Right "LAUNCH FLIGHT")
+    const headLaunchBtn = document.getElementById("btn-custom-designer-launch");
+    if (headLaunchBtn && !headLaunchBtn.dataset.bound) {
+      headLaunchBtn.dataset.bound = "1";
+      headLaunchBtn.addEventListener("click", () => launchCustomFlight());
+    }
+
+    // 6. Studio Header Back Button (Top-Left "← NASA HUB")
+    const backBtn = document.getElementById("btn-custom-designer-back");
+    if (backBtn && !backBtn.dataset.bound) {
+      backBtn.dataset.bound = "1";
+      backBtn.addEventListener("click", () => close());
+    }
   }
 
   function open() {
@@ -153,8 +167,13 @@ window.CustomDesigner = (function () {
   }
 
   function close() {
-    if (window.UI && typeof window.UI.showScreen === "function") {
-      window.UI.showScreen("screen-title");
+    const show = (window.GameUI && window.GameUI.showScreen) || (window.UI && window.UI.showScreen);
+    if (typeof show === "function") {
+      show("screen-title");
+    } else {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      const scr = document.getElementById("screen-title");
+      if (scr) scr.classList.add("active");
     }
   }
 
@@ -548,7 +567,8 @@ window.CustomDesigner = (function () {
 
     // 5. Big Launch Button
     const launchBtn = document.getElementById("btn-custom-launch-mission");
-    if (launchBtn) {
+    if (launchBtn && !launchBtn.dataset.bound) {
+      launchBtn.dataset.bound = "1";
       launchBtn.addEventListener("click", () => {
         launchCustomFlight();
       });
@@ -556,12 +576,14 @@ window.CustomDesigner = (function () {
 
     // Header Back & Launch Buttons
     const backBtn = document.getElementById("btn-custom-designer-back");
-    if (backBtn) {
+    if (backBtn && !backBtn.dataset.bound) {
+      backBtn.dataset.bound = "1";
       backBtn.addEventListener("click", () => close());
     }
 
     const headLaunchBtn = document.getElementById("btn-custom-designer-launch");
-    if (headLaunchBtn) {
+    if (headLaunchBtn && !headLaunchBtn.dataset.bound) {
+      headLaunchBtn.dataset.bound = "1";
       headLaunchBtn.addEventListener("click", () => launchCustomFlight());
     }
   }
@@ -702,14 +724,14 @@ window.CustomDesigner = (function () {
     // Build custom mission object
     const customMission = {
       id: "custom-mission",
-      name: craftState.name,
-      callsign: craftState.callsign,
-      agency: craftState.agency,
+      name: craftState.name || "Custom Spacecraft",
+      callsign: craftState.callsign || "ASTRA-1",
+      agency: craftState.agency || "NASA",
       icon: "🛰️",
       difficulty: 2,
       destination: craftState.orbitId === "mars" ? "Mars Orbit" : craftState.orbitId === "lunar" ? "Lunar Orbit" : "Low Earth Orbit",
       type: "Custom Engineered Spacecraft",
-      categoryTag: `${craftState.agency.toUpperCase()} • CUSTOM CLASS`,
+      categoryTag: `${(craftState.agency || "NASA").toUpperCase()} • CUSTOM CLASS`,
       duration: 1095
     };
 
@@ -739,19 +761,38 @@ window.CustomDesigner = (function () {
         state.orbitId = craftState.orbitId;
         state.launchVehicleId = craftState.launchVehicleId;
       }
+      if (typeof window.GameEngine.startSimulation === "function") {
+        window.GameEngine.startSimulation();
+      }
     }
 
-    // Switch to Arcade Flight Simulation
-    if (window.UI && typeof window.UI.showScreen === "function") {
-      window.UI.showScreen("screen-arcade");
+    if (window.SoundFX && typeof window.SoundFX.playBeep === "function") {
+      window.SoundFX.playBeep(900, 0.08);
+    }
+
+    // Switch to Arcade Flight Simulation Screen
+    const show = (window.GameUI && window.GameUI.showScreen) || (window.UI && window.UI.showScreen);
+    if (typeof show === "function") {
+      show("screen-arcade");
+    } else {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      const scr = document.getElementById("screen-arcade");
+      if (scr) scr.classList.add("active");
+    }
+
+    // Update arcade mission title banner
+    const titleEl = document.getElementById("arcade-mission-title");
+    if (titleEl) {
+      titleEl.textContent = `🎮 ${customMission.name.toUpperCase()} - FLIGHT OPERATIONS`;
     }
 
     // Start 3D Spaceflight
     if (window.SpaceFlightGame && typeof window.SpaceFlightGame.start === "function") {
       const canvas3D = document.getElementById("game-canvas-3d");
       window.SpaceFlightGame.start(canvas3D, () => {
-        if (window.UI && typeof window.UI.showScreen === "function") {
-          window.UI.showScreen("screen-title");
+        const exitShow = (window.GameUI && window.GameUI.showScreen) || (window.UI && window.UI.showScreen);
+        if (typeof exitShow === "function") {
+          exitShow("screen-title");
         }
       });
     }
