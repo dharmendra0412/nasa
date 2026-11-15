@@ -1774,22 +1774,7 @@
           } catch(e) {}
         },
         playLaunch() {
-          if (!enabled) return;
-          try {
-            initAudio();
-            if (!ctx) return;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = "sawtooth";
-            osc.frequency.setValueAtTime(120, ctx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 1.2);
-            gain.gain.setValueAtTime(0.08, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 1.2);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 1.2);
-          } catch(e) {}
+          // Launch audio disabled per user request
         },
         playQuindarTone() {
           if (!enabled) return;

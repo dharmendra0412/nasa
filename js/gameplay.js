@@ -663,7 +663,6 @@ window.SpaceFlightGame = (function () {
 
     floatingTexts.length = 0;
 
-    sfx("playLaunch");
     loop();
   }
 
@@ -721,7 +720,6 @@ window.SpaceFlightGame = (function () {
         ls.countdown = 0;
         ls.isCountingDown = false;
         ls.stagingPrompt = "IGNITION & LIFTOFF! STEER INTO GREEN FLIGHT CORRIDOR!";
-        sfx("playLaunch");
         addFloatingText("🚀 LIFTOFF! WE HAVE LIFTOFF!", w / 2, 220, "#00e5ff", 26);
       } else {
         ls.countdown -= 1 / 60;
@@ -729,25 +727,6 @@ window.SpaceFlightGame = (function () {
 
         if (sec !== ls.lastCountdownSec && sec >= 0) {
           ls.lastCountdownSec = sec;
-          sfx("playBeep", 880, 0.08); // NASA countdown pip tone
-
-          // Real speech synthesis for mission control audio countdown
-          if (typeof window !== "undefined" && "speechSynthesis" in window) {
-            let txt = null;
-            if (sec === 10) txt = "T-minus ten seconds, sound suppression active";
-            else if (sec === 6) txt = "Main engine start sequence";
-            else if (sec <= 5 && sec > 0) txt = String(sec);
-            else if (sec === 0) txt = "Liftoff!";
-
-            if (txt) {
-              try {
-                const u = new SpeechSynthesisUtterance(txt);
-                u.rate = 1.15;
-                u.pitch = 0.95;
-                window.speechSynthesis.speak(u);
-              } catch (e) {}
-            }
-          }
         }
 
         if (sec > 6) {
@@ -783,7 +762,6 @@ window.SpaceFlightGame = (function () {
         if (ls.countdown <= 0) {
           ls.isCountingDown = false;
           ls.stagingPrompt = "LIFTOFF! STEER INTO GREEN FLIGHT CORRIDOR!";
-          sfx("playLaunch");
           addFloatingText("🚀 LIFTOFF! WE HAVE LIFTOFF!", w / 2, 220, "#00e5ff", 26);
         }
         return; // Stay on pad until T-0

@@ -233,9 +233,6 @@ window.GameUI = (function () {
     });
 
     const launchInstantFlight = () => {
-      if (window.SoundFX && typeof window.SoundFX.playLaunch === "function") {
-        window.SoundFX.playLaunch();
-      }
       window.GameEngine.init(selectedDifficulty || "cadet");
       window.GameEngine.setPlayers([{ name: "Lead Flight Controller", roleId: "director" }]);
       window.GameEngine.autoConfigure(selectedQuickMissionId);
@@ -1169,7 +1166,6 @@ window.GameUI = (function () {
   function setupReviewScreen() {
     if (el.btnPlayInteractive) {
       el.btnPlayInteractive.addEventListener("click", () => {
-        if (window.SoundFX) window.SoundFX.playLaunch();
         window.GameEngine.startSimulation();
         showScreen("screen-arcade");
 
@@ -1189,7 +1185,6 @@ window.GameUI = (function () {
 
     if (el.btnLaunchMission) {
       el.btnLaunchMission.addEventListener("click", () => {
-        if (window.SoundFX) window.SoundFX.playLaunch();
         window.GameEngine.startSimulation();
         initSimulationView();
         showScreen("screen-simulation");
