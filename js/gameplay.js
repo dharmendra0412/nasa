@@ -82,9 +82,7 @@ window.SpaceFlightGame = (function () {
   };
 
   function sfx(fn, ...args) {
-    if (window.SoundFX && typeof window.SoundFX[fn] === "function") {
-      window.SoundFX[fn](...args);
-    }
+    // All game audio silenced per user request
   }
 
   // Floating score popups (+50 Science, x2 Combo!)
@@ -376,14 +374,6 @@ window.SpaceFlightGame = (function () {
 
     sfx("playAlarm");
     addFloatingText(`⚠️ EMERGENCY ANOMALY: ${picked.title}`, canvasHUD ? canvasHUD.width / 2 : 480, 160, "#ff1744", 26);
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      try {
-        const u = new SpeechSynthesisUtterance(`Warning: Emergency anomaly detected. ${picked.title}. Operator intervention required.`);
-        u.rate = 1.15;
-        u.pitch = 0.9;
-        window.speechSynthesis.speak(u);
-      } catch (e) {}
-    }
   }
 
   function resolveCurrentAnomaly() {
@@ -400,15 +390,6 @@ window.SpaceFlightGame = (function () {
     os.scienceScore += 75; // Reward
     sfx("playBeep", 1280, 0.2);
     addFloatingText("🔧 ANOMALY RESOLVED! RED-TEAM PROTOCOL SUCCESS (+75 XP)", canvasHUD ? canvasHUD.width / 2 : 480, 160, "#00e676", 24);
-
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      try {
-        const u = new SpeechSynthesisUtterance("Anomaly resolved. Systems nominal. Telemetry restored.");
-        u.rate = 1.2;
-        u.pitch = 1.05;
-        window.speechSynthesis.speak(u);
-      } catch (e) {}
-    }
   }
 
   function toggleGroundTrackView() {
@@ -1009,31 +990,13 @@ window.SpaceFlightGame = (function () {
       os.targetTemp = 115.0;
     }
 
-    // Eclipse State Change Audio & Speech Announcements
+    // Eclipse State Change Announcements
     if (os.eclipsePhase !== os.prevEclipsePhase) {
       if (os.eclipsePhase === "umbra") {
-        sfx("playBeep", 460, 0.2);
         addFloatingText("🌑 ECLIPSE ENTRY: TOTAL UMBRA (-138°C)", w / 2, 210, "#e040fb", 24);
-        if (typeof window !== "undefined" && "speechSynthesis" in window) {
-          try {
-            const u = new SpeechSynthesisUtterance("Warning: Eclipse entry. Umbra confirmed. Switching to internal battery.");
-            u.rate = 1.15;
-            u.pitch = 0.95;
-            window.speechSynthesis.speak(u);
-          } catch (e) {}
-        }
       } else if (os.prevEclipsePhase === "umbra" && os.eclipsePhase === "sunlight") {
         os.sunriseGlowTimer = 75; // Radiant sunrise lens flare bloom
-        sfx("playBeep", 1320, 0.25);
         addFloatingText("🌅 ORBITAL SUNRISE! SOLAR POWER RESTORED", w / 2, 210, "#ffd600", 26);
-        if (typeof window !== "undefined" && "speechSynthesis" in window) {
-          try {
-            const u = new SpeechSynthesisUtterance("Orbital sunrise confirmed. Solar arrays charging. Spacecraft exiting shadow.");
-            u.rate = 1.15;
-            u.pitch = 0.95;
-            window.speechSynthesis.speak(u);
-          } catch (e) {}
-        }
       }
       os.prevEclipsePhase = os.eclipsePhase;
     }
@@ -1108,16 +1071,7 @@ window.SpaceFlightGame = (function () {
 
     if (contactStation) {
       if (!os.currentStation) {
-        sfx("playBeep", 1440, 0.15);
         addFloatingText(`📡 AOS: ${contactStation.name.toUpperCase()} (LINK ESTABLISHED)`, w / 2, 190, "#00e676", 24);
-        if (typeof window !== "undefined" && "speechSynthesis" in window) {
-          try {
-            const u = new SpeechSynthesisUtterance(`Acquisition of signal: ${contactStation.code} carrier locked`);
-            u.rate = 1.2;
-            u.pitch = 1.0;
-            window.speechSynthesis.speak(u);
-          } catch (e) {}
-        }
       }
       os.currentStation = contactStation;
       os.groundStationInView = true;

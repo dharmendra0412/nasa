@@ -65,7 +65,7 @@
           <!-- Right Action Controls -->
           <div class="portal-nav-actions">
             <button type="button" class="portal-action-btn" id="btn-sound-toggle" title="Toggle Audio Telemetry">
-              <span>🔊</span>
+              <span>🔇</span>
             </button>
           </div>
         </nav>
@@ -1648,177 +1648,35 @@
   <!-- Audio Synthesizer Script / Telemetry Audio (Web Audio API) -->
   <script>
     window.SoundFX = (function() {
-      let ctx = null;
-      let enabled = true;
+      let enabled = false;
 
-      function initAudio() {
-        try {
-          if (!ctx) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) ctx = new AudioContext();
-          }
-          if (ctx && ctx.state === "suspended") {
-            ctx.resume();
-          }
-        } catch(e) {}
-        return ctx;
-      }
-
-      // Automatically un-mute on first user click/touch anywhere on the page
-      if (typeof window !== "undefined") {
-        ["click", "touchstart", "pointerdown", "keydown"].forEach(evt => {
-          window.addEventListener(evt, () => initAudio(), { passive: true });
-        });
+      // Immediately cancel any ongoing speech synthesis
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        try { window.speechSynthesis.cancel(); } catch(e) {}
       }
 
       return {
         toggle() {
           enabled = !enabled;
+          if (!enabled && typeof window !== "undefined" && "speechSynthesis" in window) {
+            try { window.speechSynthesis.cancel(); } catch(e) {}
+          }
           return enabled;
         },
         isEnabled() { return enabled; },
-        initAudio,
-        playBeep(freq = 880, duration = 0.08) {
-          if (!enabled) return;
-          try {
-            initAudio();
-            if (!ctx) return;
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.frequency.setValueAtTime(freq, ctx.currentTime);
-            gain.gain.setValueAtTime(0.04, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + duration);
-          } catch(e) {}
-        },
-        playJoin() {
-          if (!enabled) return;
-          try {
-            initAudio();
-            if (!ctx) return;
-            // Ascending dual-tone NASA airlock connect chime (587 Hz -> 880 Hz)
-            const osc1 = ctx.createOscillator();
-            const osc2 = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc1.type = "sine";
-            osc2.type = "sine";
-            osc1.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-            osc2.frequency.setValueAtTime(880.00, ctx.currentTime + 0.09); // A5
-            gain.gain.setValueAtTime(0.06, ctx.currentTime);
-            gain.gain.setValueAtTime(0.07, ctx.currentTime + 0.09);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-            osc1.connect(gain);
-            osc2.connect(gain);
-            gain.connect(ctx.destination);
-            osc1.start(ctx.currentTime);
-            osc1.stop(ctx.currentTime + 0.09);
-            osc2.start(ctx.currentTime + 0.09);
-            osc2.stop(ctx.currentTime + 0.35);
-          } catch(e) {}
-        },
-        playLeave() {
-          if (!enabled) return;
-          try {
-            initAudio();
-            if (!ctx) return;
-            // Descending dual-tone disconnect alert chime (740 Hz -> 370 Hz)
-            const osc1 = ctx.createOscillator();
-            const osc2 = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc1.type = "triangle";
-            osc2.type = "triangle";
-            osc1.frequency.setValueAtTime(739.99, ctx.currentTime); // F#5
-            osc2.frequency.setValueAtTime(369.99, ctx.currentTime + 0.10); // F#4
-            gain.gain.setValueAtTime(0.08, ctx.currentTime);
-            gain.gain.setValueAtTime(0.09, ctx.currentTime + 0.10);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
-            osc1.connect(gain);
-            osc2.connect(gain);
-            gain.connect(ctx.destination);
-            osc1.start(ctx.currentTime);
-            osc1.stop(ctx.currentTime + 0.10);
-            osc2.start(ctx.currentTime + 0.10);
-            osc2.stop(ctx.currentTime + 0.45);
-          } catch(e) {}
-        },
-        playReady() {
-          if (!enabled) return;
-          try {
-            initAudio();
-            if (!ctx) return;
-            // High confirmation chirp (1046 Hz C6)
-            this.playBeep(1046.5, 0.12);
-          } catch(e) {}
-        },
-        playClaim() {
-          if (!enabled) return;
-          try {
-            initAudio();
-            if (!ctx) return;
-            // Mechanical relay console click
-            this.playBeep(659.25, 0.06);
-            setTimeout(() => this.playBeep(987.77, 0.08), 60);
-          } catch(e) {}
-        },
-        playAlarm() {
-          if (!enabled) return;
-          try {
-            initAudio();
-            if (!ctx) return;
-            [440, 660, 440].forEach((f, i) => {
-              setTimeout(() => this.playBeep(f, 0.12), i * 140);
-            });
-          } catch(e) {}
-        },
-        playLaunch() {
-          // Launch audio disabled per user request
-        },
-        playQuindarTone() {
-          if (!enabled) return;
-          try {
-            initAudio();
-            if (!ctx) return;
-            // NASA Quindar Telemetry Tone (2525 Hz intro tone + comms squelch)
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(2525, ctx.currentTime);
-            gain.gain.setValueAtTime(0.04, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.12);
-
-            setTimeout(() => {
-              if (!ctx) return;
-              const bufferSize = Math.floor(ctx.sampleRate * 0.04);
-              const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-              const data = buffer.getChannelData(0);
-              for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.02;
-              const noise = ctx.createBufferSource();
-              noise.buffer = buffer;
-              const noiseGain = ctx.createGain();
-              noiseGain.gain.setValueAtTime(0.02, ctx.currentTime);
-              noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
-              noise.connect(noiseGain);
-              noiseGain.connect(ctx.destination);
-              noise.start();
-            }, 120);
-          } catch(e) {}
-        },
-        speak(text) {
-          if (!enabled || typeof window === "undefined" || !("speechSynthesis" in window)) return;
-          try {
-            const u = new SpeechSynthesisUtterance(text);
-            u.rate = 1.15;
-            u.pitch = 0.95;
-            u.volume = 0.85;
-            window.speechSynthesis.speak(u);
-          } catch(e) {}
+        initAudio() { return null; },
+        playBeep() {},
+        playJoin() {},
+        playLeave() {},
+        playReady() {},
+        playClaim() {},
+        playAlarm() {},
+        playLaunch() {},
+        playQuindarTone() {},
+        speak() {
+          if (typeof window !== "undefined" && "speechSynthesis" in window) {
+            try { window.speechSynthesis.cancel(); } catch(e) {}
+          }
         }
       };
     })();
