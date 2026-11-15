@@ -492,15 +492,6 @@ window.GameUI = (function () {
       });
     }
 
-    const btnHeroLearn = document.getElementById("btn-hero-learn");
-    if (btnHeroLearn) {
-      btnHeroLearn.addEventListener("click", () => {
-        const modal = document.getElementById("modal-about-challenge");
-        if (modal) modal.classList.remove("hidden");
-        if (window.SoundFX) window.SoundFX.playBeep(850, 0.04);
-      });
-    }
-
     // Portal Navbar Tabs
     const navTabs = document.querySelectorAll(".portal-nav-pill .nav-tab");
     navTabs.forEach(tab => {
