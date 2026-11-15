@@ -1825,15 +1825,19 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
     if (btnMpCreate) {
       btnMpCreate.addEventListener("click", () => {
         const nameInput = document.getElementById("mp-host-name");
+        const playersSelect = document.getElementById("mp-host-players");
         const missionSelect = document.getElementById("mp-host-mission");
         const diffSelect = document.getElementById("mp-host-difficulty");
+        const codeInput = document.getElementById("mp-host-code");
 
         const name = (nameInput?.value || "Commander").trim();
+        const maxPlayers = parseInt(playersSelect?.value || "4", 10);
         const missionId = missionSelect?.value || "sentinel-e";
         const difficulty = diffSelect?.value || "engineer";
+        const customCode = (codeInput?.value || "").trim().toUpperCase();
 
         if (window.MultiplayerClient) {
-          window.MultiplayerClient.createRoom(name, missionId, difficulty);
+          window.MultiplayerClient.createRoom(name, missionId, difficulty, maxPlayers, customCode);
         }
       });
     }
@@ -1987,10 +1991,19 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
           "sentinel-e": "Earth Sentinel (LEO 400 km)",
           "stormwatch": "StormWatch (GEO 35,786 km)",
           "artemis-scout": "Artemis Scout (Lunar Polar)",
-          "red-pioneer": "Red Pioneer (Mars Exploration)"
+          "red-pioneer": "Red Pioneer (Mars Exploration)",
+          "asteroid-guard": "Asteroid Sentinel (Planetary Defense)",
+          "deepview": "DeepView-1 (Sun-Earth L2)"
         };
         if (missionTag) missionTag.textContent = missionNames[data.room.missionId] || data.room.missionId;
         if (diffTag) diffTag.textContent = `${data.room.difficulty.toUpperCase()} DIFFICULTY`;
+
+        const playersTag = document.getElementById("mp-lobby-players-tag");
+        if (playersTag) {
+          const max = data.room.maxPlayers || 4;
+          const count = data.players.length;
+          playersTag.textContent = `CREW: ${count} / ${max}${count >= max ? " (FULL)" : ""}`;
+        }
 
         renderRolesAndOccupants(data.players);
         renderChatMessages(data.chat);
@@ -2003,6 +2016,14 @@ ${report.recommendations.map(r => `- ${r}`).join("\n")}
         } else if (data.newPlayer) {
           showLiveAlert("join", data.newPlayer);
         }
+
+        const playersTag = document.getElementById("mp-lobby-players-tag");
+        if (playersTag && data.room) {
+          const max = data.room.maxPlayers || 4;
+          const count = data.players.length;
+          playersTag.textContent = `CREW: ${count} / ${max}${count >= max ? " (FULL)" : ""}`;
+        }
+
         renderRolesAndOccupants(data.players);
         updateHostControls();
       });

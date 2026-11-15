@@ -129,6 +129,7 @@ export class RoomManager {
     const playerName = (payload.playerName || 'Commander').trim().substring(0, 24);
     const missionId = payload.missionId || 'sentinel-e';
     const difficulty = payload.difficulty || 'engineer';
+    const maxPlayers = Math.min(4, Math.max(1, parseInt(payload.maxPlayers || payload.crewSize || 4, 10)));
 
     const player = {
       id: ws.clientId,
@@ -145,6 +146,7 @@ export class RoomManager {
       status: 'lobby',
       missionId: missionId,
       difficulty: difficulty,
+      maxPlayers: maxPlayers,
       createdAt: Date.now(),
       players: new Map([[ws.clientId, { player, ws }]]),
       chat: [
@@ -152,7 +154,7 @@ export class RoomManager {
           id: 'sys_' + Date.now(),
           sender: 'HOUSTON CAPCOM',
           role: 'system',
-          text: `Mission Control room [${roomCode}] initialized. Share link with your flight crew!`,
+          text: `Mission Control room [${roomCode}] initialized (${maxPlayers}-crew configuration). Share link with your flight crew!`,
           time: new Date().toLocaleTimeString(),
           voiceCallout: 'ALL_SYSTEMS_GO'
         }
@@ -164,7 +166,7 @@ export class RoomManager {
     this.clientRooms.set(ws, roomCode);
     this.clientInfo.set(ws, player);
 
-    console.log(`[ROOM] Created room ${roomCode} by ${playerName} (${ws.clientId})`);
+    console.log(`[ROOM] Created room ${roomCode} by ${playerName} (${ws.clientId}, max ${maxPlayers} players)`);
 
     this.send(ws, 'ROOM_CREATED', {
       roomCode: roomCode,
@@ -173,6 +175,7 @@ export class RoomManager {
       state: room.status,
       missionId: room.missionId,
       difficulty: room.difficulty,
+      maxPlayers: room.maxPlayers,
       chat: room.chat,
       isHost: true
     });
@@ -190,10 +193,11 @@ export class RoomManager {
       return;
     }
 
-    if (room.players.size >= 8) {
+    const maxAllowed = room.maxPlayers || 4;
+    if (room.players.size >= maxAllowed) {
       this.send(ws, 'ERROR', {
         code: 'ROOM_FULL',
-        message: `Mission Room "${rawCode}" is currently full (max 8 crew members).`
+        message: `Mission Room "${rawCode}" is currently full (maximum ${maxAllowed} flight crew members).`
       });
       return;
     }
@@ -239,6 +243,7 @@ export class RoomManager {
       state: room.status,
       missionId: room.missionId,
       difficulty: room.difficulty,
+      maxPlayers: room.maxPlayers || 4,
       chat: room.chat,
       isHost: false
     });
@@ -249,6 +254,7 @@ export class RoomManager {
       state: room.status,
       missionId: room.missionId,
       difficulty: room.difficulty,
+      maxPlayers: room.maxPlayers || 4,
       newPlayer: player
     }, ws.clientId);
 
@@ -272,7 +278,8 @@ export class RoomManager {
       players: this.serializePlayers(room),
       state: room.status,
       missionId: room.missionId,
-      difficulty: room.difficulty
+      difficulty: room.difficulty,
+      maxPlayers: room.maxPlayers || 4
     });
   }
 
@@ -290,7 +297,8 @@ export class RoomManager {
       players: this.serializePlayers(room),
       state: room.status,
       missionId: room.missionId,
-      difficulty: room.difficulty
+      difficulty: room.difficulty,
+      maxPlayers: room.maxPlayers || 4
     });
   }
 
@@ -312,7 +320,8 @@ export class RoomManager {
       players: this.serializePlayers(room),
       state: room.status,
       missionId: room.missionId,
-      difficulty: room.difficulty
+      difficulty: room.difficulty,
+      maxPlayers: room.maxPlayers || 4
     });
   }
 
@@ -471,6 +480,7 @@ export class RoomManager {
       state: room.status,
       missionId: room.missionId,
       difficulty: room.difficulty,
+      maxPlayers: room.maxPlayers || 4,
       leftPlayer: leftData
     });
 

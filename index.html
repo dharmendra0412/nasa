@@ -335,32 +335,59 @@
                 </div>
               </div>
 
-              <!-- Row 2: Destination -->
+              <!-- Row 2: Flight Crew Size (Up to 4 Players) -->
+              <div class="mp-form-row">
+                <label class="mp-row-label" for="mp-host-players">
+                  <span class="row-icon">👥</span> Crew Size
+                </label>
+                <div class="mp-row-field">
+                  <select id="mp-host-players" class="mp-select-styled">
+                    <option value="4" selected>4 Players (Full Mission Control: FLIGHT, PROP, SCIENCE, FDO)</option>
+                    <option value="3">3 Players (Trio: FLIGHT, PROP, SCIENCE)</option>
+                    <option value="2">2 Players (Duo: FLIGHT, PROP)</option>
+                    <option value="1">1 Player (Solo Flight Director)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Row 3: Destination -->
               <div class="mp-form-row">
                 <label class="mp-row-label" for="mp-host-mission">
                   <span class="row-icon">🎯</span> Destination
                 </label>
                 <div class="mp-row-field">
                   <select id="mp-host-mission" class="mp-select-styled">
-                    <option value="sentinel-e" selected>🌍 Earth Sentinel (400 km LEO)</option>
-                    <option value="stormwatch">🌀 StormWatch (GEO Weather Sat)</option>
-                    <option value="artemis-scout">🌕 Artemis Scout (Lunar Recon)</option>
-                    <option value="red-pioneer">🪐 Red Pioneer (Mars Exploration)</option>
+                    <option value="sentinel-e" selected>🌍 Sentinel-Earth Climate Monitor (400 km LEO)</option>
+                    <option value="stormwatch">🌀 StormWatch Geostationary Sentinel (35,786 km GEO)</option>
+                    <option value="artemis-scout">🌕 Artemis-Scout Lunar Recon Orbiter (100 km Polar)</option>
+                    <option value="red-pioneer">🪐 Red Pioneer Mars Surface Mapper (300 km Polar)</option>
+                    <option value="asteroid-guard">☄️ Asteroid Sentinel Planetary Defense (Deep Space)</option>
+                    <option value="deepview">🔭 DeepView-1 Space Telescope (Sun-Earth L2)</option>
                   </select>
                 </div>
               </div>
 
-              <!-- Row 3: Difficulty -->
+              <!-- Row 4: Difficulty -->
               <div class="mp-form-row">
                 <label class="mp-row-label" for="mp-host-difficulty">
                   <span class="row-icon">📊</span> Difficulty
                 </label>
                 <div class="mp-row-field">
                   <select id="mp-host-difficulty" class="mp-select-styled">
-                    <option value="cadet">Cadet (Casual)</option>
-                    <option value="engineer" selected>Systems Engineer (Normal)</option>
-                    <option value="director">Flight Director (Pro)</option>
+                    <option value="cadet">Cadet (Casual - Generous Margins)</option>
+                    <option value="engineer" selected>Systems Engineer (Normal - Realistic NASA Spec)</option>
+                    <option value="director">Flight Director (Pro - Tight Margins & Hazards)</option>
                   </select>
+                </div>
+              </div>
+
+              <!-- Row 5: Custom Room Code (Optional) -->
+              <div class="mp-form-row">
+                <label class="mp-row-label" for="mp-host-code">
+                  <span class="row-icon">#</span> Room Code
+                </label>
+                <div class="mp-row-field">
+                  <input type="text" id="mp-host-code" class="mp-input-styled mp-code-styled" placeholder="Auto (or enter e.g. APOLLO)" maxlength="12" autocomplete="off" />
                 </div>
               </div>
             </div>
@@ -478,6 +505,7 @@
               <button type="button" id="btn-mp-lobby-guide" class="btn btn-outline btn-small" title="How to Play Co-Op Guide">
                 📖 Guide
               </button>
+              <span id="mp-lobby-players-tag" class="mp-meta-tag">CREW: 1 / 4</span>
               <span id="mp-lobby-mission-tag" class="mp-meta-tag">Earth Sentinel (LEO 400 km)</span>
               <span id="mp-lobby-diff-tag" class="mp-meta-tag">Engineer Difficulty</span>
               <span class="mp-meta-tag text-green"><span class="green-blink">●</span> <span id="mp-lobby-ping">PING: --</span></span>

@@ -148,6 +148,7 @@ window.MultiplayerClient = (function () {
           state: payload.state,
           missionId: payload.missionId,
           difficulty: payload.difficulty,
+          maxPlayers: payload.maxPlayers || 4,
           isHost: payload.isHost
         };
         localPlayer = payload.player;
@@ -166,6 +167,7 @@ window.MultiplayerClient = (function () {
           if (payload.state) currentRoom.state = payload.state;
           if (payload.missionId) currentRoom.missionId = payload.missionId;
           if (payload.difficulty) currentRoom.difficulty = payload.difficulty;
+          if (payload.maxPlayers) currentRoom.maxPlayers = payload.maxPlayers;
         }
         if (payload.players) {
           roomPlayers = payload.players;
@@ -227,9 +229,11 @@ window.MultiplayerClient = (function () {
   }
 
   // Public Methods
-  function createRoom(playerName, missionId = 'sentinel-e', difficulty = 'engineer') {
+  function createRoom(playerName, missionId = 'sentinel-e', difficulty = 'engineer', maxPlayers = 4, roomCode = '') {
     connect(() => {
-      sendRaw('ROOM_CREATE', { playerName, missionId, difficulty });
+      const payload = { playerName, missionId, difficulty, maxPlayers };
+      if (roomCode) payload.roomCode = roomCode;
+      sendRaw('ROOM_CREATE', payload);
     });
   }
 
