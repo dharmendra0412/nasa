@@ -1246,25 +1246,39 @@ window.Space3D = (function () {
 
     const planetRadius = 40;
 
-    const isMars = (
-      orbitType === "mars" ||
-      orbitType === "red-pioneer" ||
-      missionId === "red-pioneer" ||
-      (missionObj && missionObj.id === "red-pioneer") ||
-      (missionObj && missionObj.destination && missionObj.destination.toLowerCase().includes("mars")) ||
-      (typeof missionId === "string" && missionId.toLowerCase().includes("mars"))
+    const ot = (orbitType || "").toLowerCase();
+    const mid = (missionId || "").toLowerCase();
+    const dest = (missionObj && missionObj.destination ? missionObj.destination : "").toLowerCase();
+
+    // Check if orbit is explicitly Earth-bound or Earth-originating (All rocket launches start from Earth)
+    const isEarth = (
+      ot === "leo" ||
+      ot === "geo" ||
+      ot === "sso" ||
+      ot === "polar" ||
+      ot === "molniya" ||
+      ot === "earth" ||
+      ot === "launch" ||
+      (!ot && !mid.includes("mars") && !mid.includes("lunar") && !mid.includes("moon"))
     );
 
-    const isMoon = (
-      !isMars && (
-        orbitType === "lunar" ||
-        missionId === "artemis-scout" ||
-        (missionObj && missionObj.id === "artemis-scout") ||
-        (missionObj && missionObj.destination && (
-          missionObj.destination.toLowerCase().includes("moon") ||
-          missionObj.destination.toLowerCase().includes("lunar")
-        ))
-      )
+    const isMars = !isEarth && (
+      ot === "mars" ||
+      ot === "low-mars-orbit" ||
+      (ot !== "lunar" && ot !== "moon" && (
+        mid === "red-pioneer" ||
+        dest.includes("mars") ||
+        mid.includes("mars")
+      ))
+    );
+
+    const isMoon = !isEarth && !isMars && (
+      ot === "lunar" ||
+      ot === "moon" ||
+      ot === "low-lunar-orbit" ||
+      mid === "artemis-scout" ||
+      dest.includes("moon") ||
+      dest.includes("lunar")
     );
 
     if (isMoon) {
@@ -1276,6 +1290,7 @@ window.Space3D = (function () {
       planetMesh = new THREE.Mesh(new THREE.SphereGeometry(planetRadius, 48, 48), moonMat);
       planetMesh.position.set(0, -planetRadius - 15, 0);
       planetMesh.receiveShadow = true;
+      planetMesh.userData = { bodyType: "moon" };
       scene.add(planetMesh);
 
     } else if (isMars) {
@@ -1287,6 +1302,7 @@ window.Space3D = (function () {
       planetMesh = new THREE.Mesh(new THREE.SphereGeometry(planetRadius, 64, 64), marsMat);
       planetMesh.position.set(0, -planetRadius - 15, 0);
       planetMesh.receiveShadow = true;
+      planetMesh.userData = { bodyType: "mars" };
       scene.add(planetMesh);
 
       atmosphereMesh = createAtmosphereShader(planetRadius, "mars");
@@ -1302,6 +1318,7 @@ window.Space3D = (function () {
       planetMesh = new THREE.Mesh(new THREE.SphereGeometry(planetRadius, 64, 64), earthMat);
       planetMesh.position.set(0, -planetRadius - 15, 0);
       planetMesh.receiveShadow = true;
+      planetMesh.userData = { bodyType: "earth" };
       scene.add(planetMesh);
 
       // Clouds Layer
@@ -2545,6 +2562,8 @@ window.Space3D = (function () {
     setCameraMode,
     renderFrame,
     handleResize,
+    clearMarsSceneObjects,
+    getCelestialBodyType: () => (planetMesh && planetMesh.userData ? planetMesh.userData.bodyType : null),
     setupMarsCruiseScene,
     setupMarsEDLScene,
     setupMarsSurfaceScene,

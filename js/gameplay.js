@@ -563,9 +563,8 @@ window.SpaceFlightGame = (function () {
     using3D = false;
     if (window.Space3D && canvas3D) {
       using3D = window.Space3D.init(canvas3D);
-      const orbitId = orbit ? orbit.id : "leo";
-      const missionId = mission ? mission.id : (state ? state.missionId : "sentinel-e");
-      window.Space3D.setupCelestialBody(orbitId, missionId, mission);
+      // All NASA launches start from Earth (LC-39A Cape Canaveral / KSC)
+      window.Space3D.setupCelestialBody("leo");
       window.Space3D.setupOrbitLine(55, 55);
 
       rocket3D = window.Space3D.buildRocket(missionConfig);
@@ -1677,6 +1676,7 @@ window.SpaceFlightGame = (function () {
     // Switch 3D WebGL scene
     if (using3D && window.Space3D) {
       if (targetPhase === "launch") {
+        if (window.Space3D.clearMarsSceneObjects) window.Space3D.clearMarsSceneObjects();
         window.Space3D.setupCelestialBody("leo");
         rocket3D = window.Space3D.buildRocket(missionConfig);
         spacecraft3D = window.Space3D.buildSpacecraft(missionConfig);

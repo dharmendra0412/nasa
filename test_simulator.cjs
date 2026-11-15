@@ -274,6 +274,15 @@ if (!flight.isMarsMission()) {
 }
 console.log("[PASS] isMarsMission() confirmed true for Red Pioneer");
 
+// Verify Launch origin is Earth (Cape Canaveral LC-39A)
+if (window.Space3D && window.Space3D.getCelestialBodyType) {
+  if (window.Space3D.getCelestialBodyType() !== 'earth') {
+    console.error(`[FAIL] Launch celestial body is '${window.Space3D.getCelestialBodyType()}', expected 'earth'!`);
+    process.exit(1);
+  }
+}
+console.log("[PASS] Phase 1 Launch originates from Earth (Cape Canaveral LC-39A)");
+
 // Phase 1: Launch & Trans-Mars Injection (TMI)
 console.log(`[PASS] Phase 1 Initialized: '${flight.getPhase()}', activePhase = ${flight.getMarsState().activePhase}`);
 flight.getLaunchState().stage = 3;
