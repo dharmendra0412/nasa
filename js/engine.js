@@ -123,6 +123,17 @@ window.GameEngine = (function () {
     }
   }
 
+  function setCustomMission(customMission, config) {
+    state.missionId = customMission ? customMission.id : "custom-mission";
+    state.customMission = customMission;
+    if (config) {
+      if (config.orbitId) state.orbitId = config.orbitId;
+      if (config.launchVehicleId) state.launchVehicleId = config.launchVehicleId;
+      if (config.components) Object.assign(state.components, config.components);
+      if (config.instruments) state.instruments = config.instruments.slice();
+    }
+  }
+
   function selectOrbit(orbitId) {
     state.orbitId = orbitId;
   }
@@ -1028,6 +1039,7 @@ window.GameEngine = (function () {
     setPhase,
     setPlayers,
     selectMission,
+    setCustomMission,
     selectOrbit,
     setComponent,
     toggleInstrument,

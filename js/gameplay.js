@@ -545,9 +545,13 @@ window.SpaceFlightGame = (function () {
     phase = "launch";
 
     const state = window.GameEngine.getState();
-    const mission = window.GameData.missions.find(m => m.id === state.missionId);
-    const orbit = window.GameData.orbits.find(o => o.id === state.orbitId);
-    const lv = window.GameData.launchVehicles.find(l => l.id === state.launchVehicleId);
+    const mission = window.GameData.missions.find(m => m.id === state.missionId) || (state && state.customMission ? state.customMission : {
+      id: "custom-mission",
+      name: "Custom Spacecraft Flight",
+      destination: "Earth (Low Earth Orbit)"
+    });
+    const orbit = window.GameData.orbits.find(o => o.id === state.orbitId) || window.GameData.orbits[0];
+    const lv = window.GameData.launchVehicles.find(l => l.id === state.launchVehicleId) || window.GameData.launchVehicles[2];
 
     missionConfig = {
       mission,

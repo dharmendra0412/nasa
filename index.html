@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mission Control: Space Mission Design Game | NASA Systems Engineering</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/custom_designer.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -55,6 +56,11 @@
               <span class="tab-icon">🏆</span>
               <span>Challenges</span>
             </button>
+            <button type="button" class="nav-tab tab-custom-pill" id="tab-custom-designer" data-tab="custom-designer" title="Custom Spacecraft Design Studio">
+              <span class="tab-icon">🛠️</span>
+              <span>Custom Studio</span>
+              <span class="custom-badge-pill">NEW</span>
+            </button>
             <button type="button" class="nav-tab tab-coop-pill" id="tab-coop" data-tab="coop">
               <span class="tab-icon">🚀</span>
               <span>Play Co-Op</span>
@@ -64,6 +70,10 @@
 
           <!-- Right Action Controls -->
           <div class="portal-nav-actions">
+            <button type="button" class="portal-custom-action-btn" id="btn-header-custom-studio" title="Design Your Own Satellite / Spacecraft">
+              <span>🛰️</span>
+              <span>Custom Studio</span>
+            </button>
             <button type="button" class="portal-action-btn" id="btn-sound-toggle" title="Toggle Audio Telemetry">
               <span>🔇</span>
             </button>
@@ -84,6 +94,11 @@
                 <span class="hero-play-icon">▶</span>
                 <span class="hero-btn-text">Start Challenge</span>
                 <span class="hero-btn-arrow">›</span>
+              </button>
+
+              <button type="button" class="btn-hero-custom" id="btn-hero-custom-studio" title="Design Your Own Custom Satellite / Spacecraft">
+                <span class="hero-btn-icon">🛠️</span>
+                <span class="hero-btn-text">Custom Design Studio</span>
               </button>
 
               <button type="button" class="btn-hero-coop" id="btn-hero-coop">
@@ -688,7 +703,10 @@
               <p class="design-sub-title">NASA Systems Engineering & Subsystem Sizing</p>
             </div>
           </div>
-          <button id="btn-quick-launch-from-design" type="button" class="btn-design-launch" title="Launch Flight (PAD 39A)">🚀 Launch Flight (PAD 39A)</button>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button id="btn-design-to-custom-studio" type="button" class="btn-design-custom-switch" title="Open Custom Spacecraft Design Studio">🛠️ Custom Studio</button>
+            <button id="btn-quick-launch-from-design" type="button" class="btn-design-launch" title="Launch Flight (PAD 39A)">🚀 Launch Flight (PAD 39A)</button>
+          </div>
         </div>
 
         <div class="design-layout">
@@ -919,6 +937,25 @@
             </div>
           </div>
         </div>
+      </section>
+
+      <!-- SCREEN: CUSTOM SPACECRAFT & SATELLITE DESIGN STUDIO -->
+      <section id="screen-custom-designer" class="screen">
+        <div class="custom-studio-header">
+          <div class="custom-studio-brand">
+            <img src="assets/nasa_meatball.jpg" alt="NASA Logo" class="custom-studio-nasa-logo" />
+            <div class="custom-studio-titles">
+              <h1><span>🛠️</span> CUSTOM SPACECRAFT DESIGN STUDIO</h1>
+              <p>NASA Systems Engineering • Build, Customize & Fly Your Own Satellite</p>
+            </div>
+          </div>
+          <div class="custom-header-actions">
+            <button id="btn-custom-designer-back" type="button" class="btn-custom-back">← NASA HUB</button>
+            <button id="btn-custom-designer-launch" type="button" class="btn-custom-launch">🚀 LAUNCH FLIGHT</button>
+          </div>
+        </div>
+
+        <div id="custom-designer-container"></div>
       </section>
 
       <!-- SCREEN 5: FLIGHT READINESS REVIEW (FRR) -->
@@ -1716,5 +1753,6 @@
   <script src="js/gameplay.js"></script>
   <script src="js/multiplayer.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/custom_designer.js"></script>
 </body>
 </html>

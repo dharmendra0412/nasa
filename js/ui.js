@@ -135,6 +135,8 @@ window.GameUI = (function () {
 
     if (screenId === "screen-design") {
       renderDesignStudio();
+    } else if (screenId === "screen-custom-designer") {
+      if (window.CustomDesigner) window.CustomDesigner.open();
     }
 
     updateHeaderBadge();
@@ -505,6 +507,9 @@ window.GameUI = (function () {
           showScreen("screen-title");
           const target = document.getElementById("section-challenges");
           if (target) target.scrollIntoView({ behavior: "smooth" });
+        } else if (tabTarget === "custom-designer" || tabTarget === "custom-studio") {
+          if (window.CustomDesigner) window.CustomDesigner.open();
+          else showScreen("screen-custom-designer");
         } else if (tabTarget === "coop") {
           showScreen("screen-multiplayer");
         } else if (tabTarget === "leaderboard") {

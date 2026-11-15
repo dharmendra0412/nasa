@@ -5,7 +5,7 @@ const path = require('path');
 console.log("=== RUNNING NASA SIMULATOR COMPREHENSIVE TESTS ===");
 
 // 1. Syntax Validation for all JS files
-const jsFiles = ['data.js', 'engine.js', 'renderer3d.js', 'gameplay.js', 'multiplayer.js', 'ui.js'];
+const jsFiles = ['data.js', 'engine.js', 'renderer3d.js', 'gameplay.js', 'multiplayer.js', 'ui.js', 'custom_designer.js'];
 let syntaxPassed = true;
 
 for (const file of jsFiles) {
@@ -159,6 +159,9 @@ eval(rendererCode);
 
 const gameplayCode = fs.readFileSync(path.join(__dirname, 'js', 'gameplay.js'), 'utf8');
 eval(gameplayCode);
+
+const customDesignerCode = fs.readFileSync(path.join(__dirname, 'js', 'custom_designer.js'), 'utf8');
+eval(customDesignerCode);
 
 console.log("[PASS] All JavaScript modules loaded and evaluated successfully in runtime environment");
 
@@ -340,7 +343,49 @@ console.log(`       - Samples Cached: ${ms.samplesCached} / 10`);
 console.log(`       - Biosignatures Found: ${ms.biosignaturesFound}`);
 console.log(`[PASS] Mars Astrobiology Core Drill & Raman Spectrometer Verified!`);
 
+// 14. Test NASA Custom Spacecraft Design Studio
+console.log("\n=== TESTING NASA CUSTOM SPACECRAFT DESIGN STUDIO ===");
+if (!window.CustomDesigner) {
+  console.error("[FAIL] window.CustomDesigner not found!");
+  process.exit(1);
+}
+console.log("[PASS] CustomDesigner module loaded and initialized");
+
+// Test Preset Application
+window.CustomDesigner.applyPreset({
+  name: "Aryabhata-Mars",
+  callsign: "ARYA-M",
+  agency: "ISRO / NASA Deep Space",
+  orbitId: "heo",
+  busId: "large-sat",
+  powerId: "rtg",
+  propulsionId: "chemical",
+  antennaId: "parabolic",
+  bandId: "ka-band",
+  thermalId: "active",
+  launchVehicleId: "titan",
+  instruments: ["drill-raman", "hires-cam"]
+});
+
+const craft = window.CustomDesigner.getCraftState();
+if (craft.name !== "Aryabhata-Mars" || craft.powerId !== "rtg" || craft.instruments.length !== 2) {
+  console.error("[FAIL] Custom spacecraft state mismatch:", craft);
+  process.exit(1);
+}
+console.log(`[PASS] Custom Spacecraft configured: '${craft.name}' (${craft.callsign})`);
+console.log(`       - Agency: ${craft.agency}`);
+console.log(`       - Bus: ${craft.busId} | Power: ${craft.powerId} | Prop: ${craft.propulsionId}`);
+console.log(`       - Instruments: [${craft.instruments.join(', ')}]`);
+
+// Test Custom Craft Launch into 3D Flight
+window.CustomDesigner.launchCustomFlight();
+if (window.GameEngine.getState().missionId !== "custom-mission") {
+  console.error("[FAIL] Custom mission not injected into GameEngine!");
+  process.exit(1);
+}
+console.log(`[PASS] Custom Spacecraft successfully launched into Flight! Mission ID: '${window.GameEngine.getState().missionId}'`);
+
 console.log("\n=======================================================");
-console.log("ALL 13 SIMULATION & RENDER TESTS PASSED WITH 0 ERRORS!");
+console.log("ALL 14 SIMULATION & RENDER TESTS PASSED WITH 0 ERRORS!");
 console.log("=======================================================");
 process.exit(0);
